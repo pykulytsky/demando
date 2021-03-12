@@ -7,14 +7,12 @@ import jwt
 from datetime import datetime
 from datetime import timedelta
 
-from app import settings
+from base import settings
 
-from .database import Base
+from base.database import Base
 from jwt.exceptions import InvalidAlgorithmError, InvalidSignatureError
 
 from typing import Optional
-
-
 
 
 class User(Base):
@@ -32,7 +30,8 @@ class User(Base):
 
     is_superuser = Column(Boolean, default=False, nullable=True)
 
-    articles = relationship("Article", back_populates="author")
+    role_id = Column(Integer, ForeignKey('role.id'))
+    role = relationship("Role", back_populates="users")
 
     def __init__(
         self,
@@ -73,3 +72,17 @@ class User(Base):
             raise JwtTokenError("Error occured, while generating JWT token.")
 
         return token.decode('utf-8')
+
+    def __str__(self) -> str:
+        return f'<User: {self.username}>'
+
+
+class Role(Base):
+
+    __tablename__ = 'roles'
+
+    id = Column(Integer, primary_key=True, index=True)
+    slug = Column(String, unique=True)
+    verbose = Column(String)
+
+    users = relationship('User', back_populates="role")
