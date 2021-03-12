@@ -15,11 +15,21 @@ from jwt.exceptions import InvalidAlgorithmError, InvalidSignatureError
 from typing import Optional
 
 
+class Role(Base):
+
+    __tablename__ = 'roles'
+
+    id = Column(Integer, primary_key=True, index=True, unique=True)
+    verbose = Column(String)
+
+    users = relationship('User', back_populates="role")
+
+
 class User(Base):
 
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, unique=True)
     username = Column(String, unique=True)
     first_name = Column(String, nullable=True)
     last_name = Column(String, nullable=True)
@@ -30,7 +40,7 @@ class User(Base):
 
     is_superuser = Column(Boolean, default=False, nullable=True)
 
-    role_id = Column(Integer, ForeignKey('role.id'))
+    role_id = Column(Integer, ForeignKey('roles.id'))
     role = relationship("Role", back_populates="users")
 
     def __init__(
@@ -75,14 +85,3 @@ class User(Base):
 
     def __str__(self) -> str:
         return f'<User: {self.username}>'
-
-
-class Role(Base):
-
-    __tablename__ = 'roles'
-
-    id = Column(Integer, primary_key=True, index=True)
-    slug = Column(String, unique=True)
-    verbose = Column(String)
-
-    users = relationship('User', back_populates="role")

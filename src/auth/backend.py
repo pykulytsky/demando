@@ -8,7 +8,7 @@ from jwt.exceptions import DecodeError
 from base.database import SessionLocal
 from auth.crud import get_user_or_false
 
-from app import settings
+from base import settings
 
 
 # Dependency
