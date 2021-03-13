@@ -14,3 +14,7 @@ def client():
 @pytest.fixture
 def mixer():
     return _mixer
+
+
+def user(mixer):
+    return mixer.blend('auth.models.User')

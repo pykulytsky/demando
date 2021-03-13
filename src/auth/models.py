@@ -19,7 +19,7 @@ class Role(Base):
 
     __tablename__ = 'roles'
 
-    id = Column(Integer, primary_key=True, index=True, unique=True)
+    id = Column(Integer, primary_key=True, index=True)
     verbose = Column(String)
 
     users = relationship('User', back_populates="role")
@@ -29,7 +29,7 @@ class User(Base):
 
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True, index=True, unique=True)
+    id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True)
     first_name = Column(String, nullable=True)
     last_name = Column(String, nullable=True)
