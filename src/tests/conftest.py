@@ -1,7 +1,10 @@
 import pytest
+import sys
+import os
+
+from main import app
 
 from fastapi.testclient import TestClient
-from app import app
 
 from mixer.backend.sqlalchemy import mixer as _mixer
 

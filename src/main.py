@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 import sentry_sdk
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
-import auth.routes as auth_routes
+from auth import routes as auth_routes
 
 from base.database import engine, Base
 
