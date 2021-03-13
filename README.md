@@ -1,5 +1,8 @@
 # demando
-Application for questions ,answers and voting
+Application for questions ,answers and voting.
+
+[![Python application](https://github.com/pykulytsky/demando/actions/workflows/ci.yml/badge.svg)](https://github.com/pykulytsky/demando/actions/workflows/ci.yml)
+[![CodeFactor](https://www.codefactor.io/repository/github/pykulytsky/demando/badge)](https://www.codefactor.io/repository/github/pykulytsky/demando)
 
 ## Run with Docker
 1. Install [docker](https://docs.docker.com/engine/install/) and [docker-compose](https://docs.docker.com/compose/install/) on your local machine.
