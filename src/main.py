@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.params import Depends
 
 import sentry_sdk
-from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from starlette.requests import Request
 from auth import routes as auth_routes
 
