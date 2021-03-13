@@ -80,8 +80,10 @@ jobs:
         cd src
         /opt/hostedtoolcache/Python/3.9.2/x64/bin/pytest -v --ignore=sendgrid --cov --junitxml=junit/test-results.xml --cov-report=xml --cov-report=html
       env:
-        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-        SENDGRID_VERIFY_EMAIL_TEMPLATE_ID: ${{ secrets.SENDGRID_VERIFY_EMAIL_TEMPLATE_ID }}
+        DB_NAME: demando
+        DB_USER: demando
+        DB_USER_PASSWORD: 1234
+        DB_HOST: localhost
         POSTGRES_DB_HOST: 127.0.0.1
 
     - name: Upload pytest test results
