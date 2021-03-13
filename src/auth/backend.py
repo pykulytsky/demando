@@ -38,7 +38,7 @@ class JWTAuthentication(HTTPBearer):
                     status_code=403,
                     detail="Invalid authentication scheme."
                 )
-            if await self._verify__jwt_token(credentials.credentials):
+            if await self._verify_jwt_token(credentials.credentials):
                 return credentials.credentials
             else:
                 raise HTTPException(status_code=403, detail="Token not valid")
@@ -48,7 +48,7 @@ class JWTAuthentication(HTTPBearer):
                 detail="Invalid authorization code."
             )
 
-    async def _verify__jwt_token(self, token: str) -> bool:
+    async def _verify_jwt_token(self, token: str) -> bool:
         valid: bool = False
 
         try:
