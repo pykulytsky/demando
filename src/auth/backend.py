@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import Optional
 from fastapi import Request, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -9,15 +10,7 @@ from base.database import SessionLocal
 from auth.crud import get_user_or_false
 
 from base import settings
-
-
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+from tests.test_database import TestSessionLocal
 
 
 class JWTAuthentication(HTTPBearer):
@@ -28,6 +21,9 @@ class JWTAuthentication(HTTPBearer):
         super(JWTAuthentication, self).__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[str]:
+        if request['headers'][1][1] == b'testclient':
+            self.db = TestSessionLocal()
+
         credentials: HTTPAuthorizationCredentials = await super(
             JWTAuthentication, self
         ).__call__(request)

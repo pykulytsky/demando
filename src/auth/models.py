@@ -59,10 +59,9 @@ class User(Base):
         self.set_password(password)
 
     def set_password(self, password: str) -> str:
-        self.password = pbkdf2_sha256.hash(
-            password,
+        self.password = pbkdf2_sha256.using(
             salt=bytes(settings.SECRET_KEY.encode('utf-8'))
-        )
+        ).hash(password)
         return self.password
 
     @property

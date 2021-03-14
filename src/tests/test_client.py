@@ -25,10 +25,11 @@ class JWTAuthTestClient(TestClient):
             self,
             app: typing.Union[ASGI2App, ASGI3App],
             user: schemas.User,
-            base_url: str,
             db: Session,
-            raise_server_exceptions: bool,
-            root_path: str) -> None:
+            base_url: str = "http://testserver",
+            raise_server_exceptions: bool = True,
+            root_path: str = "",
+    ) -> None:
 
         self.db = db
         self.user = crud.get_user(self.db, user.id)
@@ -43,19 +44,19 @@ class JWTAuthTestClient(TestClient):
         self,
         method: str,
         url: str,
-        params: Params,
-        data: DataType,
-        headers: typing.MutableMapping[str, str],
-        cookies: Cookies,
-        files: FileType,
-        timeout: TimeOut,
-        allow_redirects: bool,
-        proxies: typing.MutableMapping[str, str],
-        hooks: typing.Any,
-        stream: bool,
-        verify: typing.Union[bool, str],
-        cert: typing.Union[str, typing.Tuple[str, str]],
-        json: typing.Any
+        params: Params = None,
+        data: DataType = None,
+        headers: typing.MutableMapping[str, str] = None,
+        cookies: Cookies = None,
+        files: FileType = None,
+        timeout: TimeOut = None,
+        allow_redirects: bool = None,
+        proxies: typing.MutableMapping[str, str] = None,
+        hooks: typing.Any = None,
+        stream: bool = None,
+        verify: typing.Union[bool, str] = None,
+        cert: typing.Union[str, typing.Tuple[str, str]] = None,
+        json: typing.Any = None,
     ) -> requests.Response:
 
         return super().request(
