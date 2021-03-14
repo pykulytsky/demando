@@ -1,6 +1,6 @@
 FROM python:3.8.5-slim
 
-RUN  apt-get update && apt install -y libpq-dev gcc && rm -rf /var/lib/{apt,dpkg,cache,log}/
+RUN  apt-get update && apt-get install -y libpq-dev gcc && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
 WORKDIR /app
 

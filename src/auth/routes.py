@@ -6,12 +6,6 @@ from base.database import SessionLocal, engine, Base
 
 from .backend import JWTAuthentication
 
-
-router = APIRouter(
-    prefix='/auth',
-    tags=['auth']
-)
-
 Base.metadata.create_all(bind=engine)
 
 
@@ -22,6 +16,13 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+router = APIRouter(
+    prefix='/auth',
+    tags=['auth'],
+    dependencies=[Depends(get_db)]
+)
 
 
 @router.post("/users/", response_model=schemas.Token)

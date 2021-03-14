@@ -34,3 +34,16 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.commit()
     db.refresh(user)
     return user
+
+
+def delete_user(db: Session, user: schemas.User):
+    user = models.User(
+        email=user.email,
+        username=user.username,
+        password=user.password
+    )
+
+    db.delete(user)
+    db.commit()
+    db.refresh(user)
+    return user

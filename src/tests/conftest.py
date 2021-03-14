@@ -1,11 +1,13 @@
 import pytest
-
-from main import app, get_db
+from main import app
+from auth import routes as auth_routes
 from fastapi.testclient import TestClient
-from mixer.backend.sqlalchemy import mixer as _mixer
-from base.database import Base
 
+from mixer.backend.sqlalchemy import Mixer
+
+from base.database import Base
 from tests.test_database import TestSessionLocal, engine
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -18,7 +20,10 @@ def override_get_db():
         db.close()
 
 
-app.dependency_overrides[get_db] = override_get_db
+_mixer = Mixer(session=TestSessionLocal(), commit=True)
+
+
+app.dependency_overrides[auth_routes.get_db] = override_get_db
 
 
 @pytest.fixture
@@ -31,5 +36,10 @@ def mixer():
     return _mixer
 
 
-def user(mixer):
-    return mixer.blend('auth.models.User')
+@pytest.fixture
+def db():
+    try:
+        db = TestSessionLocal()
+        yield db
+    finally:
+        db.close()

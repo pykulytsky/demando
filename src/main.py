@@ -19,7 +19,7 @@ def get_db():
         db.close()
 
 
-app = FastAPI(dependencies=[Depends(get_db)])
+app = FastAPI()
 
 app.include_router(auth_routes.router)
 
@@ -32,12 +32,13 @@ async def sentry_exception(request: Request, call_next):
         response = await call_next(request)
         return response
     except Exception as e:
-        with sentry_sdk.push_scope() as scope:
-            scope.set_context("request", request)
-            user_id = "database_user_id"  # when available
-            scope.user = {
-                "ip_address": request.client.host,
-                "id": user_id
-            }
-            sentry_sdk.capture_exception(e)
+        if request['headers']['user-agent'] != 'testclient':
+            with sentry_sdk.push_scope() as scope:
+                scope.set_context("request", request)
+                user_id = "database_user_id"  # when available
+                scope.user = {
+                    "ip_address": request.client.host,
+                    "id": user_id
+                }
+                sentry_sdk.capture_exception(e)
         raise e

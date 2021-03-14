@@ -1,7 +1,7 @@
 # demando
 Application for questions ,answers and voting.
 
-[![Python application](https://github.com/pykulytsky/demando/actions/workflows/ci.yml/badge.svg)](https://github.com/pykulytsky/demando/actions/workflows/ci.yml)
+[![CI](https://github.com/pykulytsky/demando/actions/workflows/ci.yml/badge.svg)](https://github.com/pykulytsky/demando/actions/workflows/ci.yml)
 [![CodeFactor](https://www.codefactor.io/repository/github/pykulytsky/demando/badge)](https://www.codefactor.io/repository/github/pykulytsky/demando)
 
 ## Run with Docker
