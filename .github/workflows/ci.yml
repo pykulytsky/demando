@@ -78,7 +78,7 @@ jobs:
     - name: Test with pytest
       run: |
         cd src
-        /opt/hostedtoolcache/Python/3.9.2/x64/bin/pytest --cov ---cov-report=xml
+        /opt/hostedtoolcache/Python/3.9.2/x64/bin/pytest --cov --cov-report=xml
       env:
         DB_NAME: demando
         DB_USER: demando
