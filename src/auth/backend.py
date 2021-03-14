@@ -20,8 +20,12 @@ class JWTAuthentication(HTTPBearer):
         super(JWTAuthentication, self).__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[str]:
-        if request['headers'][1][1] == b'testclient':
-            self.db = TestSessionLocal()
+        try:
+            if request['headers'][1][1] == b'testclient':
+                self.db = TestSessionLocal()
+        except TypeError:
+            if request.__dict__['headers']['user-agent'] == 'testclient':
+                self.db = TestSessionLocal()
 
         credentials: HTTPAuthorizationCredentials = await super(
             JWTAuthentication, self

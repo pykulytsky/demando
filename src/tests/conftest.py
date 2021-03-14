@@ -64,5 +64,19 @@ def user(db):
 
 
 @pytest.fixture
+def another_user(db):
+    _user = UserCreate(
+        email='test2@test.py',
+        username='test2',
+        password='1234'
+    )
+    user = create_user(db, _user)
+    yield user
+
+    cursor = engine.connect()
+    cursor.execute('DELETE FROM users;')
+
+
+@pytest.fixture
 def auth_client(db, user):
     return JWTAuthTestClient(app, user=user, db=db)
