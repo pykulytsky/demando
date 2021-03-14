@@ -13,6 +13,8 @@ class Event(Base):
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship('User', back_populates='events')
 
+    questions = relationship('Question', back_populates='event')
+
 
 likes_table = Table('likes', Base.metadata,
                     Column('user_id', Integer, ForeignKey('users.id')),
@@ -26,6 +28,9 @@ class Question(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     body = Column(String, nullable=False)
+
+    event_id = Column(Integer, ForeignKey('events.id'))
+    event = relationship('Event', back_populates="questions")
 
     author_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     author = relationship('User', back_populates='questions')
