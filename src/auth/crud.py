@@ -50,7 +50,9 @@ def delete_user(db: Session, user: schemas.User):
 
 
 def login(db: Session, user: schemas.UserLogin):
-    db_user = db.query(models.User).filter(models.User.email == user.email).first()
+    db_user = db.query(models.User).filter(
+        models.User.email == user.email
+    ).first()
     if user:
         if db_user.verify_password(user.password):
             return db_user

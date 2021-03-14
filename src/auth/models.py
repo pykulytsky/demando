@@ -11,6 +11,7 @@ from base import settings
 
 from base.database import Base
 from jwt.exceptions import InvalidAlgorithmError, InvalidSignatureError
+from questions.models import likes_table
 
 from typing import Optional
 
@@ -42,6 +43,12 @@ class User(Base):
 
     role_id = Column(Integer, ForeignKey('roles.id'))
     role = relationship("Role", back_populates="users")
+
+    events = relationship('Event', back_populates='owner')
+    questions = relationship('Question', back_populates='author')
+    liked_questions = relationship(
+        'Question', secondary=likes_table, back_populates="likes"
+    )
 
     def __init__(
         self,

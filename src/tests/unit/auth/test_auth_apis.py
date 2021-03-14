@@ -1,6 +1,3 @@
-from pprint import pprint
-
-
 def test_read_users_works(client, user):
     response = client.get('/auth/users')
 
