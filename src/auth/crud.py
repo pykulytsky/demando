@@ -47,3 +47,10 @@ def delete_user(db: Session, user: schemas.User):
     db.commit()
     db.refresh(user)
     return user
+
+
+def login(db: Session, user: schemas.UserLogin):
+    db_user = db.query(models.User).filter(models.User.email == user.email).first()
+    if user:
+        if db_user.verify_password(user.password):
+            return db_user

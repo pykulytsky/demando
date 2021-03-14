@@ -64,6 +64,11 @@ class User(Base):
         ).hash(password)
         return self.password
 
+    def verify_password(self, password: str):
+        return pbkdf2_sha256.using(
+            salt=bytes(settings.SECRET_KEY.encode('utf-8'))
+        ).verify(password, self.password)
+
     @property
     def token(self) -> str:
         return self.generate_jwt_token()

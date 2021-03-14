@@ -36,7 +36,11 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/refresh/", response_model=schemas.Token)
 def refresh_token(user: schemas.UserLogin, db: Session = Depends(get_db)):
-    pass
+    db_user = crud.login(db, user)
+    if db_user:
+        return {"token": db_user.token}
+    else:
+        raise HTTPException(status_code=400, detail="Wrong login credentials")
 
 
 @router.get("/users/", response_model=List[schemas.User])

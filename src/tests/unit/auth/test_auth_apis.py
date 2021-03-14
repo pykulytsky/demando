@@ -15,9 +15,30 @@ def test_get_user_by_id(client, user):
     assert response.json()[0]['username'] == user.username
 
 
-def test_auth_endpoint(auth_client, user):
+def test_protected_endpoint(auth_client, user):
     response = auth_client.get(f'/auth/users/{user.id}')
 
     assert response.status_code == 200
     assert response.json()['email'] == user.email
     assert response.json()['username'] == user.username
+
+
+def test_login(client, user):
+    response = client.post('/auth/refresh/', json={
+        'email': user.email,
+        'password': '1234'
+    })
+
+    assert response.status_code == 200
+    assert response.json()['token']
+
+
+def test_create_user(client):
+    response = client.post('/auth/users/', json={
+        'username': 'test',
+        'email': 'test@py.com',
+        'password': 'assword'
+    })
+
+    assert response.status_code == 200
+    assert response.json()['token']
