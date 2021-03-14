@@ -78,7 +78,7 @@ jobs:
     - name: Test with pytest
       run: |
         cd src
-        /opt/hostedtoolcache/Python/3.9.2/x64/bin/pytest -v --ignore=sendgrid --cov --junitxml=junit/test-results.xml --cov-report=xml --cov-report=html
+        /opt/hostedtoolcache/Python/3.9.2/x64/bin/pytest --cov --cov-report=xml
       env:
         DB_NAME: demando
         DB_USER: demando
@@ -97,7 +97,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: pytest-results
-        path: src/coverage.xml
+        path: coverage.xml
       # Use always() to always run this step to publish test results when there are test failures
       if: ${{ always() }}
 
@@ -109,7 +109,7 @@ jobs:
     - uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-        files: src/coverage.xml # optional
+        files: coverage.xml # optional
         name: codecov-umbrella # optional
         fail_ci_if_error: true # optional (default = false)
         verbose: true # optional (default = false)
