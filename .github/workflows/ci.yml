@@ -106,8 +106,6 @@ jobs:
     needs: test
     steps:
     - uses: actions/checkout@master
-    - test-dir:
-      run: ls ./coverage/reports/
     - uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
@@ -115,3 +113,5 @@ jobs:
         name: codecov-umbrella # optional
         fail_ci_if_error: true # optional (default = false)
         verbose: true # optional (default = false)
+    - name: test-dir
+      run: ls ./coverage/reports/
