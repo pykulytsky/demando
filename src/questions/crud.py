@@ -15,7 +15,7 @@ def get_event(db: Session, pk: int):
 def create_event(db: Session, event: schemas.EventCreate):
     _event = models.Event(
         name=event.name,
-        owner=get_user(db, event.owner.pk)
+        owner=get_user(db, event.owner)
     )
 
     db.add(_event)
@@ -49,8 +49,8 @@ def get_questions_by_author(db: Session, author_pk):
 def create_qeustion(db: Session, question: schemas.QuestionCreate):
     _question = models.Question(
         body=question.body,
-        author=get_user(db, question.author.pk),
-        event=get_event(db, question.event.pk)
+        author=get_user(db, question.author),
+        event=get_event(db, question.event)
     )
 
     db.add(_question)

@@ -10,11 +10,7 @@ from auth.schemas import User
 def event(db, user):
     _event = EventCreate(
         name='test event',
-        owner=User(
-            pk=user.pk,
-            email=user.email,
-            username=user.username
-        )
+        owner=user.pk
     )
     event = create_event(db, _event)
     yield event
@@ -29,11 +25,7 @@ def event(db, user):
 def event_schema(user):
     _event = EventCreate(
         name='test event 1',
-        owner=User(
-            pk=user.pk,
-            email=user.email,
-            username=user.username
-        )
+        owner=user.pk
     )
 
     return _event
@@ -43,20 +35,8 @@ def event_schema(user):
 def question(event, user, db):
     _question = QuestionCreate(
         body='test question',
-        author=User(
-            pk=user.pk,
-            email=user.email,
-            username=user.username
-        ),
-        event=Event(
-            pk=event.pk,
-            name=event.name,
-            owner=User(
-                pk=user.pk,
-                email=user.email,
-                username=user.username
-            ),
-        )
+        author=user.pk,
+        event=event.pk
     )
     question = create_qeustion(db, _question)
     yield question
@@ -71,20 +51,8 @@ def question(event, user, db):
 def question_schema(user, event):
     _question = QuestionCreate(
         body='test question',
-        author=User(
-            pk=user.pk,
-            email=user.email,
-            username=user.username
-        ),
-        event=Event(
-            pk=event.pk,
-            name=event.name,
-            owner=User(
-                pk=user.pk,
-                email=user.email,
-                username=user.username
-            ),
-        )
+        author=user.pk,
+        event=event.pk
     )
 
     return _question

@@ -17,10 +17,10 @@ def test_login(user, db):
 
 
 def test_delete_user(user, db):
-    _user = User(id=user.id, email=user.email, username=user.username)
+    _user = User(pk=user.pk, email=user.email, username=user.username)
     crud.delete_user(db, _user)
 
-    assert crud.get_user(db, user.id) is None
+    assert crud.get_user(db, user.pk) is None
 
 
 def get_users(user, another_user, db):
@@ -28,7 +28,7 @@ def get_users(user, another_user, db):
 
 
 def test_user_or_false(db, user):
-    _user = User(id=user.id, email=user.email, username=user.username)
+    _user = User(pk=user.pk, email=user.email, username=user.username)
     crud.delete_user(db, _user)
 
-    assert crud.get_user_or_false(db, user.id) is False
+    assert crud.get_user_or_false(db, user.pk) is False

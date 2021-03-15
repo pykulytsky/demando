@@ -5,7 +5,7 @@ from auth.schemas import User
 
 class EventCreate(BaseModel):
     name: str
-    owner: User
+    owner: int
 
 
 class Question(BaseModel):
@@ -16,12 +16,14 @@ class Question(BaseModel):
     likes: Optional[List[User]]
 
 
-class Event(EventCreate):
+class Event(BaseModel):
     pk: int
+    name: str
     questions: Optional[List[Question]]
+    owner: User
 
 
 class QuestionCreate(BaseModel):
     body: str
-    event: Event
-    author: User
+    event: int
+    author: int

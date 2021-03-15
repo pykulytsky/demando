@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from auth.backend import JWTAuthentication
 from base.database import SessionLocal, engine, Base
 from questions.schemas import Event, EventCreate
@@ -36,7 +36,10 @@ def get_events(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 @router.get('/events/{event_pk}', response_model=Event)
 def get_event(event_pk, db: Session = Depends(get_db)):
     event = crud.get_event(db, event_pk)
-    return event
+    if event:
+        return event
+    else:
+        raise HTTPException(status_code=400, detail="No such event found")
 
 
 @router.get('/{user_pk}/events/', response_model=Event)
