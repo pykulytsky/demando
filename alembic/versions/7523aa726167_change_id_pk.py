@@ -1,4 +1,4 @@
-"""change id -> pk
+"""change pk -> pk
 
 Revision ID: 7523aa726167
 Revises: 5306c33f19be
