@@ -17,8 +17,8 @@ class Event(Base):
 
 
 likes_table = Table('likes', Base.metadata,
-                    Column('user_id', Integer, ForeignKey('users.id')),
-                    Column('question_id', Integer, ForeignKey('questions.id'))
+                    Column('user_id', Integer, ForeignKey('users.id'), nullable=True),
+                    Column('question_id', Integer, ForeignKey('questions.id'), nullable=True)
                     )
 
 
@@ -29,7 +29,7 @@ class Question(Base):
     id = Column(Integer, primary_key=True, index=True)
     body = Column(String, nullable=False)
 
-    event_id = Column(Integer, ForeignKey('events.id'))
+    event_id = Column(Integer, ForeignKey('events.id'), nullable=True)
     event = relationship('Event', back_populates="questions")
 
     author_id = Column(Integer, ForeignKey('users.id'), nullable=True)

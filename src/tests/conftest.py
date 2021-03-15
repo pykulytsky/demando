@@ -60,6 +60,8 @@ def user(db):
     yield user
 
     cursor = engine.connect()
+    cursor.execute('DELETE FROM events;')
+    cursor.execute('DELETE FROM questions;')
     cursor.execute('DELETE FROM users;')
 
 
