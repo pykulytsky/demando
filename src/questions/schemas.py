@@ -8,18 +8,20 @@ class EventCreate(BaseModel):
     owner: User
 
 
+class Question(BaseModel):
+    pk: int
+    body: str
+    author: User
+    likes_count: int
+    likes: Optional[List[User]]
+
+
 class Event(EventCreate):
-    id: int
-    questions: Optional[List['Question']]
+    pk: int
+    questions: Optional[List[Question]]
 
 
 class QuestionCreate(BaseModel):
     body: str
     event: Event
     author: User
-
-
-class Question(QuestionCreate):
-    id: int
-    likes_count: int
-    likes: Optional[List[User]]

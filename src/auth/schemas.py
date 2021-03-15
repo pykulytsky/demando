@@ -20,7 +20,7 @@ class UserCreate(UserBase):
 
 
 class User(UserBase):
-    id: int
+    pk: int
     role: Optional[int]
 
     class Config:

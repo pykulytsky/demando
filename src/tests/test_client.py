@@ -32,7 +32,7 @@ class JWTAuthTestClient(TestClient):
     ) -> None:
 
         self.db = db
-        self.user = crud.get_user(self.db, user.id)
+        self.user = crud.get_user(self.db, user.pk)
 
         super().__init__(
             app,

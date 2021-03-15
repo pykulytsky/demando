@@ -20,8 +20,12 @@ class JWTAuthentication(HTTPBearer):
         super(JWTAuthentication, self).__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[str]:
-        if request['headers'][1][1] == b'testclient':
-            self.db = TestSessionLocal()
+        try:
+            if request['headers'][1][1] == b'testclient':
+                self.db = TestSessionLocal()
+        except TypeError:
+            if request.__dict__['headers']['user-agent'] == 'testclient':
+                self.db = TestSessionLocal()
 
         credentials: HTTPAuthorizationCredentials = await super(
             JWTAuthentication, self
@@ -53,8 +57,8 @@ class JWTAuthentication(HTTPBearer):
                 algorithms=settings.ALGORITHM
             )
 
-            if paylaod.get('id', False):
-                if get_user_or_false(db=self.db, user_id=paylaod['id']):
+            if paylaod.get('pk', False):
+                if get_user_or_false(db=self.db, user_id=paylaod['pk']):
                     valid = True
 
         except DecodeError:

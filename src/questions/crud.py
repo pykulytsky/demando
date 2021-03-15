@@ -1,4 +1,3 @@
-from typing import Union
 from sqlalchemy.orm import Session
 
 from . import models, schemas
@@ -9,14 +8,14 @@ def get_events(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Event).offset(skip).limit(limit).all()
 
 
-def get_event(db: Session, int: id):
-    return db.query(models.Event).filter(models.Event.id == id).first()
+def get_event(db: Session, pk: int):
+    return db.query(models.Event).filter(models.Event.pk == pk).first()
 
 
 def create_event(db: Session, event: schemas.EventCreate):
     _event = models.Event(
         name=event.name,
-        owner=get_user(db, event.owner.id)
+        owner=get_user(db, event.owner.pk)
     )
 
     db.add(_event)
@@ -25,27 +24,33 @@ def create_event(db: Session, event: schemas.EventCreate):
     return _event
 
 
-def get_question(db: Session, int: id):
-    return db.query(models.Question).filter(models.Question.id == id).first()
-
-
-def get_events_questions(db: Session, event_id):
-    return db.query(models.Question).filter(
-        models.Question.event_id == event_id
+def get_events_by_user(db: Session, user_pk):
+    return db.query(models.Event).filter(
+        models.Event.owner_pk == user_pk
     ).all()
 
 
-def get_questions_by_author(db: Session, author_id):
+def get_question(db: Session, pk: int):
+    return db.query(models.Question).filter(models.Question.pk == pk).first()
+
+
+def get_events_questions(db: Session, event_pk):
     return db.query(models.Question).filter(
-        models.Question.author_id == author_id
+        models.Question.event_pk == event_pk
+    ).all()
+
+
+def get_questions_by_author(db: Session, author_pk):
+    return db.query(models.Question).filter(
+        models.Question.author_pk == author_pk
     )
 
 
 def create_qeustion(db: Session, question: schemas.QuestionCreate):
     _question = models.Question(
         body=question.body,
-        author=get_user(db, question.author.id),
-        event=get_event(db, question.event.id)
+        author=get_user(db, question.author.pk),
+        event=get_event(db, question.event.pk)
     )
 
     db.add(_question)

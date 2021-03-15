@@ -13,7 +13,7 @@ def test_get_user_by_id(client, user):
 
 
 def test_protected_endpoint(auth_client, user):
-    response = auth_client.get(f'/auth/users/{user.id}')
+    response = auth_client.get(f'/auth/users/{user.pk}')
 
     assert response.status_code == 200
     assert response.json()['email'] == user.email

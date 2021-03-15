@@ -11,7 +11,7 @@ def event(db, user):
     _event = EventCreate(
         name='test event',
         owner=User(
-            id=user.id,
+            pk=user.pk,
             email=user.email,
             username=user.username
         )
@@ -20,8 +20,8 @@ def event(db, user):
     yield event
 
     cursor = engine.connect()
-    cursor.execute('DELETE FROM events;')
     cursor.execute('DELETE FROM questions;')
+    cursor.execute('DELETE FROM events;')
     cursor.execute('DELETE FROM users;')
 
 
@@ -30,7 +30,7 @@ def event_schema(user):
     _event = EventCreate(
         name='test event 1',
         owner=User(
-            id=user.id,
+            pk=user.pk,
             email=user.email,
             username=user.username
         )
@@ -44,15 +44,15 @@ def question(event, user, db):
     _question = QuestionCreate(
         body='test question',
         author=User(
-            id=user.id,
+            pk=user.pk,
             email=user.email,
             username=user.username
         ),
         event=Event(
-            id=event.id,
+            pk=event.pk,
             name=event.name,
             owner=User(
-                id=user.id,
+                pk=user.pk,
                 email=user.email,
                 username=user.username
             ),
@@ -62,6 +62,29 @@ def question(event, user, db):
     yield question
 
     cursor = engine.connect()
-    cursor.execute('DELETE FROM events;')
     cursor.execute('DELETE FROM questions;')
+    cursor.execute('DELETE FROM events;')
     cursor.execute('DELETE FROM users;')
+
+
+@pytest.fixture
+def question_schema(user, event):
+    _question = QuestionCreate(
+        body='test question',
+        author=User(
+            pk=user.pk,
+            email=user.email,
+            username=user.username
+        ),
+        event=Event(
+            pk=event.pk,
+            name=event.name,
+            owner=User(
+                pk=user.pk,
+                email=user.email,
+                username=user.username
+            ),
+        )
+    )
+
+    return _question

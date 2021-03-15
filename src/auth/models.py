@@ -20,7 +20,7 @@ class Role(Base):
 
     __tablename__ = 'roles'
 
-    id = Column(Integer, primary_key=True, index=True)
+    pk = Column(Integer, primary_key=True, index=True)
     verbose = Column(String)
 
     users = relationship('User', back_populates="role")
@@ -30,7 +30,7 @@ class User(Base):
 
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True, index=True)
+    pk = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True)
     first_name = Column(String, nullable=True)
     last_name = Column(String, nullable=True)
@@ -41,7 +41,7 @@ class User(Base):
 
     is_superuser = Column(Boolean, default=False, nullable=True)
 
-    role_id = Column(Integer, ForeignKey('roles.id'))
+    role_pk = Column(Integer, ForeignKey('roles.pk'))
     role = relationship("Role", back_populates="users")
 
     events = relationship('Event', back_populates='owner')
@@ -84,7 +84,7 @@ class User(Base):
         period = datetime.now() + timedelta(days=60)
         try:
             token = jwt.encode({
-                'id': self.id,
+                'pk': self.pk,
                 'exp': period.timestamp(),
                 'is_superuser': int(self.is_superuser)
             }, settings.SECRET_KEY, algorithm=settings.ALGORITHM)

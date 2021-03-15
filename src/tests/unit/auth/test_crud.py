@@ -4,7 +4,7 @@ from auth.schemas import UserLogin
 
 
 def test_get_user(user, db):
-    assert crud.get_user(db, user.id) == user
+    assert crud.get_user(db, user.pk) == user
 
 
 def test_get_user_by_email(user, db):
