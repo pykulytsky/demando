@@ -106,6 +106,8 @@ jobs:
     needs: test
     steps:
     - uses: actions/checkout@master
+    - test-dir:
+      run: ls ./coverage/reports/
     - uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
