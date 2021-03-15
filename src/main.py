@@ -3,6 +3,7 @@ from fastapi import FastAPI
 import sentry_sdk
 from starlette.requests import Request
 from auth import routes as auth_routes
+from questions import routes as questions_routes
 
 from base.database import SessionLocal, engine, Base
 
@@ -21,6 +22,7 @@ def get_db():
 app = FastAPI()
 
 app.include_router(auth_routes.router)
+app.include_router(questions_routes.router)
 
 sentry_sdk.init(dsn="https://e08875a22d804df08150988c6886b871@o504286.ingest.sentry.io/5673787") # noqa
 
@@ -37,7 +39,7 @@ async def sentry_exception(request: Request, call_next):
                 user_id = "database_user_id"  # when available
                 scope.user = {
                     "ip_address": request.client.host,
-                    "id": user_id
+                    "pk": user_id
                 }
                 sentry_sdk.capture_exception(e)
         raise e

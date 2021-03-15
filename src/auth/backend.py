@@ -57,8 +57,8 @@ class JWTAuthentication(HTTPBearer):
                 algorithms=settings.ALGORITHM
             )
 
-            if paylaod.get('id', False):
-                if get_user_or_false(db=self.db, user_id=paylaod['id']):
+            if paylaod.get('pk', False):
+                if get_user_or_false(db=self.db, user_id=paylaod['pk']):
                     valid = True
 
         except DecodeError:

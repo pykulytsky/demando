@@ -5,11 +5,11 @@ from . import models, schemas
 
 
 def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.id == user_id).first()
+    return db.query(models.User).filter(models.User.pk == user_id).first()
 
 
 def get_user_or_false(db: Session, user_id: int) -> Union[models.User, bool]:
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+    user = db.query(models.User).filter(models.User.pk == user_id).first()
     if user:
         return user
     else:
