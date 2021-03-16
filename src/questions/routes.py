@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
-from auth.backend import JWTAuthentication, decode_token
+from auth.backend import authenticate
 from auth.schemas import User
 from base.database import SessionLocal, engine, Base
 from questions.schemas import AuthenticatedEventCreate, Event, EventCreate
@@ -51,8 +51,8 @@ def get_events_by_user(user_pk, db: Session = Depends(get_db)):
 
 @router.post(
     '/events/',
-    response_model=Event)
-def create_event(event: EventCreate, db: Session = Depends(get_db), user: User = Depends(decode_token)):
+    response_model=Event, status_code=201)
+def create_event(event: EventCreate, db: Session = Depends(get_db), user: User = Depends(authenticate)):
     event = AuthenticatedEventCreate(owner=user.pk, name=event.name)
     _event = crud.create_event(db, event)
     return _event

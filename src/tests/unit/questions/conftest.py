@@ -2,12 +2,12 @@ import pytest
 from tests.test_database import engine
 from questions.crud import create_event, create_qeustion
 
-from questions.schemas import EventCreate, QuestionCreate
+from questions.schemas import AuthenticatedEventCreate, QuestionCreate
 
 
 @pytest.fixture
 def event(db, user):
-    _event = EventCreate(
+    _event = AuthenticatedEventCreate(
         name='test event',
         owner=user.pk
     )
@@ -22,7 +22,7 @@ def event(db, user):
 
 @pytest.fixture
 def event_schema(user):
-    _event = EventCreate(
+    _event = AuthenticatedEventCreate(
         name='test event 1',
         owner=user.pk
     )

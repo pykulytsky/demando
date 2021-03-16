@@ -37,5 +37,5 @@ def test_create_user(client):
         'password': 'assword'
     })
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert response.json()['token']

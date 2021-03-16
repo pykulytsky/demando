@@ -69,8 +69,22 @@ class JWTAuthentication(HTTPBearer):
         return valid
 
 
-def decode_token(token: str = Depends(JWTAuthentication())) -> Optional[User]:
+def get_db():
     db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+def authenticate(request: Request, token: str = Depends(JWTAuthentication())) -> Optional[User]:
+
+    try:
+        if request['headers'][1][1] == b'testclient':
+            db = TestSessionLocal()
+    except TypeError:
+        if request.__dict__['headers']['user-agent'] == 'testclient':
+            db = TestSessionLocal()
 
     paylaod = jwt.decode(
         jwt=token,

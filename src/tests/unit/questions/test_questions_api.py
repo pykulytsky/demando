@@ -21,4 +21,8 @@ def test_get_event(client, event):
 
 
 def test_create_event(auth_client):
-    pass
+    response = auth_client.post('/qa/events/', json={
+        'name': 'why i am so good?',
+    })
+
+    assert response.status_code == 201
