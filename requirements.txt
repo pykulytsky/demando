@@ -9,7 +9,7 @@ click==7.1.2
 colorama==0.4.4
 coverage==5.5
 decorator==4.4.2
-Faker==6.6.0
+Faker==6.6.1
 fastapi==0.63.0
 flake8==3.9.0
 flake8-bugbear==21.3.2
