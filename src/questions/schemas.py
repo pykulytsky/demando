@@ -5,6 +5,9 @@ from auth.schemas import User
 
 class EventCreate(BaseModel):
     name: str
+
+
+class AuthenticatedEventCreate(EventCreate):
     owner: int
 
 
@@ -15,12 +18,18 @@ class Question(BaseModel):
     likes_count: int
     likes: Optional[List[User]]
 
+    class Config:
+        orm_mode = True
+
 
 class Event(BaseModel):
     pk: int
     name: str
     questions: Optional[List[Question]]
     owner: User
+
+    class Config:
+        orm_mode = True
 
 
 class QuestionCreate(BaseModel):

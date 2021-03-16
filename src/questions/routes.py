@@ -1,8 +1,9 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
-from auth.backend import JWTAuthentication
+from auth.backend import JWTAuthentication, decode_token
+from auth.schemas import User
 from base.database import SessionLocal, engine, Base
-from questions.schemas import Event, EventCreate
+from questions.schemas import AuthenticatedEventCreate, Event, EventCreate
 from sqlalchemy.orm import Session
 
 from . import crud
@@ -43,14 +44,15 @@ def get_event(event_pk, db: Session = Depends(get_db)):
 
 
 @router.get('/{user_pk}/events/', response_model=Event)
-def get_events_by_user(user_pk, event_pk, db: Session = Depends(get_db)):
+def get_events_by_user(user_pk, db: Session = Depends(get_db)):
     event = crud.get_events_by_user(db, user_pk)
     return event
 
 
 @router.post(
     '/events/',
-    response_model=Event, dependencies=[Depends(JWTAuthentication())])
-def create_event(event: EventCreate, db: Session = Depends(get_db)):
+    response_model=Event)
+def create_event(event: EventCreate, db: Session = Depends(get_db), user: User = Depends(decode_token)):
+    event = AuthenticatedEventCreate(owner=user.pk, name=event.name)
     _event = crud.create_event(db, event)
     return _event

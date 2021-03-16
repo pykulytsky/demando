@@ -1,9 +1,11 @@
 from typing import Optional
-from fastapi import Request, HTTPException
+from fastapi import Request, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 import jwt
 from jwt.exceptions import DecodeError
+from sqlalchemy.orm import Session
+from auth.models import User
 
 from base.database import SessionLocal
 from auth.crud import get_user_or_false
@@ -65,3 +67,19 @@ class JWTAuthentication(HTTPBearer):
             valid = False
 
         return valid
+
+
+def decode_token(token: str = Depends(JWTAuthentication())) -> Optional[User]:
+    db = SessionLocal()
+
+    paylaod = jwt.decode(
+        jwt=token,
+        key=settings.SECRET_KEY,
+        algorithms=settings.ALGORITHM
+    )
+
+    if paylaod.get('pk', False):
+        user = get_user_or_false(db=db, user_id=paylaod['pk'])
+        if user:
+            return user
+        # TODO If user does not exists, return anonymous user

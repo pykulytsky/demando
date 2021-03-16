@@ -1,7 +1,6 @@
 import typer
 from base.database import engine
 from tests.test_database import engine as test_engine
-from sqlalchemy import MetaData
 import time
 from sqlalchemy.engine import reflection
 
@@ -29,20 +28,13 @@ def truncate_db():
 
 
 @manager.command()
-def truncate_table(table: str):
-    con = engine.connect()
-    records_count = len(con.execute(f'SELECT * FROM {table};').fetchall())
-    total = 0
-
-
-@manager.command()
 def truncate_test_db():
     total = 0
 
     insp = reflection.Inspector.from_engine(test_engine)
     total_tables = insp.get_table_names()
 
-    con = engine.connect()
+    con = test_engine.connect()
 
     typer.echo("\n")
     with typer.progressbar(total_tables, fill_char="█") as progress:

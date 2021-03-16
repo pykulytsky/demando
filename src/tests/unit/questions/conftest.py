@@ -2,8 +2,7 @@ import pytest
 from tests.test_database import engine
 from questions.crud import create_event, create_qeustion
 
-from questions.schemas import EventCreate, QuestionCreate, Event
-from auth.schemas import User
+from questions.schemas import EventCreate, QuestionCreate
 
 
 @pytest.fixture
