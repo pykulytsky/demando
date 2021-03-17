@@ -2,7 +2,7 @@ import pytest
 from tests.test_database import engine
 from questions.crud import create_event, create_qeustion
 
-from questions.schemas import AuthenticatedEventCreate, QuestionCreate
+from questions.schemas import AuthenticatedEventCreate, AuthenticatedQuestionCreate
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ def event_schema(user):
 
 @pytest.fixture
 def question(event, user, db):
-    _question = QuestionCreate(
+    _question = AuthenticatedQuestionCreate(
         body='test question',
         author=user.pk,
         event=event.pk
@@ -48,7 +48,7 @@ def question(event, user, db):
 
 @pytest.fixture
 def question_schema(user, event):
-    _question = QuestionCreate(
+    _question = AuthenticatedQuestionCreate(
         body='test question',
         author=user.pk,
         event=event.pk

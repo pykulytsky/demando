@@ -1,5 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql.sqltypes import Boolean
 from base.database import Base
 
 
@@ -12,6 +13,8 @@ class Event(Base):
 
     owner_pk = Column(Integer, ForeignKey('users.pk'))
     owner = relationship('User', back_populates='events')
+
+    answered = Column(Boolean, default=False)
 
     questions = relationship('Question', back_populates='event')
 

@@ -39,3 +39,9 @@ def test_create_user(client):
 
     assert response.status_code == 201
     assert response.json()['token']
+
+
+def test_get_me(auth_client):
+    response = auth_client.get('/auth/users/me/')
+
+    assert response.status_code == 200

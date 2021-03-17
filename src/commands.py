@@ -13,7 +13,7 @@ def truncate_db():
     total = 0
 
     insp = reflection.Inspector.from_engine(engine)
-    total_tables = insp.get_table_names()
+    total_tables = insp.get_table_names()[::-1]
 
     con = engine.connect()
 
@@ -32,7 +32,7 @@ def truncate_test_db():
     total = 0
 
     insp = reflection.Inspector.from_engine(test_engine)
-    total_tables = insp.get_table_names()
+    total_tables = insp.get_table_names()[::-1]
 
     con = test_engine.connect()
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from base.database import SessionLocal, engine, Base
 
 from .events import event_router

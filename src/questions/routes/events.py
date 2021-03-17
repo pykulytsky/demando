@@ -39,7 +39,10 @@ def get_events_by_user(user_pk, db: Session = Depends(get_db)):
 
 
 @event_router.get('/my/', response_model=List[Event])
-def get_my_events(db: Session = Depends(get_db), user: User = Depends(authenticate)):
+def get_my_events(
+    db: Session = Depends(get_db),
+    user: User = Depends(authenticate)
+):
     event = crud.get_events_by_user(db, user.pk)
     return event
 
@@ -47,7 +50,11 @@ def get_my_events(db: Session = Depends(get_db), user: User = Depends(authentica
 @event_router.post(
     '/',
     response_model=Event, status_code=201)
-def create_event(event: EventCreate, db: Session = Depends(get_db), user: User = Depends(authenticate)):
+def create_event(
+    event: EventCreate,
+    db: Session = Depends(get_db),
+    user: User = Depends(authenticate)
+):
     event = AuthenticatedEventCreate(owner=user.pk, name=event.name)
     _event = crud.create_event(db, event)
     return _event

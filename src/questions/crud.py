@@ -43,10 +43,10 @@ def get_events_questions(db: Session, event_pk):
 def get_questions_by_author(db: Session, author_pk):
     return db.query(models.Question).filter(
         models.Question.author_pk == author_pk
-    )
+    ).all()
 
 
-def create_qeustion(db: Session, question: schemas.QuestionCreate):
+def create_qeustion(db: Session, question: schemas.AuthenticatedQuestionCreate):
     _question = models.Question(
         body=question.body,
         author=get_user(db, question.author),
@@ -57,3 +57,7 @@ def create_qeustion(db: Session, question: schemas.QuestionCreate):
     db.commit()
     db.refresh(_question)
     return _question
+
+
+def get_questions(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Question).offset(skip).limit(limit).all()

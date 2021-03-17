@@ -35,4 +35,7 @@ class Event(BaseModel):
 class QuestionCreate(BaseModel):
     body: str
     event: int
+
+
+class AuthenticatedQuestionCreate(QuestionCreate):
     author: int

@@ -76,7 +76,11 @@ def get_db():
         db.close()
 
 
-def authenticate(request: Request, token: str = Depends(JWTAuthentication())) -> Optional[User]:
+def authenticate(
+    request: Request, token: str = Depends(JWTAuthentication())
+) -> Optional[User]:
+
+    db = SessionLocal()
 
     try:
         if request['headers'][1][1] == b'testclient':
