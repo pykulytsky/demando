@@ -1,5 +1,5 @@
 # demando
-Application for questions ,answers and voting.
+Application for questions, answers and voting.
 
 [![CI](https://github.com/pykulytsky/demando/actions/workflows/ci.yml/badge.svg)](https://github.com/pykulytsky/demando/actions/workflows/ci.yml)
 [![CodeFactor](https://www.codefactor.io/repository/github/pykulytsky/demando/badge)](https://www.codefactor.io/repository/github/pykulytsky/demando)
@@ -15,7 +15,7 @@ git clone https://github.com/pykulytsky/demando.git
 ```bash
 cd demando
 ```
-4. Build docekr image
+4. Build docker image
 ```bash
 docker-compose build app
 ```
