@@ -13,4 +13,7 @@ DB_HOST = config('DB_HOST', 'db')
 
 DEBUG = True
 
-SENTRY_DSN = config('SENTRY_DSN', 'https://e08875a22d804df08150988c6886b871@o504286.ingest.sentry.io/5673787')
+SENTRY_DSN = config(
+    'SENTRY_DSN',
+    'https://e08875a22d804df08150988c6886b871@o504286.ingest.sentry.io/5673787'
+)

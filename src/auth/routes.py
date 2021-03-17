@@ -52,5 +52,7 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 
 
 @router.get('/users/me/', response_model=schemas.User)
-def get_me(user: schemas.User = Depends(authenticate), db: Session = Depends(get_db)):
+def get_me(
+    user: schemas.User = Depends(authenticate),
+):
     return user

@@ -18,5 +18,3 @@ pools_router = APIRouter(
     prefix='/pools',
     tags=['pools'],
 )
-
-

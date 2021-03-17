@@ -10,7 +10,6 @@ from base.database import SessionLocal, get_db
 from auth.crud import get_user_or_false
 
 from base import settings
-from tests.test_database import TestSessionLocal
 from sqlalchemy.orm import Session
 
 
@@ -21,7 +20,9 @@ class JWTAuthentication(HTTPBearer):
         self.db = SessionLocal()
         super(JWTAuthentication, self).__init__(auto_error=auto_error)
 
-    async def __call__(self, request: Request, db: Session = Depends(get_db)) -> Optional[str]:
+    async def __call__(
+        self, request: Request, db: Session = Depends(get_db)
+    ) -> Optional[str]:
 
         self.db = db
 
@@ -66,7 +67,9 @@ class JWTAuthentication(HTTPBearer):
 
 
 def authenticate(
-    request: Request, token: str = Depends(JWTAuthentication()), db: Session = Depends(get_db)
+    request: Request,
+    token: str = Depends(JWTAuthentication()),
+    db: Session = Depends(get_db)
 ) -> Optional[User]:
 
     paylaod = jwt.decode(
