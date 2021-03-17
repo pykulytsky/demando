@@ -12,7 +12,9 @@ from auth.crud import create_user
 from auth.schemas import UserCreate
 
 
-Base.metadata.create_all(bind=engine)
+@pytest.fixture(autouse=True)
+def create_models():
+    Base.metadata.create_all(bind=engine)
 
 
 def override_get_db():

@@ -39,3 +39,9 @@ class QuestionCreate(BaseModel):
 
 class AuthenticatedQuestionCreate(QuestionCreate):
     author: int
+
+
+class QuestionPatch(BaseModel):
+    body: Optional[str]
+    likes_count: Optional[int]
+    likes: Optional[List[User]]

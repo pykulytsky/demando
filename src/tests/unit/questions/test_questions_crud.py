@@ -1,4 +1,5 @@
 from questions import crud
+from questions import schemas
 
 
 def test_get_events_empty(db):
@@ -35,3 +36,15 @@ def test_create_question(db, question_schema):
 
 def test_get_question_by_user(db, question, user):
     assert crud.get_questions_by_author(db, user.pk)[0] == question
+
+
+def test_update_question(db, question):
+    body = question.body
+
+    updated_question = crud.update_question(
+        db, question_pk=question.pk, patched_data=schemas.QuestionPatch(
+            body='changed!!!!'
+        )
+    )
+
+    assert updated_question.body != body

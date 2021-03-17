@@ -61,3 +61,40 @@ def create_qeustion(db: Session, question: schemas.AuthenticatedQuestionCreate):
 
 def get_questions(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Question).offset(skip).limit(limit).all()
+
+
+def update_question(db: Session, question_pk: int, patched_data: schemas.QuestionPatch):
+    question = db.query(models.Question).filter(
+        models.Question.pk == question_pk
+    )
+
+    if question:
+        question.update({
+            k: patched_data.__dict__[k]
+            for k in patched_data.__dict__.keys()
+            if patched_data.__dict__[k] is not None}
+        )
+        db.commit()
+        db.refresh(question.first())
+
+        return question.first()
+
+
+def delete_question(db: Session, question_pk: int):
+    question = db.query(models.Question).filter(
+        models.Question.pk == question_pk
+    ).first()
+
+    db.delete(question)
+    db.refresh(question)
+    return question
+
+
+def delete_event(db: Session, event_pk: int):
+    event = db.query(models.Event).filter(
+        models.Event.pk == event_pk
+    ).first()
+
+    db.delete(event)
+    db.refresh(event)
+    return event

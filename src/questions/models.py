@@ -14,8 +14,6 @@ class Event(Base):
     owner_pk = Column(Integer, ForeignKey('users.pk'))
     owner = relationship('User', back_populates='events')
 
-    answered = Column(Boolean, default=False)
-
     questions = relationship('Question', back_populates='event')
 
 
@@ -45,6 +43,8 @@ class Question(Base):
 
     author_pk = Column(Integer, ForeignKey('users.pk'), nullable=True)
     author = relationship('User', back_populates='questions')
+
+    answered = Column(Boolean, default=False)
 
     likes_count = Column(Integer, default=0)
     likes = relationship(
