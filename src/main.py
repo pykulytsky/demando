@@ -1,25 +1,18 @@
 from fastapi import FastAPI
+from fastapi.param_functions import Depends
 
 import sentry_sdk
 from starlette.requests import Request
 from auth import routes as auth_routes
-from questions import routes as questions_routes
+from questions.routes import base as questions_routes
 
-from base.database import SessionLocal, engine, Base
+from base.database import engine, Base, get_db
 
 
 Base.metadata.create_all(bind=engine)
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-app = FastAPI()
+app = FastAPI(dependencies=[Depends(get_db)])
 
 app.include_router(auth_routes.router)
 app.include_router(questions_routes.router)

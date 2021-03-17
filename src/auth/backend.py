@@ -4,7 +4,6 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 import jwt
 from jwt.exceptions import DecodeError
-from sqlalchemy.orm import Session
 from auth.models import User
 
 from base.database import SessionLocal
@@ -96,4 +95,5 @@ def authenticate(request: Request, token: str = Depends(JWTAuthentication())) ->
         user = get_user_or_false(db=db, user_id=paylaod['pk'])
         if user:
             return user
-        # TODO If user does not exists, return anonymous user
+        else:
+            raise HTTPException(status_code=403, detail="Not authenticated")

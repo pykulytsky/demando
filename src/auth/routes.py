@@ -2,26 +2,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from auth import crud, schemas
 from typing import List
 from sqlalchemy.orm import Session
-from base.database import SessionLocal, engine, Base
+from base.database import engine, Base, get_db
 
 from .backend import JWTAuthentication
 
 Base.metadata.create_all(bind=engine)
 
 
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
 router = APIRouter(
     prefix='/auth',
     tags=['auth'],
-    dependencies=[Depends(get_db)]
 )
 
 

@@ -2,30 +2,14 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from auth.backend import authenticate
 from auth.schemas import User
-from base.database import SessionLocal, engine, Base
+from base.database import engine, Base, get_db
 from questions.schemas import AuthenticatedEventCreate, Event, EventCreate
 from sqlalchemy.orm import Session
 
-from . import crud
-
+from questions import crud
 
 Base.metadata.create_all(bind=engine)
 
-
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-router = APIRouter(
-    prefix='/qa',
-    tags=['qa'],
-    dependencies=[Depends(get_db)]
-)
 
 event_router = APIRouter(
     prefix='/events',
@@ -67,6 +51,3 @@ def create_event(event: EventCreate, db: Session = Depends(get_db), user: User =
     event = AuthenticatedEventCreate(owner=user.pk, name=event.name)
     _event = crud.create_event(db, event)
     return _event
-
-
-router.include_router(event_router)

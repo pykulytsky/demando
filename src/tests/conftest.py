@@ -1,7 +1,5 @@
 import pytest
-from main import app
-from auth import routes as auth_routes
-from questions import routes as questions_routes
+from main import app, get_db
 from fastapi.testclient import TestClient
 from .test_client import JWTAuthTestClient
 
@@ -28,8 +26,7 @@ def override_get_db():
 _mixer = Mixer(session=TestSessionLocal(), commit=True)
 
 
-app.dependency_overrides[auth_routes.get_db] = override_get_db
-app.dependency_overrides[questions_routes.get_db] = override_get_db
+app.dependency_overrides[get_db] = override_get_db
 
 
 @pytest.fixture
