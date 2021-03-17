@@ -9,18 +9,18 @@ def auth_request(user, auth_client):
 
 
 @pytest.mark.asyncio
-async def test_backend_works(auth_request):
+async def test_backend_works(auth_request, db):
 
     backend = JWTAuthentication()
-    result = await backend(auth_request)
+    result = await backend(auth_request, db=db)
 
     assert isinstance(result, str)
 
 
 @pytest.mark.asyncio
-async def test_backend_verify_token(auth_request, mocker):
+async def test_backend_verify_token(auth_request, mocker, db):
     mocker.patch('auth.backend.JWTAuthentication._verify_jwt_token')
     backend = JWTAuthentication()
-    result = await backend(auth_request)
+    result = await backend(auth_request, db=db)
 
     backend._verify_jwt_token.assert_called_once_with(result)

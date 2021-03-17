@@ -6,11 +6,12 @@ import jwt
 from jwt.exceptions import DecodeError
 from auth.models import User
 
-from base.database import SessionLocal
+from base.database import SessionLocal, get_db
 from auth.crud import get_user_or_false
 
 from base import settings
 from tests.test_database import TestSessionLocal
+from sqlalchemy.orm import Session
 
 
 class JWTAuthentication(HTTPBearer):
@@ -20,13 +21,9 @@ class JWTAuthentication(HTTPBearer):
         self.db = SessionLocal()
         super(JWTAuthentication, self).__init__(auto_error=auto_error)
 
-    async def __call__(self, request: Request) -> Optional[str]:
-        try:
-            if request['headers'][1][1] == b'testclient':
-                self.db = TestSessionLocal()
-        except TypeError:
-            if request.__dict__['headers']['user-agent'] == 'testclient':
-                self.db = TestSessionLocal()
+    async def __call__(self, request: Request, db: Session = Depends(get_db)) -> Optional[str]:
+
+        self.db = db
 
         credentials: HTTPAuthorizationCredentials = await super(
             JWTAuthentication, self
@@ -68,26 +65,9 @@ class JWTAuthentication(HTTPBearer):
         return valid
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
 def authenticate(
-    request: Request, token: str = Depends(JWTAuthentication())
+    request: Request, token: str = Depends(JWTAuthentication()), db: Session = Depends(get_db)
 ) -> Optional[User]:
-
-    db = SessionLocal()
-
-    try:
-        if request['headers'][1][1] == b'testclient':
-            db = TestSessionLocal()
-    except TypeError:
-        if request.__dict__['headers']['user-agent'] == 'testclient':
-            db = TestSessionLocal()
 
     paylaod = jwt.decode(
         jwt=token,
