@@ -11,8 +11,9 @@ class BaseManager():
 
         self.db = db
 
-    def create(self, **fields):
-        self.check_fields()
+    def create(self, disable_check: bool = False, **fields):
+        if disable_check:
+            self.check_fields(**fields)
 
         instance = self.model(**fields)
 
@@ -37,7 +38,7 @@ class BaseManager():
         return self.db.query(self.model).offset(skip).limit(limit).all()
 
     def get(self, **fields) -> Type:
-        self.check_fields()
+        self.check_fields(**fields)
 
         expression = [
             getattr(self.model, k) == fields[k] for k in fields.keys()
@@ -80,3 +81,15 @@ class BaseManager():
             if field not in self._get_model_fields():
                 raise ValueError(
                     f"Field {field} is not suported, suported fields: {self._get_model_fields()}")
+
+    def refresh(self, instance):
+        self.db.commit()
+        self.db.refresh(instance)
+
+        return instance
+
+
+class BaseManagerModel():
+    @classmethod
+    def manager(cls):
+        return BaseManager(cls)
