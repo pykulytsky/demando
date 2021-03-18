@@ -1,19 +1,21 @@
-from typing import List, Type
+from typing import Callable, List, Type, Union
 
 from sqlalchemy.orm import Session
 from base.database import SessionLocal
+from base.exceptions import ObjectDoesNotExists
 
 
 class BaseManager():
-    def __init__(self, model: Type, db: Session = SessionLocal()) -> None:
-        self.model = model
+    def __init__(self, klass: Type, db: Session = SessionLocal()) -> None:
+        self.model = klass
+
         self.db = db
 
-    def create(self, instance):
-        if not isinstance(instance, self.model):
-            raise TypeError(
-                f"Instance must be {str(self.model)} not {type(instance)}"
-            )
+    def create(self, **fields):
+        self.check_fields()
+
+        instance = self.model(**fields)
+
         self.db.add(instance)
         self.db.commit()
         self.db.refresh(instance)
@@ -31,5 +33,50 @@ class BaseManager():
 
         return instance
 
-    def all(self) -> List[Type]:
-        return self.db.query(self.model).all()
+    def all(self, skip: int = 0, limit: int = 100) -> List[Type]:
+        return self.db.query(self.model).offset(skip).limit(limit).all()
+
+    def get(self, **fields) -> Type:
+        self.check_fields()
+
+        expression = [
+            getattr(self.model, k) == fields[k] for k in fields.keys()
+        ]
+
+        instance = self.db.query(self.model).filter(*expression).first()
+        if instance:
+            return instance
+
+        raise ObjectDoesNotExists(
+            f"No {self.model.__name__.lower()} with such parameters."
+        )
+
+    def get_or_false(self, **fields) -> Union[Type, bool]:
+        try:
+            instance = self.get(**fields)
+            return instance
+        except ObjectDoesNotExists:
+            return False
+
+    def exists(self, **fields):
+        try:
+            self.get(**fields)
+            return True
+        except ObjectDoesNotExists:
+            return False
+
+    def _get_model_fields(self) -> List[str]:
+        fields = []
+
+        for field in dir(self.model):
+            if not field.startswith('_'):
+                if not isinstance(getattr(self.model, field), Callable):
+                    fields.append(field)
+
+        return fields
+
+    def check_fields(self, **fields):
+        for field in fields.keys():
+            if field not in self._get_model_fields():
+                raise ValueError(
+                    f"Field {field} is not suported, suported fields: {self._get_model_fields()}")

@@ -12,6 +12,7 @@ from base import settings
 from base.database import Base
 from jwt.exceptions import InvalidAlgorithmError, InvalidSignatureError
 from questions.models import likes_table
+from base.manager import BaseManager
 
 from typing import Optional
 
@@ -63,6 +64,9 @@ class User(Base):
         self.last_name = last_name
         self.email = email
 
+        print(f'{self.__module__=}')
+        print(f'{self.__class__=}')
+
         self.set_password(password)
 
     def set_password(self, password: str) -> str:
@@ -96,3 +100,7 @@ class User(Base):
 
     def __str__(self) -> str:
         return f'<User: {self.username}>'
+
+    @classmethod
+    def manager(cls):
+        return BaseManager(cls)
