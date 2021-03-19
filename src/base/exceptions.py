@@ -4,3 +4,7 @@ class NotValidModel(Exception):
 
 class ObjectDoesNotExists(Exception):
     pass
+
+
+class ImproperlyConfigured(Exception):
+    pass

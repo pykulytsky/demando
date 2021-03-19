@@ -12,12 +12,12 @@ from base import settings
 from base.database import Base
 from jwt.exceptions import InvalidAlgorithmError, InvalidSignatureError
 from questions.models import likes_table
-from base.manager import BaseManagerModel
+from .manager import AuthManagerModel
 
 from typing import Optional
 
 
-class Role(Base, BaseManagerModel):
+class Role(Base, AuthManagerModel):
 
     __tablename__ = 'roles'
 
@@ -27,7 +27,7 @@ class Role(Base, BaseManagerModel):
     users = relationship('User', back_populates="role")
 
 
-class User(Base, BaseManagerModel):
+class User(Base, AuthManagerModel):
 
     __tablename__ = 'users'
 
@@ -63,9 +63,6 @@ class User(Base, BaseManagerModel):
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
-
-        print(f'{self.__module__=}')
-        print(f'{self.__class__=}')
 
         self.set_password(password)
 

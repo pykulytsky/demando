@@ -11,6 +11,8 @@ from tests.test_database import TestSessionLocal, engine
 from auth.crud import create_user
 from auth.schemas import UserCreate
 
+from sqlalchemy.engine import reflection
+
 
 @pytest.fixture(autouse=True)
 def create_models():
@@ -47,6 +49,13 @@ def db():
         db = TestSessionLocal()
         yield db
     finally:
+        insp = reflection.Inspector.from_engine(engine)
+        total_tables = insp.get_table_names()[::-1]
+
+        con = engine.connect()
+        for table in total_tables:
+            if table != 'alembic_version':
+                con.execute(f'DELETE FROM {table} CASCADE;')
         db.close()
 
 
@@ -60,11 +69,6 @@ def user(db):
     user = create_user(db, _user)
     yield user
 
-    cursor = engine.connect()
-    cursor.execute('DELETE FROM events;')
-    cursor.execute('DELETE FROM questions;')
-    cursor.execute('DELETE FROM users;')
-
 
 @pytest.fixture
 def another_user(db):
@@ -75,9 +79,6 @@ def another_user(db):
     )
     user = create_user(db, _user)
     yield user
-
-    cursor = engine.connect()
-    cursor.execute('DELETE FROM users;')
 
 
 @pytest.fixture

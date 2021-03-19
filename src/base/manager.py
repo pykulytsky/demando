@@ -1,12 +1,16 @@
-from typing import Callable, List, Type, Union
+from typing import List, Type, Union
 
 from sqlalchemy.orm import Session
-from base.database import SessionLocal
-from base.exceptions import ObjectDoesNotExists
+from sqlalchemy import MetaData
+from base.database import Base, SessionLocal
+from base.exceptions import ObjectDoesNotExists, ImproperlyConfigured
 
 
 class BaseManager():
     def __init__(self, klass: Type, db: Session = SessionLocal()) -> None:
+        if not issubclass(klass, Base):
+            raise ImproperlyConfigured(
+                f"Type {klass.__name__} is not suported.")
         self.model = klass
 
         self.db = db
@@ -52,6 +56,15 @@ class BaseManager():
             f"No {self.model.__name__.lower()} with such parameters."
         )
 
+    def filter(self, **fields):
+        self.check_fields(**fields)
+
+        expression = [
+            getattr(self.model, k) == fields[k] for k in fields.keys()
+        ]
+
+        return self.db.query(self.model).filter(*expression).all()
+
     def get_or_false(self, **fields) -> Union[Type, bool]:
         try:
             instance = self.get(**fields)
@@ -71,7 +84,7 @@ class BaseManager():
 
         for field in dir(self.model):
             if not field.startswith('_'):
-                if not isinstance(getattr(self.model, field), Callable):
+                if not callable(getattr(self.model, field)) and not isinstance(getattr(self.model, field), MetaData): # noqa
                     fields.append(field)
 
         return fields
@@ -79,8 +92,7 @@ class BaseManager():
     def check_fields(self, **fields):
         for field in fields.keys():
             if field not in self._get_model_fields():
-                raise ValueError(
-                    f"Field {field} is not suported, suported fields: {self._get_model_fields()}")
+                raise ValueError(f"Field {field} is not suported, suported fields: {self._get_model_fields()}") # noqa
 
     def refresh(self, instance):
         self.db.commit()
