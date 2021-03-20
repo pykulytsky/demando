@@ -21,7 +21,7 @@ def test_protected_endpoint(auth_client, user):
 
 
 def test_login(client, user):
-    response = client.post('/auth/refresh/', json={
+    response = client.post('/auth/users/refresh/', json={
         'email': user.email,
         'password': '1234'
     })

@@ -1,7 +1,13 @@
-from typing import Callable, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Type, Union
+from fastapi.datastructures import Default, DefaultPlaceholder
+
+from fastapi.encoders import DictIntStrAny, SetIntStr
+from fastapi.routing import APIRoute
+from starlette.responses import JSONResponse, Response
+from starlette.routing import BaseRoute
 
 from .exceptions import ImproperlyConfigured, ObjectDoesNotExists
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, params
 
 from sqlalchemy.orm import Session
 from .database import get_db
@@ -132,8 +138,71 @@ class BaseCrudRouter(APIRouter):
 
         return route
 
-    @staticmethod
-    def get_routes() -> list:
+    def get(self, path, *args, **kwargs):
+        self.remove_api_route(path, ['GET'])
+        return super().get(path, *args, **kwargs)
+
+    def post(self, path, *args, **kwargs):
+        self.remove_api_route(path, ['POST'])
+        return super().post(path, *args, **kwargs)
+
+    def put(self, path, *args, **kwargs):
+        self.remove_api_route(path, ['PUT'])
+        return super().put(path, *args, **kwargs)
+
+    def delete(self, path, *args, **kwargs):
+        self.remove_api_route(path, ['DELETE'])
+        return super().delete(path, *args, **kwargs)
+
+    def api_route(self, path: str, *args, **kwargs):
+        """ Overrides and exiting route if it exists"""
+        methods = kwargs['methods'] if 'methods' in kwargs else ['GET']
+        self.remove_api_route(path, methods)
+        return super().api_route(path, *args, **kwargs)
+
+    def add_api_route(
+        self,
+        path: str,
+        endpoint: Callable[..., Any],
+        *,
+        response_model: Optional[Type[Any]] = None,
+        status_code: int = 200,
+        tags: Optional[List[str]] = None,
+        dependencies: Optional[Sequence[params.Depends]] = None,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        response_description: str = "Successful Response",
+        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        deprecated: Optional[bool] = None,
+        methods: Optional[Union[Set[str], List[str]]] = None,
+        operation_id: Optional[str] = None,
+        response_model_include: Optional[Union[SetIntStr, DictIntStrAny]] = None,
+        response_model_exclude: Optional[Union[SetIntStr, DictIntStrAny]] = None,
+        response_model_by_alias: bool = True,
+        response_model_exclude_unset: bool = False,
+        response_model_exclude_defaults: bool = False,
+        response_model_exclude_none: bool = False,
+        include_in_schema: bool = True,
+        response_class: Union[Type[Response], DefaultPlaceholder] = Default(
+            JSONResponse
+        ),
+        name: Optional[str] = None,
+        route_class_override: Optional[Type[APIRoute]] = None,
+        callbacks: Optional[List[BaseRoute]] = None,
+    ) -> None:
+        if path in self.routes:
+            self.remove_api_route(path, methods)
+
+        return super().add_api_route(path, endpoint, response_model=response_model, status_code=status_code, tags=tags, dependencies=dependencies, summary=summary, description=description, response_description=response_description, responses=responses, deprecated=deprecated, methods=methods, operation_id=operation_id, response_model_include=response_model_include, response_model_exclude=response_model_exclude, response_model_by_alias=response_model_by_alias, response_model_exclude_unset=response_model_exclude_unset, response_model_exclude_defaults=response_model_exclude_defaults, response_model_exclude_none=response_model_exclude_none, include_in_schema=include_in_schema, response_class=response_class, name=name, route_class_override=route_class_override, callbacks=callbacks)
+
+    def remove_api_route(self, path: str, methods: List[str]):
+        methods = set(methods)
+
+        for r in self.routes:
+            if path in r.path and r.methods == methods:
+                self.routes.remove(r)
+
+    def get_routes(self) -> list:
         return [
             'get_all',
             'create',

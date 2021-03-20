@@ -6,7 +6,6 @@ from .pools import pools_router
 from .questions import questions_router
 
 
-
 Base.metadata.create_all(bind=engine)
 
 
