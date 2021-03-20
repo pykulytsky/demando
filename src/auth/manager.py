@@ -1,5 +1,7 @@
 from typing import Type
+from auth.exceptions import WrongLoginCredentials
 from base import settings
+from base.exceptions import ObjectDoesNotExists
 from base.manager import BaseManager, BaseManagerModel
 
 from passlib.hash import pbkdf2_sha256
@@ -36,8 +38,18 @@ class AuthManager(BaseManager):
             salt=bytes(settings.SECRET_KEY.encode('utf-8'))
         )
 
+    def login(self, login_schema: schemas.UserLogin):
+        try:
+            user = self.get(email=login_schema.email)
+            if self.verify_password(login_schema.password, user):
+                return user
+            else:
+                raise WrongLoginCredentials("Password didnt match.")
+        except ObjectDoesNotExists:
+            raise WrongLoginCredentials("No user with such email was found.")
+
 
 class AuthManagerModel(BaseManagerModel):
     @classmethod
-    def manager(cls):
-        return AuthManager(cls)
+    def manager(cls, db):
+        return AuthManager(cls, db)

@@ -19,13 +19,13 @@ questions_router = APIRouter(
 
 
 @questions_router.get('/{question_pk}', response_model=schemas.Question)
-def get_question(question_pk: int, db: Session = Depends(get_db)):
+async def get_question(question_pk: int, db: Session = Depends(get_db)):
     question = crud.get_question(db, question_pk)
     return question
 
 
 @questions_router.get('/my/', response_model=List[schemas.Question])
-def get_my_questions(
+async def get_my_questions(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
@@ -36,7 +36,7 @@ def get_my_questions(
 
 
 @questions_router.get('/', response_model=List[schemas.Question])
-def get_questions_list(
+async def get_questions_list(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db)
@@ -46,7 +46,7 @@ def get_questions_list(
 
 
 @questions_router.patch('/{question_pk}', response_model=schemas.Question)
-def patch_question(
+async def patch_question(
     question_pk: int,
     question: schemas.QuestionPatch,
     db: Session = Depends(get_db),
@@ -57,7 +57,7 @@ def patch_question(
 
 
 @questions_router.post('/', response_model=schemas.Question)
-def create_question(
+async def create_question(
     question: schemas.QuestionCreate,
     db: Session = Depends(get_db),
     user: User = Depends(authenticate)

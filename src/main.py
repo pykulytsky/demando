@@ -6,6 +6,19 @@ from auth import routes as auth_routes
 from questions.routes import base as questions_routes
 
 from base.database import engine, Base, get_db
+from base.router import BaseCrudRouter
+
+from auth.models import User
+from auth import schemas
+
+
+crud = BaseCrudRouter(
+    model=User,
+    get_schema=schemas.User,
+    create_schema=schemas.UserCreate,
+    prefix='/test',
+    tags=['test']
+)
 
 
 Base.metadata.create_all(bind=engine)
@@ -15,6 +28,8 @@ app = FastAPI(dependencies=[Depends(get_db)])
 
 app.include_router(auth_routes.router)
 app.include_router(questions_routes.router)
+app.include_router(crud)
+
 
 sentry_sdk.init(dsn=settings.SENTRY_DSN)
 

@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
-from auth import crud, schemas
+from auth import schemas
 from typing import List
 from sqlalchemy.orm import Session
+from auth.models import User
 from base.database import engine, Base, get_db
 
 from .backend import JWTAuthentication, authenticate
@@ -16,26 +17,26 @@ router = APIRouter(
 
 
 @router.post("/users/", response_model=schemas.Token, status_code=201)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=user.email)
+async def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    manager = User.manager(db)
+    db_user = manager.exists(email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    new_user = crud.create_user(db=db, user=user)
+    new_user = manager.create_user(user)
     return {"token": new_user.token}
 
 
 @router.post("/refresh/", response_model=schemas.Token)
-def refresh_token(user: schemas.UserLogin, db: Session = Depends(get_db)):
-    db_user = crud.login(db, user)
-    if db_user:
-        return {"token": db_user.token}
-    else:
-        raise HTTPException(status_code=400, detail="Wrong login credentials")
+async def refresh_token(user: schemas.UserLogin, db: Session = Depends(get_db)):
+    manager = User.manager(db)
+    db_user = manager.login(user)
+
+    return {"token": db_user.token}
 
 
 @router.get("/users/", response_model=List[schemas.User])
-def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    users = crud.get_users(db, skip=skip, limit=limit)
+async def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    users = User.manager(db).all(skip=skip, limit=limit)
     return users
 
 
@@ -44,15 +45,15 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     response_model=schemas.User,
     dependencies=[Depends(JWTAuthentication())]
 )
-def read_user(user_id: int, db: Session = Depends(get_db)):
-    db_user = crud.get_user(db, user_id=user_id)
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+async def read_user(user_id: int, db: Session = Depends(get_db)):
+    manager = User.manager(db)
+    db_user = manager.get(pk=user_id)
+
     return db_user
 
 
 @router.get('/users/me/', response_model=schemas.User)
-def get_me(
+async def get_me(
     user: schemas.User = Depends(authenticate),
 ):
     return user

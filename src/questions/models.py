@@ -3,8 +3,10 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import Boolean
 from base.database import Base
 
+from base.manager import BaseManagerModel
 
-class Event(Base):
+
+class Event(Base, BaseManagerModel):
 
     __tablename__ = 'events'
 
@@ -31,7 +33,7 @@ likes_table = Table('likes', Base.metadata,
                     )
 
 
-class Question(Base):
+class Question(Base, BaseManagerModel):
 
     __tablename__ = 'questions'
 

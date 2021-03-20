@@ -5,9 +5,12 @@ from sqlalchemy import MetaData
 from base.database import Base, SessionLocal
 from base.exceptions import ObjectDoesNotExists, ImproperlyConfigured
 
+from fastapi import Depends
+from .database import get_db
+
 
 class BaseManager():
-    def __init__(self, klass: Type, db: Session = SessionLocal()) -> None:
+    def __init__(self, klass: Type, db: Session = Depends(get_db)) -> None:
         if not issubclass(klass, Base):
             raise ImproperlyConfigured(
                 f"Type {klass.__name__} is not suported.")
@@ -103,5 +106,5 @@ class BaseManager():
 
 class BaseManagerModel():
     @classmethod
-    def manager(cls):
-        return BaseManager(cls)
+    def manager(cls, db):
+        return BaseManager(cls, db)
