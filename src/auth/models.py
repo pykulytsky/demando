@@ -46,6 +46,7 @@ class User(Base, AuthManagerModel):
 
     events = relationship('Event', back_populates='owner')
     polls = relationship('Poll', back_populates='owner')
+    votes = relationship('Vote', back_populates='owner')
     questions = relationship('Question', back_populates='author')
 
     liked_questions = relationship(

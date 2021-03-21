@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from auth.backend import authenticate
 from auth.schemas import User
 from base.database import engine, Base, get_db
@@ -8,8 +8,6 @@ from sqlalchemy.orm import Session
 from .. import models
 
 from base.router import CrudRouter
-
-from auth.models import User as _User
 
 
 Base.metadata.create_all(bind=engine)

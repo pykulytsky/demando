@@ -63,3 +63,35 @@ class Poll(Base, BaseManagerModel):
 
     owner_pk = Column(Integer, ForeignKey('users.pk'))
     owner = relationship('User', back_populates='polls')
+
+    options = relationship('Option', back_populates='poll')
+    votes = relationship('Vote', back_populates='poll')
+
+
+class Option(Base, BaseManagerModel):
+
+    __tablename__ = 'options'
+
+    pk = Column(Integer, primary_key=True, index=True)
+    name = name = Column(String, nullable=False)
+
+    poll_pk = Column(Integer, ForeignKey('polls.pk'))
+    poll = relationship('Poll', back_populates='options')
+
+    votes = relationship('Vote', back_populates='option')
+
+
+class Vote(Base, BaseManagerModel):
+
+    __tablename__ = 'votes'
+
+    pk = Column(Integer, primary_key=True, index=True)
+
+    poll_pk = Column(Integer, ForeignKey('polls.pk'))
+    poll = relationship('Poll', back_populates='votes')
+
+    owner_pk = Column(Integer, ForeignKey('users.pk'))
+    owner = relationship('User', back_populates='votes')
+
+    option_pk = Column(Integer, ForeignKey('options.pk'))
+    option = relationship('Option', back_populates='votes')

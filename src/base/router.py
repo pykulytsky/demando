@@ -92,11 +92,11 @@ class BaseCrudRouter(APIRouter):
         *,
         response_model: Optional[Type[Any]] = None,
         status_code: int = 200,
+        response_description: Optional[str] = None,
+        summary: Optional[str] = None,
         tags: Optional[List[str]] = None,
         dependencies: Optional[Sequence[params.Depends]] = None,
-        summary: Optional[str] = None,
         description: Optional[str] = None,
-        response_description: str = "Successful Response",
         responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
         deprecated: Optional[bool] = None,
         methods: Optional[Union[Set[str], List[str]]] = None,
@@ -117,6 +117,20 @@ class BaseCrudRouter(APIRouter):
     ) -> None:
         if path in self.routes:
             self.remove_api_route(path, methods)
+
+        if not summary:
+            _endpoint_name = endpoint.__name__.strip('_').replace('_', ' ').capitalize()
+            if self.model.__name__.lower() in _endpoint_name:
+                summary = _endpoint_name
+            else:
+                summary = _endpoint_name + ' ' + self.model.__name__
+
+        if not response_description:
+            response_description = f"{self.model.__name__} Successful Response"
+
+        if methods and not status_code:
+            if len(methods) == 1 and methods[0].upper() == 'POST':
+                status_code = 201
 
         return super().add_api_route(
             path,
@@ -167,63 +181,66 @@ class CrudRouter(BaseCrudRouter):
         prefix: Optional[str] = None,
         tags: Optional[List] = [],
         add_create_route: bool = True,
+        override_routes: bool = False,
         *args,
         **kwargs
     ) -> None:
+        if not override_routes:
+            super().__init__(
+                model=model,
+                get_schema=get_schema,
+                create_schema=create_schema,
+                update_schema=update_schema,
+                prefix=prefix,
+                tags=tags,
+                *args,
+                **kwargs
+            )
 
-        super().__init__(
-            model=model,
-            get_schema=get_schema,
-            create_schema=create_schema,
-            update_schema=update_schema,
-            prefix=prefix,
-            tags=tags,
-            *args,
-            **kwargs
-        )
-
-        super().add_api_route(
-            '/',
-            self._get_all,
-            response_model=List[self.get_schema],
-            dependencies=[Depends(get_db)],
-            summary=f"Get all {self.model.__name__}`s"
-        )
-
-        if add_create_route:
             super().add_api_route(
                 '/',
-                self._create(),
-                methods=['POST'],
+                self._get_all,
+                response_model=List[self.get_schema],
+                dependencies=[Depends(get_db)],
+                summary=f"Get all {self.model.__name__}`s"
+            )
+
+            if add_create_route:
+                super().add_api_route(
+                    '/',
+                    self._create(),
+                    methods=['POST'],
+                    response_model=self.get_schema,
+                    dependencies=[Depends(get_db)],
+                    summary=f"Create {self.model.__name__}",
+                    status_code=201
+
+                )
+            super().add_api_route(
+                '/{pk}',
+                self._get(),
+                methods=['GET'],
                 response_model=self.get_schema,
                 dependencies=[Depends(get_db)],
-                summary=f"Create {self.model.__name__}",
-                status_code=201
+                summary=f"Get {self.model.__name__}",
+
             )
-        super().add_api_route(
-            '/{pk}',
-            self._get(),
-            methods=['GET'],
-            response_model=self.get_schema,
-            dependencies=[Depends(get_db)],
-            summary=f"Get {self.model.__name__}"
-        )
-        super().add_api_route(
-            '/{pk}',
-            self._update(),
-            methods=['PATCH'],
-            response_model=self.get_schema,
-            dependencies=[Depends(get_db)],
-            summary=f"Update {self.model.__name__}"
-        )
-        super().add_api_route(
-            '/{pk}',
-            self._delete(),
-            methods=['DELETE'],
-            response_model=self.get_schema,
-            dependencies=[Depends(get_db)],
-            summary=f"Delete {self.model.__name__}"
-        )
+            super().add_api_route(
+                '/{pk}',
+                self._update(),
+                methods=['PATCH'],
+                response_model=self.get_schema,
+                dependencies=[Depends(get_db)],
+                summary=f"Patch {self.model.__name__}",
+            )
+            super().add_api_route(
+                '/{pk}',
+                self._delete(),
+                methods=['DELETE'],
+                response_model=self.get_schema,
+                dependencies=[Depends(get_db)],
+                summary=f"Delete {self.model.__name__}",
+            )
 
     async def _get_all(
         self,

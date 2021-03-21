@@ -33,7 +33,7 @@ async def create_user(
     return {"token": new_user.token}
 
 
-@auth_router.post("/refresh/", response_model=schemas.Token)
+@auth_router.post("/refresh/", response_model=schemas.Token, status_code=200)
 async def refresh_token(
     user: schemas.UserLogin,
     db: Session = Depends(get_db)
