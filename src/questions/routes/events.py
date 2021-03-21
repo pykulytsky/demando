@@ -7,7 +7,7 @@ from questions.schemas import events as schemas
 from sqlalchemy.orm import Session
 from .. import models
 
-from base.router import BaseCrudRouter
+from base.router import CrudRouter
 
 from auth.models import User as _User
 
@@ -15,7 +15,7 @@ from auth.models import User as _User
 Base.metadata.create_all(bind=engine)
 
 
-event_router = BaseCrudRouter(
+event_router = CrudRouter(
     model=models.Event,
     get_schema=schemas.Event,
     create_schema=schemas.EventCreate,

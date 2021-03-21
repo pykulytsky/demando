@@ -1,5 +1,5 @@
 from base.database import SessionLocal, engine, Base
-from base.router import BaseCrudRouter
+from base.router import CrudRouter
 
 from .. import models
 from questions.schemas import polls as schemas
@@ -17,7 +17,7 @@ def get_db():
         db.close()
 
 
-polls_router = BaseCrudRouter(
+polls_router = CrudRouter(
     model=models.Poll,
     get_schema=schemas.Poll,
     create_schema=schemas.PollCreate,

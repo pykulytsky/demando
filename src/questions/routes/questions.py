@@ -8,13 +8,13 @@ from base.database import engine, Base, get_db
 from .. import models
 from questions.schemas import questions as schemas
 
-from base.router import BaseCrudRouter
+from base.router import CrudRouter
 
 
 Base.metadata.create_all(bind=engine)
 
 
-questions_router = BaseCrudRouter(
+questions_router = CrudRouter(
     model=models.Question,
     get_schema=schemas.Question,
     create_schema=schemas.QuestionCreate,
