@@ -52,3 +52,14 @@ class Question(Base, BaseManagerModel):
     likes = relationship(
         'User', secondary=likes_table, back_populates="liked_questions"
     )
+
+
+class Poll(Base, BaseManagerModel):
+
+    __tablename__ = 'polls'
+
+    pk = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+
+    owner_pk = Column(Integer, ForeignKey('users.pk'))
+    owner = relationship('User', back_populates='polls')

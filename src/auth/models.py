@@ -2,7 +2,6 @@ from .exceptions import JwtTokenError
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from passlib.hash import pbkdf2_sha256
 import jwt
 from datetime import datetime
 from datetime import timedelta
@@ -46,7 +45,9 @@ class User(Base, AuthManagerModel):
     role = relationship("Role", back_populates="users")
 
     events = relationship('Event', back_populates='owner')
+    polls = relationship('Poll', back_populates='owner')
     questions = relationship('Question', back_populates='author')
+
     liked_questions = relationship(
         'Question', secondary=likes_table, back_populates="likes"
     )
@@ -63,19 +64,7 @@ class User(Base, AuthManagerModel):
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
-
-        self.set_password(password)
-
-    def set_password(self, password: str) -> str:
-        self.password = pbkdf2_sha256.using(
-            salt=bytes(settings.SECRET_KEY.encode('utf-8'))
-        ).hash(password)
-        return self.password
-
-    def verify_password(self, password: str):
-        return pbkdf2_sha256.using(
-            salt=bytes(settings.SECRET_KEY.encode('utf-8'))
-        ).verify(password, self.password)
+        self.password = password
 
     @property
     def token(self) -> str:

@@ -19,9 +19,8 @@ class BaseManager():
         self.db = db
 
     def create(self, disable_check: bool = False, **fields):
-        if disable_check:
+        if not disable_check:
             self.check_fields(**fields)
-
         instance = self.model(**fields)
 
         self.db.add(instance)

@@ -1,4 +1,5 @@
 import pytest
+from auth.models import User
 from main import app, get_db
 from fastapi.testclient import TestClient
 from .test_client import JWTAuthTestClient
@@ -66,7 +67,7 @@ def user(db):
         username='test1',
         password='1234'
     )
-    user = create_user(db, _user)
+    user = User.manager(db).create_user(_user)
     yield user
 
 
@@ -77,7 +78,7 @@ def another_user(db):
         username='test2',
         password='1234'
     )
-    user = create_user(db, _user)
+    user = User.manager(db).create_user(_user)
     yield user
 
 

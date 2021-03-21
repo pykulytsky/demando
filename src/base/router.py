@@ -155,7 +155,6 @@ class BaseCrudRouter(APIRouter):
         return super().delete(path, *args, **kwargs)
 
     def api_route(self, path: str, *args, **kwargs):
-        """ Overrides and exiting route if it exists"""
         methods = kwargs['methods'] if 'methods' in kwargs else ['GET']
         self.remove_api_route(path, methods)
         return super().api_route(path, *args, **kwargs)
@@ -203,10 +202,4 @@ class BaseCrudRouter(APIRouter):
                 self.routes.remove(r)
 
     def get_routes(self) -> list:
-        return [
-            'get_all',
-            'create',
-            'get',
-            'update',
-            'delete'
-        ]
+        return self.routes

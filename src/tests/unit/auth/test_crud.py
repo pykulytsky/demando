@@ -11,11 +11,6 @@ def test_get_user_by_email(user, db):
     assert crud.get_user_by_email(db, user.email) == user
 
 
-def test_login(user, db):
-    user_login = UserLogin(email=user.email, password='1234')
-    assert crud.login(db, user_login) == user
-
-
 def test_delete_user(user, db):
     _user = User(pk=user.pk, email=user.email, username=user.username)
     crud.delete_user(db, _user)

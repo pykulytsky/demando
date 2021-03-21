@@ -7,4 +7,4 @@ def test_create_user(user_schema, manager):
 def test_create_user_password(user_schema, manager):
     user = manager.create_user(user_schema)
 
-    assert manager.verify_password(user_schema.password, user)
+    assert manager.verify_password('1488', user)

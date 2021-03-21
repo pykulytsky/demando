@@ -1,24 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException
-from auth import schemas
-from typing import List
-from sqlalchemy.orm import Session
+from auth.backend import authenticate
 from auth.models import User
-from base.database import engine, Base, get_db
+from base.router import BaseCrudRouter
+from base.database import get_db
 
-from .backend import JWTAuthentication, authenticate
+from . import schemas
+from .exceptions import WrongLoginCredentials
 
-Base.metadata.create_all(bind=engine)
+from sqlalchemy.orm import Session
+from fastapi import Depends, HTTPException
 
 
-router = APIRouter(
-    prefix='/auth',
-    tags=['auth'],
+auth_router = BaseCrudRouter(
+    model=User,
+    get_schema=schemas.User,
+    create_schema=schemas.UserCreate,
+    update_schema=schemas.UserBase,
+    prefix='/auth/users',
+    tags=['auth']
 )
 
 
-@router.post("/users/", response_model=schemas.Token, status_code=201)
-async def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    manager = User.manager(db)
+@auth_router.post('/', response_model=schemas.Token, status_code=201)
+async def create_user(user: auth_router.create_schema, db: Session = Depends(get_db)):
+    manager = auth_router.model.manager(db)
     db_user = manager.exists(email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -26,34 +30,19 @@ async def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return {"token": new_user.token}
 
 
-@router.post("/refresh/", response_model=schemas.Token)
+@auth_router.post("/refresh/", response_model=schemas.Token)
 async def refresh_token(user: schemas.UserLogin, db: Session = Depends(get_db)):
-    manager = User.manager(db)
-    db_user = manager.login(user)
+    manager = auth_router.model.manager(db)
+    try:
+        db_user = manager.login(user)
+    except WrongLoginCredentials as e:
+        raise HTTPException(status_code=403, detail=str(e))
 
     return {"token": db_user.token}
 
 
-@router.get("/users/", response_model=List[schemas.User])
-async def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    users = User.manager(db).all(skip=skip, limit=limit)
-    return users
-
-
-@router.get(
-    "/users/{user_id}",
-    response_model=schemas.User,
-    dependencies=[Depends(JWTAuthentication())]
-)
-async def read_user(user_id: int, db: Session = Depends(get_db)):
-    manager = User.manager(db)
-    db_user = manager.get(pk=user_id)
-
-    return db_user
-
-
-@router.get('/users/me/', response_model=schemas.User)
+@auth_router.get('/me/', response_model=schemas.User)
 async def get_me(
-    user: schemas.User = Depends(authenticate),
+    user: auth_router.get_schema = Depends(authenticate),
 ):
     return user

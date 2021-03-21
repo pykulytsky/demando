@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 
-from . import models, schemas
+from . import models
+from .schemas import events
+from .schemas import questions
 from auth.crud import get_user
 
 
@@ -12,7 +14,7 @@ def get_event(db: Session, pk: int):
     return db.query(models.Event).filter(models.Event.pk == pk).first()
 
 
-def create_event(db: Session, event: schemas.EventCreate):
+def create_event(db: Session, event: events.EventCreate):
     _event = models.Event(
         name=event.name,
         owner=get_user(db, event.owner)
@@ -47,7 +49,7 @@ def get_questions_by_author(db: Session, author_pk):
 
 
 def create_qeustion(
-    db: Session, question: schemas.AuthenticatedQuestionCreate
+    db: Session, question: questions.AuthenticatedQuestionCreate
 ):
     _question = models.Question(
         body=question.body,
@@ -66,7 +68,7 @@ def get_questions(db: Session, skip: int = 0, limit: int = 100):
 
 
 def update_question(
-    db: Session, question_pk: int, patched_data: schemas.QuestionPatch
+    db: Session, question_pk: int, patched_data: questions.QuestionPatch
 ):
     question = db.query(models.Question).filter(
         models.Question.pk == question_pk

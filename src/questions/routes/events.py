@@ -1,60 +1,53 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Depends, HTTPException
 from auth.backend import authenticate
 from auth.schemas import User
 from base.database import engine, Base, get_db
-from questions.schemas import AuthenticatedEventCreate, Event, EventCreate
+from questions.schemas import events as schemas
 from sqlalchemy.orm import Session
+from .. import models
 
-from questions import crud
+from base.router import BaseCrudRouter
+
+from auth.models import User as _User
+
 
 Base.metadata.create_all(bind=engine)
 
 
-event_router = APIRouter(
+event_router = BaseCrudRouter(
+    model=models.Event,
+    get_schema=schemas.Event,
+    create_schema=schemas.EventCreate,
+    update_schema=schemas.EventUpdate,
     prefix='/events',
     tags=['events'],
 )
 
 
-@event_router.get('/', response_model=List[Event])
-async def get_events(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    events = crud.get_events(db, skip, limit)
-    return events
-
-
-@event_router.get('/{event_pk}', response_model=Event)
-async def get_event(event_pk, db: Session = Depends(get_db)):
-    event = crud.get_event(db, event_pk)
-    if event:
-        return event
-    else:
-        raise HTTPException(status_code=400, detail="No such event found")
-
-
-@event_router.get('/user/{user_pk}', response_model=List[Event])
+@event_router.get('/user/{user_pk}', response_model=List[schemas.Event])
 async def get_events_by_user(user_pk, db: Session = Depends(get_db)):
-    event = crud.get_events_by_user(db, user_pk)
+    event = models.Event.manager(db).filter(owner_pk=user_pk)
     return event
 
 
-@event_router.get('/my/', response_model=List[Event])
+@event_router.get('/my/', response_model=List[schemas.Event])
 async def get_my_events(
     db: Session = Depends(get_db),
     user: User = Depends(authenticate)
 ):
-    event = crud.get_events_by_user(db, user.pk)
+    event = models.Event.manager(db).filter(owner_pk=user.pk)
     return event
 
 
 @event_router.post(
     '/',
-    response_model=Event, status_code=201)
+    response_model=schemas.Event, status_code=201)
 async def create_event(
-    event: EventCreate,
+    event: schemas.EventCreate,
     db: Session = Depends(get_db),
     user: User = Depends(authenticate)
 ):
-    event = AuthenticatedEventCreate(owner=user.pk, name=event.name)
-    _event = crud.create_event(db, event)
+
+    _event = models.Event.manager(db).create(disable_check=False, **event.__dict__, owner=user)
     return _event

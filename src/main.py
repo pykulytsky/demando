@@ -5,7 +5,7 @@ from starlette.requests import Request
 from questions.routes import base as questions_routes
 
 from base.database import engine, Base, get_db
-from auth.router import auth_router
+from auth.routes import auth_router
 
 
 Base.metadata.create_all(bind=engine)
@@ -27,12 +27,11 @@ async def sentry_exception(request: Request, call_next):
         return response
     except Exception as e:
         if request['headers'][1][1] != b'testclient':
+            print('captured')
             with sentry_sdk.push_scope() as scope:
                 scope.set_context("request", request)
-                user_id = "database_user_id"  # when available
                 scope.user = {
                     "ip_address": request.client.host,
-                    "pk": user_id
                 }
                 sentry_sdk.capture_exception(e)
         raise e

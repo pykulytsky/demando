@@ -1,9 +1,11 @@
 import pytest
 from tests.test_database import engine
-from questions.crud import create_event, create_qeustion
 
-from questions.schemas import (
-    AuthenticatedEventCreate, AuthenticatedQuestionCreate)
+from questions.models import Event, Question
+from auth.models import User
+
+from questions.schemas.questions import AuthenticatedQuestionCreate
+from questions.schemas.events import AuthenticatedEventCreate
 
 
 @pytest.fixture
@@ -12,7 +14,7 @@ def event(db, user):
         name='test event',
         owner=user.pk
     )
-    event = create_event(db, _event)
+    event = Event.manager(db).create(owner=user, name='test event')
     yield event
 
     cursor = engine.connect()
@@ -38,7 +40,7 @@ def question(event, user, db):
         author=user.pk,
         event=event.pk
     )
-    question = create_qeustion(db, _question)
+    question = Question.manager(db).create(disable_check=False, body='test question', author=user, event=event)
     yield question
 
     cursor = engine.connect()
