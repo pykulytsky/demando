@@ -22,7 +22,7 @@ from pydantic import BaseModel
 
 
 class BaseCrudRouter(APIRouter):
-    """Base router implements methdos for create and remove api routes."""
+    """Base router implements methods for create and remove api routes."""
     model = None
     create_schema = None
     get_schema = None
@@ -91,7 +91,7 @@ class BaseCrudRouter(APIRouter):
         endpoint: Callable[..., Any],
         *,
         response_model: Optional[Type[Any]] = None,
-        status_code: int = 200,
+        status_code: Optional[int] = None,
         response_description: Optional[str] = None,
         summary: Optional[str] = None,
         tags: Optional[List[str]] = None,
@@ -128,9 +128,11 @@ class BaseCrudRouter(APIRouter):
         if not response_description:
             response_description = f"{self.model.__name__} Successful Response"
 
-        if methods and not status_code:
-            if len(methods) == 1 and methods[0].upper() == 'POST':
-                status_code = 201
+        if not status_code:
+            status_code = 200
+            if methods:
+                if len(methods) == 1 and methods[0].upper() == 'POST':
+                    status_code = 201
 
         return super().add_api_route(
             path,

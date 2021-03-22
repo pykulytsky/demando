@@ -47,5 +47,9 @@ async def create_event(
     user: User = Depends(authenticate)
 ):
 
-    _event = models.Event.manager(db).create(disable_check=False, **event.__dict__, owner=user)
+    _event = models.Event.manager(db).create(
+        disable_check=False,
+        **event.__dict__,
+        owner=user
+    )
     return _event

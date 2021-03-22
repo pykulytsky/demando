@@ -48,7 +48,7 @@ class UvicornTestServer(uvicorn.Server):
 
 
 @pytest.fixture
-async def startup_and_shutdown_server():
+async def server():
     """Start server as test fixture and tear down after test"""
     server = UvicornTestServer()
     await server.up()

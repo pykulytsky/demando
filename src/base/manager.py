@@ -2,7 +2,7 @@ from typing import List, Type, Union
 
 from sqlalchemy.orm import Session
 from sqlalchemy import MetaData
-from base.database import Base, SessionLocal
+from base.database import Base
 from base.exceptions import ObjectDoesNotExists, ImproperlyConfigured
 
 from fastapi import Depends

@@ -1,7 +1,7 @@
 import pytest
 from tests.test_database import engine
 
-from questions.models import Event, Question
+from questions.models import Event, Question, Poll
 
 from questions.schemas.questions import AuthenticatedQuestionCreate
 from questions.schemas.events import AuthenticatedEventCreate
@@ -30,7 +30,12 @@ def event_schema(user):
 
 @pytest.fixture
 def question(event, user, db):
-    question = Question.manager(db).create(disable_check=False, body='test question', author=user, event=event)
+    question = Question.manager(db).create(
+        disable_check=False,
+        body='test question',
+        author=user,
+        event=event
+    )
     yield question
 
     cursor = engine.connect()
@@ -48,3 +53,10 @@ def question_schema(user, event):
     )
 
     return _question
+
+
+@pytest.fixture
+def poll(user, db):
+    poll = Poll.manager(db).create(name='klara or karl?', owner=user)
+
+    return poll

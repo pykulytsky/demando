@@ -1,8 +1,9 @@
 from pydantic import BaseModel
 from auth.schemas import User
+from typing import List, Optional
 
 
-class Option(BaseModel):
+class BaseOption(BaseModel):
     pk: int
     name: str
 
@@ -12,10 +13,26 @@ class OptionCreate(BaseModel):
     poll: int
 
 
-class Vote(BaseModel):
+class BaseVote(BaseModel):
     pk: int
-    option: Option
+    option: BaseOption
+
+
+class BasePoll(BaseModel):
+    pk: int
+    name: str
+
+
+class Option(BaseOption):
+    votes: Optional[List[BaseVote]]
+    poll: BasePoll
+
+
+class Vote(BaseVote):
     owner: User
+
+    class Config:
+        orm_mode = True
 
 
 class VoteCreate(BaseModel):
@@ -27,8 +44,11 @@ class Poll(BaseModel):
     pk: int
     name: str
     owner: User
-    options: Option
-    votes: Vote
+    options: Optional[List[BaseOption]]
+    votes: Optional[List[BaseVote]]
+
+    class Config:
+        orm_mode = True
 
 
 class PollCreate(BaseModel):

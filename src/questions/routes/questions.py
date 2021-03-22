@@ -42,5 +42,9 @@ async def create_question(
     user: User = Depends(authenticate)
 ):
 
-    _question = models.Question.manager(db).create(body=question.body, event=models.Event.manager(db).get(pk=question.event), author=user)
+    _question = models.Question.manager(db).create(
+        body=question.body,
+        event=models.Event.manager(db).get(pk=question.event),
+        author=user
+    )
     return _question

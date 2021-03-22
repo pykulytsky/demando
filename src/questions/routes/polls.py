@@ -1,20 +1,16 @@
-from base.database import SessionLocal, engine, Base
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from base.database import engine, Base, get_db
 from base.router import CrudRouter
 
 from .. import models
+from auth.models import User
 from questions.schemas import polls as schemas
+
+from auth.backend import authenticate
 
 
 Base.metadata.create_all(bind=engine)
-
-
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 polls_router = CrudRouter(
@@ -25,3 +21,17 @@ polls_router = CrudRouter(
     prefix='/polls',
     tags=['polls'],
 )
+
+
+@polls_router.post(
+    '/', response_model=polls_router.get_schema, status_code=201
+)
+def create_poll(
+    schema: polls_router.create_schema,
+    db: Session = Depends(get_db),
+    user: User = Depends(authenticate)
+):
+    return polls_router.model.manager(db).create(
+        **schema.__dict__,
+        owner=user
+    )
