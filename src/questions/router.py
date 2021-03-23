@@ -55,31 +55,14 @@ class ItemRouter(CrudRouter):
 
     def _create(self):
         async def route(
-            question: self.create_schema,
+            create_schema: self.create_schema,
             db: Session = Depends(get_db),
             user: User = Depends(authenticate)
         ):
-            data = {}
-            model_fields = fields = self._get_schemas_diff(exclude=['user', 'owner', 'author'])
-            models = self._get_schema_diff_models_exclude_user()
 
-            for field in question.__dict__.keys():
-                if field in model_fields:
-                    data.update({
-                        field: models[model_fields.index(field)].manager(db).get(pk=getattr(question, field))
-                    })
-                else:
-                    data.update({
-                        field: question.__dict__[field]
-                    })
-
-            for user_field in ['user', 'author', 'owner']:
-                if hasattr(self.model, user_field):
-                    data.update({
-                        user_field: user
-                    })
-
-            instance = self.model.manager(db).create(**data)
+            instance = self.model.manager(db).create(
+                **self.get_create_data(create_schema=create_schema, user=user, db=db)
+            )
             return instance
 
         return route
@@ -129,3 +112,26 @@ class ItemRouter(CrudRouter):
 
     def find_user_field(self):
         pass
+
+    def get_create_data(self, create_schema, user, db) -> Dict:
+        data = {}
+        model_fields = self._get_schemas_diff(
+            exclude=['user', 'owner', 'author']
+        )
+        models = self._get_schema_diff_models_exclude_user()
+
+        for field in create_schema.__dict__.keys():
+            if field in model_fields:
+                data.update({
+                    field: models[model_fields.index(field)].manager(db).get(pk=getattr(create_schema, field))
+                })
+            else:
+                data.update({
+                    field: create_schema.__dict__[field]
+                })
+
+        for user_field in ['user', 'author', 'owner']:
+            if hasattr(self.model, user_field):
+                data.update({user_field: user})
+
+        return data

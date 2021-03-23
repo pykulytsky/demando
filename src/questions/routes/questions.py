@@ -32,18 +32,3 @@ async def get_my_questions(
 ):
     questions = models.Question.manager(db).filter(author_pk=user.pk)
     return questions
-
-
-# @questions_router.post('/', response_model=schemas.Question)
-# async def create_question(
-#     question: schemas.QuestionCreate,
-#     db: Session = Depends(get_db),
-#     user: User = Depends(authenticate)
-# ):
-
-#     _question = models.Question.manager(db).create(
-#         body=question.body,
-#         event=models.Event.manager(db).get(pk=question.event),
-#         author=user
-#     )
-#     return _question
