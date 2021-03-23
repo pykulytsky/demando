@@ -1,7 +1,7 @@
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from base.database import engine, Base, get_db
-from base.router import CrudRouter
+from questions.router import ItemRouter
 
 from .. import models
 from auth.models import User
@@ -13,7 +13,7 @@ from auth.backend import authenticate
 Base.metadata.create_all(bind=engine)
 
 
-polls_router = CrudRouter(
+polls_router = ItemRouter(
     model=models.Poll,
     get_schema=schemas.Poll,
     create_schema=schemas.PollCreate,

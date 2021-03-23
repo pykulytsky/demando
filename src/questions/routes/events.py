@@ -3,17 +3,16 @@ from fastapi import Depends
 from auth.backend import authenticate
 from auth.schemas import User
 from base.database import engine, Base, get_db
+from questions.router import ItemRouter
 from questions.schemas import events as schemas
 from sqlalchemy.orm import Session
 from .. import models
-
-from base.router import CrudRouter
 
 
 Base.metadata.create_all(bind=engine)
 
 
-event_router = CrudRouter(
+event_router = ItemRouter(
     model=models.Event,
     get_schema=schemas.Event,
     create_schema=schemas.EventCreate,
@@ -36,20 +35,3 @@ async def get_my_events(
 ):
     event = models.Event.manager(db).filter(owner_pk=user.pk)
     return event
-
-
-@event_router.post(
-    '/',
-    response_model=schemas.Event, status_code=201)
-async def create_event(
-    event: schemas.EventCreate,
-    db: Session = Depends(get_db),
-    user: User = Depends(authenticate)
-):
-
-    _event = models.Event.manager(db).create(
-        disable_check=False,
-        **event.__dict__,
-        owner=user
-    )
-    return _event

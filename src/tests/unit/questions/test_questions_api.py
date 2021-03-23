@@ -18,7 +18,7 @@ def test_ask_question(auth_client, event, user):
         'event': event.pk
     })
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert response.json()['body'] == 'how to use TDD?'
     assert response.json()['author']['username'] == user.username
 

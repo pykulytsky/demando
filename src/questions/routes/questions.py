@@ -4,17 +4,16 @@ from sqlalchemy.orm import Session
 from auth.backend import authenticate
 from auth.schemas import User
 from base.database import engine, Base, get_db
+from questions.router import ItemRouter
 
 from .. import models
 from questions.schemas import questions as schemas
-
-from base.router import CrudRouter
 
 
 Base.metadata.create_all(bind=engine)
 
 
-questions_router = CrudRouter(
+questions_router = ItemRouter(
     model=models.Question,
     get_schema=schemas.Question,
     create_schema=schemas.QuestionCreate,
@@ -35,16 +34,16 @@ async def get_my_questions(
     return questions
 
 
-@questions_router.post('/', response_model=schemas.Question)
-async def create_question(
-    question: schemas.QuestionCreate,
-    db: Session = Depends(get_db),
-    user: User = Depends(authenticate)
-):
+# @questions_router.post('/', response_model=schemas.Question)
+# async def create_question(
+#     question: schemas.QuestionCreate,
+#     db: Session = Depends(get_db),
+#     user: User = Depends(authenticate)
+# ):
 
-    _question = models.Question.manager(db).create(
-        body=question.body,
-        event=models.Event.manager(db).get(pk=question.event),
-        author=user
-    )
-    return _question
+#     _question = models.Question.manager(db).create(
+#         body=question.body,
+#         event=models.Event.manager(db).get(pk=question.event),
+#         author=user
+#     )
+#     return _question

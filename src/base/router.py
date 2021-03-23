@@ -311,6 +311,7 @@ class AuthenticatedCrudRouter(CrudRouter):
         prefix: Optional[str] = None,
         tags: Optional[List] = [],
         auth_backend: Type = JWTAuthentication,
+        add_create_route: bool = False,
         *args,
         **kwargs
     ) -> None:
@@ -323,7 +324,7 @@ class AuthenticatedCrudRouter(CrudRouter):
             db=db,
             prefix=prefix,
             tags=tags,
-            add_create_route=False,
+            add_create_route=add_create_route,
             *args,
             **kwargs
         )
