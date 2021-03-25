@@ -1,4 +1,4 @@
-alembic==1.5.7
+alembic==1.5.8
 asgi-lifespan==1.0.1
 attrs==20.3.0
 autopep8==1.5.5
