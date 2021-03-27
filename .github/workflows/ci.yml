@@ -5,7 +5,7 @@ name: Python application
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, poetry-version-management ]
   pull_request:
     branches: [ master ]
 
@@ -22,9 +22,20 @@ jobs:
       with:
         python-version: 3.9
 
+    - name: Bootstrap poetry
+        shell: bash
+        run: |
+          python -m ensurepip
+          python -m pip install --upgrade pip
+          python -m pip install poetry
+
+    - name: Configure poetry
+        shell: bash
+        run: python -m poetry config virtualenvs.in-project true
+
     - name: Install flake8
       run: |
-        pip3 install flake8
+        python3 -m poetry add flake8
     - name: Run flake8
       uses: julianwachholz/flake8-action@v1.1.0
       with:

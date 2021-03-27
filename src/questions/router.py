@@ -1,4 +1,3 @@
-from sqlalchemy.sql.expression import update
 from auth.models import User
 from base.router import CrudRouter
 from pydantic import BaseModel
@@ -7,7 +6,7 @@ from fastapi import Depends
 from base.database import Base, get_db, engine
 from sqlalchemy.orm import Session
 from typing import Dict, Optional, List, Type
-from base.utils import get_base_models, get_class_by_table
+from base.utils import get_class_by_table
 
 from auth.backend import JWTAuthentication, authenticate
 
@@ -50,7 +49,6 @@ class ItemRouter(CrudRouter):
             dependencies=[Depends(get_db)],
             summary=f"Create {self.model.__name__}",
             status_code=201
-
         )
 
     def _create(self):
@@ -61,7 +59,11 @@ class ItemRouter(CrudRouter):
         ):
 
             instance = self.model.manager(db).create(
-                **self.get_create_data(create_schema=create_schema, user=user, db=db)
+                **self.get_create_data(
+                    create_schema=create_schema,
+                    user=user,
+                    db=db
+                )
             )
             return instance
 
