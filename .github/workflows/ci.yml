@@ -109,8 +109,8 @@ jobs:
         verbose: true # optional (default = false)
 
   tests:
-    name: ${{ matrix.os }} / ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}-latest
+    name: test ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
