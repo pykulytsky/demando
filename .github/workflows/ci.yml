@@ -128,6 +128,14 @@ jobs:
         shell: bash
         run: echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")
 
+      - name: Setup PostgreSQL
+      uses: Harmon758/postgresql-action@v1.0.0
+      with:
+        postgresql version: 12.2
+        postgresql db: 'demando'
+        postgresql user: 'demando'
+        postgresql password: '1234'
+
       - name: Bootstrap poetry
         shell: bash
         run: |
@@ -157,3 +165,9 @@ jobs:
       - name: Run pytest
         shell: bash
         run: python -m poetry run pytest
+        env:
+          DB_NAME: demando
+          DB_USER: demando
+          DB_USER_PASSWORD: 1234
+          DB_HOST: localhost
+          POSTGRES_DB_HOST: 127.0.0.1
