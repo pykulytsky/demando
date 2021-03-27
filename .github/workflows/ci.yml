@@ -23,10 +23,11 @@ jobs:
         python-version: 3.9
 
     - name: Bootstrap poetry
-        run: |
-          python -m ensurepip
-          python -m pip install --upgrade pip
-          python -m pip install poetry
+      shell: bash
+      run: |
+        python -m ensurepip
+        python -m pip install --upgrade pip
+        python -m pip install poetry
 
     - name: Configure poetry
         shell: bash
