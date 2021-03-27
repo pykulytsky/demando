@@ -4,94 +4,126 @@ from sqlalchemy.sql.sqltypes import Boolean
 from demando.base.database import Base
 
 from demando.base.manager import BaseManagerModel
+from demando.base.database import db
 
 
-class Event(Base, BaseManagerModel):
+class Event(db.Model, BaseManagerModel):
 
     __tablename__ = 'events'
 
-    pk = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True)
+    pk = db.Column(Integer(), primary_key=True, index=True)
+    name = db.Column(db.String(), unique=True)
 
-    owner_pk = Column(Integer, ForeignKey('users.pk'))
-    owner = relationship('User', back_populates='events')
+    owner_pk = db.Column(db.Integer(), ForeignKey('users.pk'))
 
-    questions = relationship('Question', back_populates='event')
+    @property
+    async def owner(self):
+        from demando.auth.models import User
+        return await User.get(self.owner_pk)
 
-
-likes_table = Table('likes', Base.metadata,
-                    Column(
-                        'user_pk',
-                        Integer,
-                        ForeignKey('users.pk'),
-                        nullable=True),
-                    Column(
-                        'question_pk',
-                        Integer,
-                        ForeignKey('questions.pk'),
-                        nullable=True)
-                    )
+    @property
+    async def questions(self):
+        return await Question.query.where(Question.event_pk == self.pk).gino.all()
 
 
-class Question(Base, BaseManagerModel):
+class UserLikes(db.Model):
+
+    __tablename__ = 'user_likes'
+
+    user_pk = db.Column(db.Integer(), ForeignKey('users.pk'), nullable=True)
+    question_pk = db.Column(db.Integer(), ForeignKey('questions.pk'), nullable=True)
+
+
+class Question(db.Model, BaseManagerModel):
 
     __tablename__ = 'questions'
 
-    pk = Column(Integer, primary_key=True, index=True)
-    body = Column(String, nullable=False)
+    pk = db.Column(db.Integer(), primary_key=True, index=True)
+    body = db.Column(db.String(), nullable=False)
 
-    event_pk = Column(Integer, ForeignKey('events.pk'), nullable=True)
+    event_pk = db.Column(db.Integer(), db.ForeignKey('events.pk'), nullable=True)
     event = relationship('Event', back_populates="questions")
 
-    author_pk = Column(Integer, ForeignKey('users.pk'), nullable=True)
+    author_pk = db.Column(db.Integer(), db.ForeignKey('users.pk'), nullable=True)
     author = relationship('User', back_populates='questions')
 
-    answered = Column(Boolean, default=False)
+    @property
+    async def author(self):
+        from demando.auth.models import User
 
-    likes_count = Column(Integer, default=0)
-    likes = relationship(
-        'User', secondary=likes_table, back_populates="liked_questions"
-    )
+        return await User.get(self.author_pk)
+
+    answered = db.Column(db.Boolean(), default=False)
+
+    likes_count = db.Column(db.Integer(), default=0)
+
+    @property
+    async def likes(self):
+        return await UserLikes.query.where(UserLikes.question_pk == self.pk).gino.all()
 
 
-class Poll(Base, BaseManagerModel):
+class Poll(db.Model, BaseManagerModel):
 
     __tablename__ = 'polls'
 
-    pk = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
+    pk = db.Column(db.Integer(), primary_key=True, index=True)
+    name = db.Column(db.String(), nullable=False)
 
-    owner_pk = Column(Integer, ForeignKey('users.pk'))
-    owner = relationship('User', back_populates='polls')
+    owner_pk = db.Column(db.Integer(), db.ForeignKey('users.pk'))
 
-    options = relationship('Option', back_populates='poll')
-    votes = relationship('Vote', back_populates='poll')
+    @property
+    async def owner(self):
+        from demando.auth.models import User
+        return await User.get(self.owner_pk)
+
+    @property
+    async def options(self):
+        return await Option.query.where(Option.poll_pk == self.pk).gino.all()
+
+    @property
+    async def votes(self):
+        return await Vote.query.where(Vote.poll_pk == self.pk).gino.all()
 
 
-class Option(Base, BaseManagerModel):
+class Option(db.Model, BaseManagerModel):
 
     __tablename__ = 'options'
 
-    pk = Column(Integer, primary_key=True, index=True)
-    name = name = Column(String, nullable=False)
+    pk = db.Column(db.Integer(), primary_key=True, index=True)
+    name = db.Column(db.String(), nullable=False)
 
-    poll_pk = Column(Integer, ForeignKey('polls.pk'))
-    poll = relationship('Poll', back_populates='options')
+    poll_pk = db.Column(db.Integer(), db.ForeignKey('polls.pk'))
 
-    votes = relationship('Vote', back_populates='option')
+    @property
+    async def poll(self):
+        return await Poll.get(self.poll_pk)
+
+    @property
+    async def votes(self):
+        return await Vote.query.where(Vote.option_pk == self.pk).gino.all()
 
 
-class Vote(Base, BaseManagerModel):
+class Vote(db.Model, BaseManagerModel):
 
     __tablename__ = 'votes'
 
-    pk = Column(Integer, primary_key=True, index=True)
+    pk = db.Column(db.Integer(), primary_key=True, index=True)
 
-    poll_pk = Column(Integer, ForeignKey('polls.pk'))
-    poll = relationship('Poll', back_populates='votes')
+    poll_pk = db.Column(db.Integer(), db.ForeignKey('polls.pk'))
 
-    owner_pk = Column(Integer, ForeignKey('users.pk'))
-    owner = relationship('User', back_populates='votes')
+    @property
+    async def poll(self):
+        return await Poll.get(self.poll_pk)
 
-    option_pk = Column(Integer, ForeignKey('options.pk'))
-    option = relationship('Option', back_populates='votes')
+    owner_pk = db.Column(db.Integer(), db.ForeignKey('users.pk'))
+
+    @property
+    async def owner(self):
+        from demando.auth.models import User
+        return await User.get(self.owner_pk)
+
+    option_pk = db.Column(db.Integer(), db.ForeignKey('options.pk'))
+
+    @property
+    async def option(self):
+        return await Option.get(self.option_pk)

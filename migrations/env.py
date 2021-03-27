@@ -17,7 +17,12 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+from demando.base.settings import DB_DSN
+from demando.main import db
+
+config.set_main_option("sqlalchemy.url", str(DB_DSN))
+target_metadata = db
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

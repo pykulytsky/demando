@@ -25,12 +25,11 @@ async def create_user(
     user: auth_router.create_schema,
     db: Session = Depends(get_db)
 ):
-    manager = auth_router.model.manager(db)
-    db_user = manager.exists(email=user.email)
+    db_user = await User.query.where(User.email == user.email).gino.all()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    new_user = manager.create_user(user)
-    return {"token": new_user.token}
+    new_user = await User.create(**user.__dict__)
+    return {"token": await new_user.token}
 
 
 @auth_router.post("/refresh/", response_model=schemas.Token, status_code=200)

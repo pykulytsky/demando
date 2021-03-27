@@ -1,6 +1,6 @@
 import pytest
 from demando.auth.models import User
-from demando.main import app, get_db
+from demando.main import get_app, get_db
 from fastapi.testclient import TestClient
 from .test_client import JWTAuthTestClient
 
@@ -14,6 +14,7 @@ from demando.auth.schemas import UserCreate
 
 from sqlalchemy.engine import reflection
 
+app = get_app()
 
 @pytest.fixture(autouse=True)
 def create_models():

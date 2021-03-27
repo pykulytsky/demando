@@ -57,7 +57,7 @@ class JWTAuthentication(HTTPBearer):
             )
 
             if paylaod.get('pk', False):
-                if get_user_or_false(db=self.db, user_id=paylaod['pk']):
+                if await User.get_or_404(paylaod['pk']):
                     valid = True
 
         except DecodeError:
@@ -66,7 +66,7 @@ class JWTAuthentication(HTTPBearer):
         return valid
 
 
-def authenticate(
+async def authenticate(
     request: Request,
     token: str = Depends(JWTAuthentication()),
     db: Session = Depends(get_db)
@@ -79,7 +79,7 @@ def authenticate(
     )
 
     if paylaod.get('pk', False):
-        user = get_user_or_false(db=db, user_id=paylaod['pk'])
+        user = await User.get_or_404(paylaod['pk'])
         if user:
             return user
         else:

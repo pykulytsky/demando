@@ -10,68 +10,74 @@ from demando.base import settings
 
 from demando.base.database import Base
 from jwt.exceptions import InvalidAlgorithmError, InvalidSignatureError
-from demando.questions.models import likes_table
+from demando.questions.models import Event, Poll, Question, UserLikes, Vote
 from .manager import AuthManagerModel
 
 from typing import Optional
 
+from demando.base.database import db
 
-class Role(Base, AuthManagerModel):
+
+class Role(db.Model, AuthManagerModel):
 
     __tablename__ = 'roles'
 
-    pk = Column(Integer, primary_key=True, index=True)
-    verbose = Column(String)
+    pk = db.Column(db.Integer(), primary_key=True, index=True)
+    verbose = db.Column(db.String())
 
-    users = relationship('User', back_populates="role")
+    @property
+    async def users(self):
+        return await User.query.where(User.role_pk == self.pk).gino.all()
 
 
-class User(Base, AuthManagerModel):
+class User(db.Model, AuthManagerModel):
 
     __tablename__ = 'users'
 
-    pk = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True)
-    first_name = Column(String, nullable=True)
-    last_name = Column(String, nullable=True)
-    age = Column(Integer, nullable=True)
+    pk = db.Column(db.Integer(), primary_key=True, index=True)
+    username = db.Column(db.String(), unique=True)
+    first_name = db.Column(db.String(), nullable=True)
+    last_name = db.Column(db.String(), nullable=True)
+    age = db.Column(db.Integer(), nullable=True)
 
-    password = Column(String)
-    email = Column(String, unique=True)
+    password = db.Column(db.String())
+    email = db.Column(db.String(), unique=True)
 
-    is_superuser = Column(Boolean, default=False, nullable=True)
+    is_superuser = db.Column(db.Boolean(), default=False, nullable=True)
 
-    role_pk = Column(Integer, ForeignKey('roles.pk'))
+    role_pk = db.Column(db.Integer(), db.ForeignKey('roles.pk'))
     role = relationship("Role", back_populates="users")
 
-    events = relationship('Event', back_populates='owner')
-    polls = relationship('Poll', back_populates='owner')
-    votes = relationship('Vote', back_populates='owner')
-    questions = relationship('Question', back_populates='author')
-
-    liked_questions = relationship(
-        'Question', secondary=likes_table, back_populates="likes"
-    )
-
-    def __init__(
-        self,
-        username: str,
-        password: str,
-        email: str,
-        first_name: Optional[str] = None,
-        last_name: Optional[str] = None,
-    ) -> None:
-        self.username = username
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
-        self.password = password
+    @property
+    async def role(self):
+        return await Role.get(self.role_pk)
 
     @property
-    def token(self) -> str:
-        return self.generate_jwt_token()
+    async def polls(self):
+        return await Poll.query.where(Poll.owner_pk == self.pk).gino.all()
 
-    def generate_jwt_token(self) -> str:
+    @property
+    async def votes(self):
+        return await Vote.query.where(Vote.owner_pk == self.pk).gino.all()
+
+    @property
+    async def events(self):
+        return await Event.query.where(Event.owner_pk == self.pk).gino.all()
+
+    @property
+    async def quetions(self):
+        return await Question.query.where(Question.owner_pk == self.pk).gino.all()
+
+    @property
+    async def liked_questions(self):
+        return await UserLikes.query.where(UserLikes.user_pk == self.pk).gino.all()
+
+
+    @property
+    async def token(self) -> str:
+        return await self.generate_jwt_token()
+
+    async def generate_jwt_token(self) -> str:
         period = datetime.now() + timedelta(days=60)
         try:
             token = jwt.encode({
@@ -85,5 +91,5 @@ class User(Base, AuthManagerModel):
 
         return token.decode('utf-8')
 
-    def __str__(self) -> str:
+    async def __str__(self) -> str:
         return f'<User: {self.username}>'

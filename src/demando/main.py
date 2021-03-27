@@ -7,31 +7,41 @@ from .questions.routes import base as questions_routes
 from .base.database import engine, Base, get_db
 from .auth.routes import auth_router
 
+from .base.database import db
+
 
 Base.metadata.create_all(bind=engine)
 
 
-app = FastAPI(dependencies=[Depends(get_db)])
+# app = FastAPI(dependencies=[Depends(get_db)])
 
-app.include_router(auth_router)
-app.include_router(questions_routes.router)
-
-
-sentry_sdk.init(dsn=settings.SENTRY_DSN)
+# app.include_router(auth_router)
+# app.include_router(questions_routes.router)
 
 
-@app.middleware("http")
-async def sentry_exception(request: Request, call_next):
-    try:
-        response = await call_next(request)
-        return response
-    except Exception as e:
-        if request['headers'][1][1] != b'testclient':
-            print('captured')
-            with sentry_sdk.push_scope() as scope:
-                scope.set_context("request", request)
-                scope.user = {
-                    "ip_address": request.client.host,
-                }
-                sentry_sdk.capture_exception(e)
-        raise e
+
+
+def get_app():
+    app = FastAPI(title="Demando")
+    sentry_sdk.init(dsn=settings.SENTRY_DSN)
+
+    @app.middleware("http")
+    async def sentry_exception(request: Request, call_next):
+        try:
+            response = await call_next(request)
+            return response
+        except Exception as e:
+            if request['headers'][1][1] != b'testclient':
+                print('captured')
+                with sentry_sdk.push_scope() as scope:
+                    scope.set_context("request", request)
+                    scope.user = {
+                        "ip_address": request.client.host,
+                    }
+                    sentry_sdk.capture_exception(e)
+            raise e
+
+    db.init_app(app)
+    app.include_router(auth_router)
+    app.include_router(questions_routes.router)
+    return app
