@@ -27,6 +27,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   tests:
+    needs: lint
     name: test ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
