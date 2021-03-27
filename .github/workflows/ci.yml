@@ -24,7 +24,7 @@ jobs:
           checkName: "Python Lint"
           path: path/to/files
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}o
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   test:
     needs: lint
     name: Test with pytest
