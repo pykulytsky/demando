@@ -11,37 +11,20 @@ on:
 
 jobs:
   lint:
-    name: Lint with flake8
+    name: Python Lint
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-
-    - name: Bootstrap poetry
-      shell: bash
-      run: |
-        python -m ensurepip
-        python -m pip install --upgrade pip
-        python -m pip install poetry
-
-    - name: Configure poetry
-      shell: bash
-      run: python -m poetry config virtualenvs.in-project true
-
-    - name: Install flake8
-      run: |
-        python3 -m poetry add flake8
-    - name: Run flake8
-      uses: julianwachholz/flake8-action@v1.1.0
-      with:
-        checkName: 'lint'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+      - name: Run flake8
+        uses: julianwachholz/flake8-action@v1.1.0
+        with:
+          checkName: "Python Lint"
+          path: path/to/files
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}o
   test:
     needs: lint
     name: Test with pytest
