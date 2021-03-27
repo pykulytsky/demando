@@ -27,3 +27,6 @@ class QuestionPatch(BaseModel):
     body: Optional[str]
     likes_count: Optional[int]
     likes: Optional[List[User]]
+
+    class Config:
+        orm_mode = True
