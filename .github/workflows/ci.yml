@@ -30,8 +30,8 @@ jobs:
         python -m pip install poetry
 
     - name: Configure poetry
-        shell: bash
-        run: python -m poetry config virtualenvs.in-project true
+      shell: bash
+      run: python -m poetry config virtualenvs.in-project true
 
     - name: Install flake8
       run: |
@@ -41,7 +41,7 @@ jobs:
       with:
         checkName: 'lint'
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   test:
     needs: lint
     name: Test with pytest
