@@ -25,14 +25,12 @@ class JWTAuthTestClient(TestClient):
             self,
             app: typing.Union[ASGI2App, ASGI3App],
             user: schemas.User,
-            db: Session,
             base_url: str = "http://testserver",
             raise_server_exceptions: bool = True,
             root_path: str = "",
     ) -> None:
 
-        self.db = db
-        self.user = crud.get_user(self.db, user.pk)
+        self.user = user
 
         super().__init__(
             app,

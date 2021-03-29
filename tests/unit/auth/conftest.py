@@ -6,8 +6,8 @@ import pytest
 
 
 @pytest.fixture
-def manager(db):
-    return AuthManager(User, db)
+def manager():
+    return AuthManager(User)
 
 
 @pytest.fixture

@@ -28,7 +28,7 @@ async def create_user(
     db_user = await User.query.where(User.email == user.email).gino.all()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    new_user = await User.create(**user.__dict__)
+    new_user = await User.manager().create_user(user)
     return {"token": await new_user.token}
 
 
@@ -37,13 +37,13 @@ async def refresh_token(
     user: schemas.UserLogin,
     db: Session = Depends(get_db)
 ):
-    manager = auth_router.model.manager(db)
+    manager = auth_router.model.manager()
     try:
-        db_user = manager.login(user)
+        db_user = await manager.login(user)
     except WrongLoginCredentials as e:
         raise HTTPException(status_code=403, detail=str(e))
 
-    return {"token": db_user.token}
+    return {"token": await db_user.token}
 
 
 @auth_router.get('/me/', response_model=schemas.User)

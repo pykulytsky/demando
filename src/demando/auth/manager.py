@@ -11,25 +11,21 @@ from . import schemas
 
 class AuthManager(BaseManager):
 
-    def create_user(self, user_schema: schemas.UserCreate):
+    async def create_user(self, user_schema: schemas.UserCreate):
         fields = user_schema.__dict__
-        self.check_fields(**fields)
+        await self.check_fields(**fields)
         fields['password'] = self.set_password(fields['password'])
 
-        instance = super().create(
-            disable_check=True, **fields
-        )
-
-        self.refresh(instance)
+        instance = await self.model.create(**fields)
 
         return instance
 
-    def set_password(self, passwd: str) -> str:
+    async def set_password(self, passwd: str) -> str:
         password = self._hasher().hash(passwd)
         return password
 
     @staticmethod
-    def verify_password(password: str, instance: Type) -> bool:
+    async def verify_password(password: str, instance: Type) -> bool:
         return AuthManager._hasher().verify(password, instance.password)
 
     @staticmethod
@@ -38,18 +34,18 @@ class AuthManager(BaseManager):
             salt=bytes(settings.SECRET_KEY.encode('utf-8'))
         )
 
-    def login(self, login_schema: schemas.UserLogin):
-        try:
-            user = self.get(email=login_schema.email)
-            if self.verify_password(login_schema.password, user):
+    async def login(self, login_schema: schemas.UserLogin):
+        user = await self.get(email=login_schema.email)
+        if user:
+            if await self.verify_password(login_schema.password, user):
                 return user
             else:
                 raise WrongLoginCredentials("Password didnt match.")
-        except ObjectDoesNotExists:
+        else:
             raise WrongLoginCredentials("No user with such email was found.")
 
 
 class AuthManagerModel(BaseManagerModel):
     @classmethod
-    def manager(cls, db):
-        return AuthManager(cls, db)
+    def manager(cls):
+        return AuthManager(cls)

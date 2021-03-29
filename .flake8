@@ -1,4 +1,4 @@
 [flake8]
 ignore = B008
 exclude =
-    alembic
+    migrations

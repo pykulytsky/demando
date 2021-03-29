@@ -17,6 +17,7 @@ from fastapi import APIRouter, Depends, HTTPException, params
 
 from sqlalchemy.orm import Session
 from .database import get_db
+from .database import db
 
 from pydantic import BaseModel
 
@@ -33,19 +34,13 @@ class BaseCrudRouter(APIRouter):
         get_schema: BaseModel,
         create_schema: BaseModel,
         update_schema: BaseModel = None,
-        db: Session = Depends(get_db),
         prefix: Optional[str] = None,
         tags: Optional[List] = list(),
         *args,
         **kwargs
     ) -> None:
-        if not hasattr(model, 'manager'):
-            raise AttributeError(
-                f"Model {model.__name__} not suported, \
-                model must have a 'manager' field.")
 
         self.model = model
-
         self.get_schema = get_schema
         self.create_schema = create_schema
         self.update_schema = update_schema
@@ -203,7 +198,6 @@ class CrudRouter(BaseCrudRouter):
                 '/',
                 self._get_all,
                 response_model=List[self.get_schema],
-                dependencies=[Depends(get_db)],
                 summary=f"Get all {self.model.__name__}`s"
             )
 
@@ -213,7 +207,6 @@ class CrudRouter(BaseCrudRouter):
                     self._create(),
                     methods=['POST'],
                     response_model=self.get_schema,
-                    dependencies=[Depends(get_db)],
                     summary=f"Create {self.model.__name__}",
                     status_code=201
 
@@ -223,7 +216,6 @@ class CrudRouter(BaseCrudRouter):
                 self._get(),
                 methods=['GET'],
                 response_model=self.get_schema,
-                dependencies=[Depends(get_db)],
                 summary=f"Get {self.model.__name__}",
 
             )
@@ -232,7 +224,6 @@ class CrudRouter(BaseCrudRouter):
                 self._update(),
                 methods=['PATCH'],
                 response_model=self.get_schema,
-                dependencies=[Depends(get_db)],
                 summary=f"Patch {self.model.__name__}",
             )
             super().add_api_route(
@@ -240,7 +231,6 @@ class CrudRouter(BaseCrudRouter):
                 self._delete(),
                 methods=['DELETE'],
                 response_model=self.get_schema,
-                dependencies=[Depends(get_db)],
                 summary=f"Delete {self.model.__name__}",
             )
 
@@ -248,52 +238,46 @@ class CrudRouter(BaseCrudRouter):
         self,
         skip: int = 0,
         limit: int = 100,
-        db: Session = Depends(get_db)
     ) -> Callable:
         @self.get('/', response_model=List[self.get_schema])
         async def _get_all(
             skip: int = 0,
             limit: int = 100,
-            db: Session = Depends(get_db)
         ):
-            return self.model.manager(db).all(skip, limit)
+            print(await self.model.query.offset(skip).limit(limit).gino.all())
+            return await self.model.query.offset(skip).limit(limit).gino.all()
 
-        return await _get_all(skip, limit, db)
+        return await _get_all(skip, limit)
 
     def _create(self) -> Callable:
-        async def route(
-            instance_create_schema: self.create_schema,
-            db: Session = Depends(get_db)
-        ):
-            return self.model.manager(db).create(instance_create_schema)
+        async def route(instance_create_schema: self.create_schema):
+            return await self.model.create(instance_create_schema)
 
         return route
 
     def _get(self) -> Callable:
-        async def route(pk: int, db: Session = Depends(get_db)):
-            try:
-                return self.model.manager(db).get(pk=pk)
-            except ObjectDoesNotExists:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"{self.model.__name__} does not exists"
-                )
+        async def route(pk: int):
+            user = await self.model.get(pk)
+            print(user)
+            if user:
+                return user
+
+            raise HTTPException(
+                status_code=400,
+                detail=f"{self.model.__name__} does not exists"
+            )
 
         return route
 
     def _update(self) -> Callable:
-        async def route(
-            pk,
-            update_schema: self.update_schema,
-            db: Session = Depends(get_db)
-        ):
-            return self.model.manager(db).update(pk, update_schema)
+        async def route(pk, update_schema: self.update_schema):
+            return await self.model.update(pk, update_schema)
 
         return route
 
     def _delete(self) -> Callable:
-        async def route(pk, db: Session = Depends(get_db)):
-            return self.model.manager(db).delete(pk=pk)
+        async def route(pk):
+            return await self.model.delete(pk)
 
         return route
 
@@ -307,7 +291,6 @@ class AuthenticatedCrudRouter(CrudRouter):
         get_schema: BaseModel,
         create_schema: BaseModel,
         update_schema: BaseModel = None,
-        db: Session = Depends(get_db),
         prefix: Optional[str] = None,
         tags: Optional[List] = [],
         auth_backend: Type = JWTAuthentication,
@@ -345,6 +328,6 @@ class AuthenticatedCrudRouter(CrudRouter):
             db: Session = Depends(get_db),
             token: str = Depends(self.auth_backend())
         ):
-            return self.model.manager(db).create(instance_create_schema)
+            return self.model.manager(db).create(**instance_create_schema.__dict__)
 
         return route

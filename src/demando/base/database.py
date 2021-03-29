@@ -2,9 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from gino.ext.starlette import Gino # noqa
-
-from . import settings
+from gino_starlette import Gino # noqa
 
 from . import settings
 

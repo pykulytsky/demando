@@ -23,7 +23,7 @@ SENTRY_DSN = config(
     default='https://e08875a22d804df08150988c6886b871@o504286.ingest.sentry.io/5673787'
 )
 
-
+TESTING = config("TESTING", cast=bool, default=False)
 
 DB_DRIVER = config("DB_DRIVER", default="postgresql")
 DB_HOST = config("DB_HOST", default='localhost')
@@ -52,3 +52,11 @@ DB_USE_CONNECTION_FOR_REQUEST = config(
 )
 DB_RETRY_LIMIT = config("DB_RETRY_LIMIT", cast=int, default=1)
 DB_RETRY_INTERVAL = config("DB_RETRY_INTERVAL", cast=int, default=1)
+
+TESTING = config("TESTING", cast=bool, default=False)
+
+if TESTING:
+    if DB_DATABASE:
+        DB_DATABASE += "_test"
+    else:
+        DB_DATABASE = "demando_test"

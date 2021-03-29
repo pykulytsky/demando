@@ -10,26 +10,16 @@ from .database import get_db
 
 
 class BaseManager():
-    def __init__(self, klass: Type, db: Session = Depends(get_db)) -> None:
-        if not issubclass(klass, Base):
-            raise ImproperlyConfigured(
-                f"Type {klass.__name__} is not suported.")
+    def __init__(self, klass: Type) -> None:
         self.model = klass
 
-        self.db = db
-
-    def create(self, disable_check: bool = False, **fields):
+    async def create(self, disable_check: bool = False, **fields):
         if not disable_check:
-            self.check_fields(**fields)
-        instance = self.model(**fields)
+            await self.check_fields(**fields)
 
-        self.db.add(instance)
-        self.db.commit()
-        self.db.refresh(instance)
+        return await self.model.create(**fields)
 
-        return instance
-
-    def delete(self, instance):
+    async def delete(self, instance):
         if not isinstance(instance, self.model):
             raise TypeError(
                 f"Instance must be {str(self.model)} not {type(instance)}"
@@ -40,48 +30,46 @@ class BaseManager():
 
         return instance
 
-    def all(self, skip: int = 0, limit: int = 100) -> List[Type]:
-        return self.db.query(self.model).offset(skip).limit(limit).all()
+    async def all(self, skip: int = 0, limit: int = 100) -> List[Type]:
+        return await self.model.query.offset(skip).limit(limit).gino.all()
 
-    def get(self, **fields) -> Type:
-        self.check_fields(**fields)
+    async def get(self, **fields) -> Type:
+        await self.check_fields(**fields)
 
         expression = [
             getattr(self.model, k) == fields[k] for k in fields.keys()
         ]
 
-        instance = self.db.query(self.model).filter(*expression).first()
+        instance = await self.model.query.where(*expression).gino.first()
         if instance:
             return instance
 
-        raise ObjectDoesNotExists(
-            f"No {self.model.__name__.lower()} with such parameters."
-        )
+        raise ObjectDoesNotExists("Object not found.")
 
-    def filter(self, **fields):
-        self.check_fields(**fields)
+    async def filter(self, **fields):
+        await self.check_fields(**fields)
 
         expression = [
             getattr(self.model, k) == fields[k] for k in fields.keys()
         ]
 
-        return self.db.query(self.model).filter(*expression).all()
+        return await self.model.query.where(*expression).gino.all()
 
-    def get_or_false(self, **fields) -> Union[Type, bool]:
+    async def get_or_false(self, **fields) -> Union[Type, bool]:
         try:
-            instance = self.get(**fields)
+            instance = await self.get(**fields)
             return instance
         except ObjectDoesNotExists:
             return False
 
-    def exists(self, **fields):
+    async def exists(self, **fields):
         try:
-            self.get(**fields)
+            await self.get(**fields)
             return True
         except ObjectDoesNotExists:
             return False
 
-    def _get_model_fields(self) -> List[str]:
+    async def _get_model_fields(self) -> List[str]:
         fields = []
 
         for field in dir(self.model):
@@ -91,19 +79,13 @@ class BaseManager():
 
         return fields
 
-    def check_fields(self, **fields):
+    async def check_fields(self, **fields):
         for field in fields.keys():
-            if field not in self._get_model_fields():
-                raise ValueError(f"Field {field} is not suported, suported fields: {self._get_model_fields()}") # noqa
-
-    def refresh(self, instance):
-        self.db.commit()
-        self.db.refresh(instance)
-
-        return instance
+            if field not in await self._get_model_fields():
+                raise ValueError(f"Field {field} is not suported, suported fields: {await self._get_model_fields()}") # noqa
 
 
 class BaseManagerModel():
     @classmethod
-    def manager(cls, db):
-        return BaseManager(cls, db)
+    def manager(cls):
+        return BaseManager(cls)
