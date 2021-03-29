@@ -15,7 +15,7 @@ from auth.schemas import UserCreate
 from sqlalchemy.engine import reflection
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="session")
 def create_models():
     Base.metadata.create_all(bind=engine)
 
@@ -34,17 +34,17 @@ _mixer = Mixer(session=TestSessionLocal(), commit=True)
 app.dependency_overrides[get_db] = override_get_db
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def client():
     return TestClient(app)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def mixer():
     return _mixer
 
 
-@pytest.fixture
+@pytest.fixture()
 def db():
     try:
         db = TestSessionLocal()
@@ -60,7 +60,7 @@ def db():
         db.close()
 
 
-@pytest.fixture
+@pytest.fixture()
 def user(db):
     _user = UserCreate(
         email='test1@test.py',
@@ -71,7 +71,7 @@ def user(db):
     yield user
 
 
-@pytest.fixture
+@pytest.fixture()
 def another_user(db):
     _user = UserCreate(
         email='test2@test.py',
@@ -82,6 +82,6 @@ def another_user(db):
     yield user
 
 
-@pytest.fixture
+@pytest.fixture()
 def auth_client(db, user):
     return JWTAuthTestClient(app, user=user, db=db)
