@@ -9,7 +9,6 @@ from mixer.backend.sqlalchemy import Mixer
 from base.database import Base
 from tests.test_database import TestSessionLocal, engine
 
-from auth.crud import create_user
 from auth.schemas import UserCreate
 
 from sqlalchemy.engine import reflection

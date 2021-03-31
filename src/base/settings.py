@@ -10,6 +10,7 @@ TEST_DB_NAME = config('TEST_DB_NAME', 'demando')
 DB_USER = config('DB_USER', 'demando')
 DB_USER_PASSWORD = config('DB_USER_PASSWORD', '1234')
 DB_HOST = config('DB_HOST', 'db')
+DB_PORT = config('DB_PORT', '5432')
 
 DEBUG = True
 

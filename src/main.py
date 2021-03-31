@@ -27,7 +27,6 @@ async def sentry_exception(request: Request, call_next):
         return response
     except Exception as e:
         if request['headers'][1][1] != b'testclient':
-            print('captured')
             with sentry_sdk.push_scope() as scope:
                 scope.set_context("request", request)
                 scope.user = {
