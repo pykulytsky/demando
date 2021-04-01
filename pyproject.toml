@@ -13,7 +13,7 @@ homepage = "https://github.com/pykulytsky/demando"
 [tool.poetry.dependencies]
 python = "^3.8"
 gino = {extras = ["pg", "starlette"], version = "^1.0.1"}
-alembic = "1.5.7"
+alembic = "1.5.8"
 psycopg2 = "2.8.6"
 asgi-lifespan = "1.0.1"
 attrs = "20.3.0"
