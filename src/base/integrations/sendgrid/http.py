@@ -26,8 +26,7 @@ import httpcore
 
 import typing
 from ... import settings
-
-from urllib.parse import urljoin
+from .exceptions import SendgridAuthenticationFailed, SendgridWrongResponse
 
 
 class BearerAuth(httpx.Auth):
@@ -35,11 +34,11 @@ class BearerAuth(httpx.Auth):
         self._auth_header = self._build_auth_header(token)
 
     def auth_flow(self, request: Request) -> typing.AsyncGenerator[Request, Response]:
-        request['Authorization'] = self._auth_header
+        request.headers['Authorization'] = self._auth_header
 
         yield request
 
-    def _build_auth_header(token: str) -> str:
+    def _build_auth_header(self, token: str) -> str:
         return "Bearer " + token
 
 
@@ -48,6 +47,8 @@ class SendgridHTTP(httpx.AsyncClient):
         self,
         *,
         params: QueryParamTypes = None,
+        token: str = settings.SENDGRID_API_KEY,
+        base_url: str = settings.SENDGRID_BASE_URL,
         headers: HeaderTypes = None,
         cookies: CookieTypes = None,
         verify: VerifyTypes = True,
@@ -64,8 +65,7 @@ class SendgridHTTP(httpx.AsyncClient):
         app: typing.Callable = None,
         trust_env: bool = True,
     ):
-        auth = BearerAuth(token=settings.SENDGRID_API_KEY)
-        base_url = settings.SENDGRID_BASE_URL
+        auth = BearerAuth(token=token)
 
         super().__init__(
             auth=auth,
@@ -104,10 +104,7 @@ class SendgridHTTP(httpx.AsyncClient):
         allow_redirects: bool = True,
         timeout: typing.Union[TimeoutTypes, UnsetType] = UNSET,
     ) -> Response:
-
-        url = self._format_url(url)
-
-        return super().request(
+        response = await super().request(
             method,
             url,
             content=content,
@@ -122,5 +119,9 @@ class SendgridHTTP(httpx.AsyncClient):
             timeout=timeout
         )
 
-    def _format_url(self, url: str):
-        return urljoin(self.base_url, url.lstrip('/'))
+        if response.status_code in [403, 401]:
+            raise SendgridAuthenticationFailed(f"[{response.status_code}]: {response.text}")
+        elif response.status_code > 299:
+            raise SendgridWrongResponse(f"[{response.status_code}]: {response.text}")
+        else:
+            return response

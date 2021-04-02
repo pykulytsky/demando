@@ -1,10 +1,12 @@
 from .exceptions import JwtTokenError
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 import jwt
 from datetime import datetime
 from datetime import timedelta
+import uuid
 
 from base import settings
 
@@ -52,6 +54,8 @@ class User(Base, AuthManagerModel):
     liked_questions = relationship(
         'Question', secondary=likes_table, back_populates="likes"
     )
+
+    verification_code = Column(UUID(as_uuid=True), default=uuid.uuid4())
 
     def __init__(
         self,

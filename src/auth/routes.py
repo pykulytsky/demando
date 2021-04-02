@@ -1,13 +1,16 @@
 from auth.backend import authenticate
 from auth.models import User
+from base import settings
 from base.router import CrudRouter
 from base.database import get_db
+
+from base.integrations.sendgrid.client import SendgridApp
 
 from . import schemas
 from .exceptions import WrongLoginCredentials
 
 from sqlalchemy.orm import Session
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, BackgroundTasks
 
 
 auth_router = CrudRouter(
@@ -23,13 +26,19 @@ auth_router = CrudRouter(
 @auth_router.post('/', response_model=schemas.Token, status_code=201)
 async def create_user(
     user: auth_router.create_schema,
-    db: Session = Depends(get_db)
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
 ):
     manager = auth_router.model.manager(db)
     db_user = manager.exists(email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     new_user = manager.create_user(user)
+
+    client = SendgridApp(db)
+
+    background_tasks.add_task(client.send_verification_mail, new_user.pk)
+
     return {"token": new_user.token}
 
 

@@ -55,3 +55,6 @@ SENTRY_DSN = config(
 SENDGRID_BASE_URL = config('SENDGRID_BASE_URL', cast=URLPath, default='')
 SENDGRID_API_KEY = config('SENDGRID_API_KEY', cast=str, default='')
 SENDGRID_VERIFY_EMAIL_TEMPLATE_ID = config('SENDGRID_VERIFY_EMAIL_TEMPLATE_ID', cast=str, default='')
+
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', cast=str, default='pragmatic.once.lviv@gmail.com')
+EMAIL_HOST_USER_NAME = config('EMAIL_HOST_USER_NAME', cast=str, default='Oleh Pykulytsky')
