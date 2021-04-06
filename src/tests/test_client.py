@@ -6,7 +6,7 @@ from starlette.testclient import (
     ASGI2App, ASGI3App, Cookies, DataType, FileType, Params, TimeOut)
 
 from auth import schemas
-from auth import crud
+from auth.models import User
 
 
 class BearerAuth(requests.auth.AuthBase):
@@ -32,7 +32,7 @@ class JWTAuthTestClient(TestClient):
     ) -> None:
 
         self.db = db
-        self.user = crud.get_user(self.db, user.pk)
+        self.user = User.manager(self.db).get(pk=user.pk)
 
         super().__init__(
             app,

@@ -17,6 +17,9 @@ class BaseVote(BaseModel):
     pk: int
     option: BaseOption
 
+    class Config:
+        orm_mode = True
+
 
 class BasePoll(BaseModel):
     pk: int
@@ -24,11 +27,16 @@ class BasePoll(BaseModel):
 
 
 class Option(BaseOption):
+    pk: int
+    name: str
     votes: Optional[List[BaseVote]]
-    poll: BasePoll
+
+    class Config:
+        orm_mode = True
 
 
 class Vote(BaseVote):
+    pk: int
     owner: User
 
     class Config:
@@ -36,6 +44,7 @@ class Vote(BaseVote):
 
 
 class VoteCreate(BaseModel):
+    pk: int
     poll: int
     option: int
 

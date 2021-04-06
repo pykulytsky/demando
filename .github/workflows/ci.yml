@@ -28,7 +28,7 @@ jobs:
 
   tests:
     needs: lint
-    name: test ${{ matrix.python-version }}
+    name: Test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
       matrix:

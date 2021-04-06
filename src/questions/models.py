@@ -67,13 +67,18 @@ class Poll(Base, BaseManagerModel):
     options = relationship('Option', back_populates='poll')
     votes = relationship('Vote', back_populates='poll')
 
+    @property
+    def rating(self):
+        ratings = {}
+        return ratings
+
 
 class Option(Base, BaseManagerModel):
 
     __tablename__ = 'options'
 
     pk = Column(Integer, primary_key=True, index=True)
-    name = name = Column(String, nullable=False)
+    name = Column(String, nullable=False)
 
     poll_pk = Column(Integer, ForeignKey('polls.pk'))
     poll = relationship('Poll', back_populates='options')

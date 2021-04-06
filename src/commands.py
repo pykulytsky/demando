@@ -1,3 +1,4 @@
+from typing import List
 import typer
 from base.database import engine
 from tests.test_database import engine as test_engine

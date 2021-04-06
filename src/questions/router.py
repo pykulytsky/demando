@@ -57,6 +57,11 @@ class ItemRouter(CrudRouter):
             db: Session = Depends(get_db),
             user: User = Depends(authenticate)
         ):
+            print(self.get_create_data(
+                    create_schema=create_schema,
+                    user=user,
+                    db=db
+                ))
 
             instance = self.model.manager(db).create(
                 **self.get_create_data(
@@ -117,6 +122,7 @@ class ItemRouter(CrudRouter):
 
     def get_create_data(self, create_schema, user, db) -> Dict:
         data = {}
+
         model_fields = self._get_schemas_diff(
             exclude=['user', 'owner', 'author']
         )
@@ -124,9 +130,10 @@ class ItemRouter(CrudRouter):
 
         for field in create_schema.__dict__.keys():
             if field in model_fields:
-                data.update({
-                    field: models[model_fields.index(field)].manager(db).get(pk=getattr(create_schema, field))
-                })
+                if hasattr(models[model_fields.index(field)], 'manager'):
+                    data.update({
+                        field: models[model_fields.index(field)].manager(db).get(pk=getattr(create_schema, field))
+                    })
             else:
                 data.update({
                     field: create_schema.__dict__[field]

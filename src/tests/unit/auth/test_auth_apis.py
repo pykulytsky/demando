@@ -1,3 +1,6 @@
+from base.integrations.sendgrid.client import SendgridApp
+
+
 def test_read_users_works(client, user):
     response = client.get('/auth/users')
 
@@ -45,3 +48,15 @@ def test_get_me(auth_client):
     response = auth_client.get('/auth/users/me/')
 
     assert response.status_code == 200
+
+
+def test_send_email_after_create_user(client, mocker):
+    mocker.patch('base.integrations.sendgrid.client.SendgridApp.send_verification_mail')
+    response = client.post('/auth/users/', json={
+        'username': 'test',
+        'email': 'test@py.com',
+        'password': 'assword'
+    })
+
+    assert response.status_code == 201
+    SendgridApp.send_verification_mail.assert_called_once()

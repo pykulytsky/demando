@@ -1,6 +1,6 @@
 
 from base.database import engine, Base
-from base.router import CrudRouter
+from questions.router import ItemRouter
 
 from .. import models
 from questions.schemas import polls as schemas
@@ -9,7 +9,7 @@ from questions.schemas import polls as schemas
 Base.metadata.create_all(bind=engine)
 
 
-options_router = CrudRouter(
+options_router = ItemRouter(
     model=models.Option,
     get_schema=schemas.Option,
     create_schema=schemas.OptionCreate,
