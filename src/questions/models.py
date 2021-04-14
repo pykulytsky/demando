@@ -1,102 +1,43 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Table
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql.sqltypes import Boolean
-from base.database import Base
-
-from base.manager import BaseManagerModel
+from tortoise.models import Model
+from tortoise import fields
 
 
-class Event(Base, BaseManagerModel):
+class Event(Model):
+    id = fields.IntField(pk=True)
 
-    __tablename__ = 'events'
-
-    pk = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True)
-
-    owner_pk = Column(Integer, ForeignKey('users.pk'))
-    owner = relationship('User', back_populates='events')
-
-    questions = relationship('Question', back_populates='event')
+    name = fields.CharField(max_length=256, unique=True)
+    owner = fields.ForeignKeyField('auth.User', related_name='events')
 
 
-likes_table = Table('likes', Base.metadata,
-                    Column(
-                        'user_pk',
-                        Integer,
-                        ForeignKey('users.pk'),
-                        nullable=True),
-                    Column(
-                        'question_pk',
-                        Integer,
-                        ForeignKey('questions.pk'),
-                        nullable=True)
-                    )
+class Question(Model):
+    id = fields.IntField(pk=True)
+
+    body = fields.CharField(max_length=1024)
+    event = fields.ForeignKeyField('questions.Event')
+    author = fields.ForeignKeyField('auth.User', related_name='questions')
+    answered = fields.BooleanField(default=False)
+
+    likes = fields.ManyToManyField('auth.User', related_name='liked_questions')
 
 
-class Question(Base, BaseManagerModel):
+class Poll(Model):
+    id = fields.IntField(pk=True)
 
-    __tablename__ = 'questions'
-
-    pk = Column(Integer, primary_key=True, index=True)
-    body = Column(String, nullable=False)
-
-    event_pk = Column(Integer, ForeignKey('events.pk'), nullable=True)
-    event = relationship('Event', back_populates="questions")
-
-    author_pk = Column(Integer, ForeignKey('users.pk'), nullable=True)
-    author = relationship('User', back_populates='questions')
-
-    answered = Column(Boolean, default=False)
-
-    likes_count = Column(Integer, default=0)
-    likes = relationship(
-        'User', secondary=likes_table, back_populates="liked_questions"
-    )
+    name = fields.CharField(max_length=256)
+    owner = fields.ForeignKeyField('auth.User', related_name='polls')
 
 
-class Poll(Base, BaseManagerModel):
+class Option(Model):
+    id = fields.IntField(pk=True)
 
-    __tablename__ = 'polls'
-
-    pk = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-
-    owner_pk = Column(Integer, ForeignKey('users.pk'))
-    owner = relationship('User', back_populates='polls')
-
-    options = relationship('Option', back_populates='poll')
-    votes = relationship('Vote', back_populates='poll')
-
-    @property
-    def rating(self):
-        ratings = {}
-        return ratings
+    name = fields.CharField(max_length=256)
+    poll = fields.ForeignKeyField('questions.Poll', related_name='options')
 
 
-class Option(Base, BaseManagerModel):
+class Vote(Model):
+    id = fields.IntField(pk=True)
 
-    __tablename__ = 'options'
+    poll = fields.ForeignKeyField('questions.Poll', related_name='votes')
+    option = fields.ForeignKeyField('questions.Option', related_name='votes')
 
-    pk = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-
-    poll_pk = Column(Integer, ForeignKey('polls.pk'))
-    poll = relationship('Poll', back_populates='options')
-
-    votes = relationship('Vote', back_populates='option')
-
-
-class Vote(Base, BaseManagerModel):
-
-    __tablename__ = 'votes'
-
-    pk = Column(Integer, primary_key=True, index=True)
-
-    poll_pk = Column(Integer, ForeignKey('polls.pk'))
-    poll = relationship('Poll', back_populates='votes')
-
-    owner_pk = Column(Integer, ForeignKey('users.pk'))
-    owner = relationship('User', back_populates='votes')
-
-    option_pk = Column(Integer, ForeignKey('options.pk'))
-    option = relationship('Option', back_populates='votes')
+    owner = fields.ForeignKeyField('auth.User', related_name='votes')

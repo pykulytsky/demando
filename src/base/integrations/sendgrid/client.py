@@ -1,3 +1,4 @@
+from typing import Optional
 from auth.models import User
 from base.database import get_db
 from .http import SendgridHTTP
@@ -47,10 +48,7 @@ class SendgridApp():
 
         return False
 
-    async def send_verification_mail(
-        self,
-        user_pk: int
-    ):
+    async def send_verification_mail(self, user_pk: int):
         _user = User.manager(self.db).get(pk=user_pk)
 
         template_id = settings.SENDGRID_VERIFY_EMAIL_TEMPLATE_ID

@@ -21,7 +21,6 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     pk: int
-    role: Optional[int]
 
     class Config:
         orm_mode = True

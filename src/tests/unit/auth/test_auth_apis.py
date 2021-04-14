@@ -1,7 +1,9 @@
+from auth.models import User
 from base.integrations.sendgrid.client import SendgridApp
+import pytest
 
 
-def test_read_users_works(client, user):
+def test_read_users_works(client, event_loop):
     response = client.get('/auth/users')
 
     assert response.status_code == 200

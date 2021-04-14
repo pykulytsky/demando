@@ -1,75 +1,78 @@
-from .exceptions import JwtTokenError
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from typing import Any, Iterable, Optional, Type
+from tortoise.models import MODEL, Model
+from tortoise import fields
+
+from auth import schemas
+from . import validators
+from base import settings
 
 import jwt
+from jwt.exceptions import InvalidAlgorithmError, InvalidSignatureError
+from .exceptions import JwtTokenError, WrongLoginCredentials
+
 from datetime import datetime
 from datetime import timedelta
 import uuid
 
-from base import settings
-
-from base.database import Base
-from jwt.exceptions import InvalidAlgorithmError, InvalidSignatureError
-from questions.models import likes_table
-from .manager import AuthManagerModel
-
-from typing import Optional
+from passlib.hash import pbkdf2_sha256
 
 
-class Role(Base, AuthManagerModel):
+class User(Model):
 
-    __tablename__ = 'roles'
+    id = fields.IntField(pk=True)
 
-    pk = Column(Integer, primary_key=True, index=True)
-    verbose = Column(String)
+    username = fields.CharField(max_length=256, unique=True)
+    first_name = fields.CharField(max_length=256, null=True)
+    last_name = fields.CharField(max_length=256, null=True)
 
-    users = relationship('User', back_populates="role")
+    age = fields.IntField(null=True)
 
-
-class User(Base, AuthManagerModel):
-
-    __tablename__ = 'users'
-
-    pk = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True)
-    first_name = Column(String, nullable=True)
-    last_name = Column(String, nullable=True)
-    age = Column(Integer, nullable=True)
-
-    password = Column(String)
-    email = Column(String, unique=True)
-
-    is_superuser = Column(Boolean, default=False, nullable=True)
-
-    role_pk = Column(Integer, ForeignKey('roles.pk'))
-    role = relationship("Role", back_populates="users")
-
-    events = relationship('Event', back_populates='owner')
-    polls = relationship('Poll', back_populates='owner')
-    votes = relationship('Vote', back_populates='owner')
-    questions = relationship('Question', back_populates='author')
-
-    liked_questions = relationship(
-        'Question', secondary=likes_table, back_populates="likes"
+    password = fields.CharField(max_length=256)
+    email = fields.CharField(
+        max_length=256,
+        validators=[validators.EmailValidator()]
     )
 
-    verification_code = Column(UUID(as_uuid=True), default=uuid.uuid4())
+    is_superuser = fields.BooleanField(default=False)
+    is_active = fields.BooleanField(default=True)
 
-    def __init__(
-        self,
-        username: str,
-        password: str,
-        email: str,
-        first_name: Optional[str] = None,
-        last_name: Optional[str] = None,
-    ) -> None:
-        self.username = username
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
-        self.password = password
+    role = fields.ForeignKeyField('auth.Role', related_name='users', null=True)
+
+    created = fields.DatetimeField(auto_now=True)
+    updated = fields.DatetimeField(auto_now_add=True)
+
+    verification_code = fields.UUIDField(default=uuid.uuid4())
+
+    @classmethod
+    async def create(cls: Type[MODEL], **kwargs: Any) -> MODEL:
+        if kwargs.get('first_name', False):
+            kwargs['first_name'] = kwargs['first_name'].capitalize()
+        if kwargs.get('last_name', False):
+            kwargs['last_name'] = kwargs['last_name'].capitalize()
+
+        kwargs['password'] = await cls.set_password(kwargs['password'])
+
+        return await super().create(**kwargs)
+
+    @property
+    def full_name(self):
+        if self.first_name and self.last_name:
+            return f'{self.first_name} {self.last_name}'
+
+    @staticmethod
+    async def set_password(passwd: str) -> str:
+        password = User._hasher().hash(passwd)
+        return password
+
+    @staticmethod
+    def verify_password(password: str, instance: Type) -> bool:
+        return User._hasher().verify(password, instance.password)
+
+    @staticmethod
+    def _hasher():
+        return pbkdf2_sha256.using(
+            salt=bytes(settings.SECRET_KEY.encode('utf-8'))
+        )
 
     @property
     def token(self) -> str:
@@ -89,5 +92,21 @@ class User(Base, AuthManagerModel):
 
         return token.decode('utf-8')
 
+    @staticmethod
+    async def login(login_schema: schemas.UserLogin):
+        user = await User.get(email=login_schema.email)
+        if User.verify_password(login_schema.password, user):
+            return user
+        else:
+            raise WrongLoginCredentials("Password didnt match.")
+
     def __str__(self) -> str:
         return f'<User: {self.username}>'
+
+    class Meta:
+        table = 'users'
+
+
+class Role(Model):
+    id = fields.IntField(pk=True)
+    verbose = fields.CharField(max_length=128)

@@ -1,3 +1,4 @@
+from typing import Generator
 import pytest
 from auth.models import User
 from main import app, get_db
@@ -11,76 +12,55 @@ from tests.test_database import TestSessionLocal, engine
 
 from auth.schemas import UserCreate
 
-from sqlalchemy.engine import reflection
+from tortoise.contrib.test import finalizer, initializer
 
 
-@pytest.fixture(autouse=True, scope="session")
-def create_models():
-    Base.metadata.create_all(bind=engine)
-
-
-def override_get_db():
-    try:
-        db = TestSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-
-_mixer = Mixer(session=TestSessionLocal(), commit=True)
-
-
-app.dependency_overrides[get_db] = override_get_db
-
-
-@pytest.fixture(scope="session")
-def client():
-    return TestClient(app)
-
-
-@pytest.fixture(scope="session")
-def mixer():
-    return _mixer
-
-
-@pytest.fixture()
-def db():
-    try:
-        db = TestSessionLocal()
-        yield db
-    finally:
-        insp = reflection.Inspector.from_engine(engine)
-        total_tables = insp.get_table_names()[::-1]
-
-        con = engine.connect()
-        for table in total_tables:
-            if table != 'alembic_version':
-                con.execute(f'DELETE FROM {table} CASCADE;')
-        db.close()
-
-
-@pytest.fixture()
-def user(db):
-    _user = UserCreate(
-        email='test1@test.py',
-        username='test1',
-        password='1234'
+@pytest.fixture(autouse=True)
+@pytest.mark.asyncio
+async def init_db():
+    await initializer(
+        modules=['auth', 'questions'],
+        db_url='sqlite://:memory:',
     )
-    user = User.manager(db).create_user(_user)
-    yield user
+    yield
+    await finalizer()
+
+
+@pytest.fixture(scope="module")
+def client() -> Generator:
+    with TestClient(app) as client:
+        yield client
+
+
+@pytest.fixture(scope="module")
+def event_loop(client: TestClient) -> Generator:
+    yield client.task.get_loop()
 
 
 @pytest.fixture()
-def another_user(db):
+async def user():
     _user = UserCreate(
-        email='test2@test.py',
-        username='test2',
-        password='1234'
+        email='test12@test.py',
+        username='test12',
+        password='12342'
     )
-    user = User.manager(db).create_user(_user)
+    user = await User.create(**_user.dict())
     yield user
+    await user.delete()
 
 
 @pytest.fixture()
-def auth_client(db, user):
-    return JWTAuthTestClient(app, user=user, db=db)
+async def another_user():
+    _user = UserCreate(
+        email='test23@test.py',
+        username='test23',
+        password='12344'
+    )
+    user = await User.create(**_user.dict())
+    yield user
+    await user.delete()
+
+
+@pytest.fixture()
+def auth_client(user):
+    return JWTAuthTestClient(app, user=user)

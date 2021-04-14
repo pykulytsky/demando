@@ -1,5 +1,5 @@
 from auth.backend import authenticate
-from auth.models import User
+from auth.models import User, Role
 from base import settings
 from base.router import CrudRouter
 from base.database import get_db
@@ -11,7 +11,6 @@ from .exceptions import WrongLoginCredentials
 
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, BackgroundTasks
-
 
 auth_router = CrudRouter(
     model=User,
@@ -29,15 +28,14 @@ async def create_user(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-    manager = auth_router.model.manager(db)
-    db_user = manager.exists(email=user.email)
+    db_user = await User.get_or_none(email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    new_user = manager.create_user(user)
+    new_user = await User.create(**user.dict())
 
     client = SendgridApp(db)
 
-    background_tasks.add_task(client.send_verification_mail, new_user.pk)
+    background_tasks.add_task(client.send_verification_mail, new_user.id)
 
     return {"token": new_user.token}
 
@@ -47,9 +45,8 @@ async def refresh_token(
     user: schemas.UserLogin,
     db: Session = Depends(get_db)
 ):
-    manager = auth_router.model.manager(db)
     try:
-        db_user = manager.login(user)
+        db_user = await User.login(user)
     except WrongLoginCredentials as e:
         raise HTTPException(status_code=403, detail=str(e))
 

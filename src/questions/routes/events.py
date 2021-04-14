@@ -24,7 +24,7 @@ event_router = ItemRouter(
 
 @event_router.get('/user/{user_pk}', response_model=List[schemas.Event])
 async def get_events_by_user(user_pk, db: Session = Depends(get_db)):
-    event = models.Event.manager(db).filter(owner_pk=user_pk)
+    event = models.Event.filter(owner_pk=user_pk).first()
     return event
 
 
@@ -33,5 +33,5 @@ async def get_my_events(
     db: Session = Depends(get_db),
     user: User = Depends(authenticate)
 ):
-    event = models.Event.manager(db).filter(owner_pk=user.pk)
+    event = models.Event.filter(owner_pk=user.pk)
     return event

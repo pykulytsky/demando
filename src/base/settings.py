@@ -6,7 +6,7 @@ from starlette.datastructures import Secret, URLPath
 
 config = Config('settings.ini')
 
-DEBUG = config('DEBUG', cast=bool, default=False)
+DEBUG = config('DEBUG', cast=bool, default=True)
 
 
 SECRET_KEY = config('SECRET_KEY', default='')
@@ -58,3 +58,6 @@ SENDGRID_VERIFY_EMAIL_TEMPLATE_ID = config('SENDGRID_VERIFY_EMAIL_TEMPLATE_ID', 
 
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', cast=str, default='demando@info.com')
 EMAIL_HOST_USER_NAME = config('EMAIL_HOST_USER_NAME', cast=str, default='Ivan Ivanov')
+
+MAILBOXLAYER_API_KEY = config('MAILBOXLAYER_API_KEY', cast=str)
+MAILBOXLAYER_BASE_URL = config('MAILBOXLAYER_BASE_URL', cast=str)

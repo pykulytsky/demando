@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 from .database import get_db
 
 from pydantic import BaseModel
+from tortoise.models import Model
 
 
 class BaseCrudRouter(APIRouter):
@@ -39,11 +40,8 @@ class BaseCrudRouter(APIRouter):
         *args,
         **kwargs
     ) -> None:
-        if not hasattr(model, 'manager'):
-            raise AttributeError(
-                f"Model {model.__name__} not suported, \
-                    model must have a 'manager' field.")
-
+        # if not isinstance(model, Model):
+        #     raise TypeError(f"Model {model.__name__} not suported. Class must be instance of tortoise.models.Model")
         self.model = model
 
         self.get_schema = get_schema
@@ -257,7 +255,7 @@ class CrudRouter(BaseCrudRouter):
             limit: int = 100,
             db: Session = Depends(get_db)
         ):
-            return self.model.manager(db).all(skip, limit)
+            return await self.model.all()
 
         return await _get_all(skip, limit, db)
 
@@ -266,14 +264,14 @@ class CrudRouter(BaseCrudRouter):
             instance_create_schema: self.create_schema,
             db: Session = Depends(get_db)
         ):
-            return self.model.manager(db).create(instance_create_schema)
+            return await self.model.create(**instance_create_schema.dict())
 
         return route
 
     def _get(self) -> Callable:
         async def route(pk: int, db: Session = Depends(get_db)):
             try:
-                return self.model.manager(db).get(pk=pk)
+                return await self.model.get(pk=pk)
             except ObjectDoesNotExists:
                 raise HTTPException(
                     status_code=400,
@@ -288,13 +286,15 @@ class CrudRouter(BaseCrudRouter):
             update_schema: self.update_schema,
             db: Session = Depends(get_db)
         ):
-            return self.model.manager(db).update(pk, update_schema)
+            isntance = await self.model.get(pk=pk)
+            return await isntance.save(**update_schema.dict())
 
         return route
 
     def _delete(self) -> Callable:
         async def route(pk, db: Session = Depends(get_db)):
-            return self.model.manager(db).delete(pk=pk)
+            isntance = await self.model.get(pk=pk)
+            return await isntance.delete()
 
         return route
 
@@ -346,6 +346,6 @@ class AuthenticatedCrudRouter(CrudRouter):
             db: Session = Depends(get_db),
             token: str = Depends(self.auth_backend())
         ):
-            return self.model.manager(db).create(instance_create_schema)
+            return self.model.create(**instance_create_schema.dict())
 
         return route
