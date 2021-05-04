@@ -1,6 +1,6 @@
 [[package]]
 name = "alembic"
-version = "1.5.7"
+version = "1.6.0"
 description = "A database migration tool for SQLAlchemy."
 category = "main"
 optional = false
@@ -905,12 +905,12 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "df532bba112af90d3fd7fa138bb3949909fa6564d44ac4f398f14668c8b09d17"
+content-hash = "c32ac7ac8ff15805e9c720034f6f213fd289cf7210fdcf94369f2b31194927b3"
 
 [metadata.files]
 alembic = [
-    {file = "alembic-1.5.7-py2.py3-none-any.whl", hash = "sha256:f33d561f3ce2ca390f1c87ff3849cd7d97bb93bae9c91357727263498e10028f"},
-    {file = "alembic-1.5.7.tar.gz", hash = "sha256:66bbb0e7d6277b007dfe7e27237093c79b76cf4f94e6fbd0f7af6f9409546fe6"},
+    {file = "alembic-1.6.0-py2.py3-none-any.whl", hash = "sha256:d7f6d4dc6abed18e1591932a85349a7d621298ef0daa40021609cdca54a6047c"},
+    {file = "alembic-1.6.0.tar.gz", hash = "sha256:3ff4f90d23dd283d7822d78ffbc07cb256344ae1d60500b933378bc13407efcc"},
 ]
 appnope = [
     {file = "appnope-0.1.2-py2.py3-none-any.whl", hash = "sha256:93aa393e9d6c54c5cd570ccadd8edad61ea0c4b9ea7a01409020c9aa019eb442"},
