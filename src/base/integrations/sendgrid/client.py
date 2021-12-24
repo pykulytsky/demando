@@ -57,7 +57,7 @@ class SendgridApp():
         subject = 'Please verify your account'
         dynamic_template_data = {
             'first_name': _user.first_name,
-            'verification_link': f'http://localhost:8080/verify/{_user.verification_code}'
+            'verification_link': f'http://localhost:8000/verify/{_user.verification_code}'
         }
 
         return await self._send_email(

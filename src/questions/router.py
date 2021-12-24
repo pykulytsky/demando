@@ -57,12 +57,6 @@ class ItemRouter(CrudRouter):
             db: Session = Depends(get_db),
             user: User = Depends(authenticate)
         ):
-            print(self.get_create_data(
-                    create_schema=create_schema,
-                    user=user,
-                    db=db
-                ))
-
             instance = self.model.manager(db).create(
                 **self.get_create_data(
                     create_schema=create_schema,

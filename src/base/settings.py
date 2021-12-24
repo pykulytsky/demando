@@ -6,7 +6,7 @@ from starlette.datastructures import Secret, URLPath
 
 config = Config('settings.ini')
 
-DEBUG = config('DEBUG', cast=bool, default=False)
+DEBUG = config('DEBUG', cast=bool, default=True)
 
 
 SECRET_KEY = config('SECRET_KEY', default='')

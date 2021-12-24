@@ -7,6 +7,7 @@ from questions.routes import base as questions_routes
 from base.database import engine, Base, get_db
 from auth.routes import auth_router
 
+from fastapi.middleware.cors import CORSMiddleware
 
 Base.metadata.create_all(bind=engine)
 
@@ -15,6 +16,17 @@ app = FastAPI(dependencies=[Depends(get_db)])
 
 app.include_router(auth_router)
 app.include_router(questions_routes.router)
+
+origins = [
+    '*'
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*']
+)
 
 
 sentry_sdk.init(dsn=settings.SENTRY_DSN)
