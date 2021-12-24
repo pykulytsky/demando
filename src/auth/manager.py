@@ -40,7 +40,11 @@ class AuthManager(BaseManager):
 
     def login(self, login_schema: schemas.UserLogin):
         try:
-            user = self.get(email=login_schema.email)
+            if login_schema.email:
+                user = self.get(email=login_schema.email)
+            else:
+                user = self.get(username=login_schema.username)
+
             if self.verify_password(login_schema.password, user):
                 return user
             else:

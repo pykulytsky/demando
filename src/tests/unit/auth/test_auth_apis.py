@@ -23,7 +23,7 @@ def test_protected_endpoint(auth_client, user):
     assert response.json()['username'] == user.username
 
 
-def test_login(client, user):
+def test_refresh_token_with_email(client, user):
     response = client.post('/auth/users/refresh/', json={
         'email': user.email,
         'password': '1234'
@@ -32,6 +32,15 @@ def test_login(client, user):
     assert response.status_code == 200
     assert response.json()['token']
 
+
+def test_refresh_token_with_username(client, user):
+    response = client.post('/auth/users/refresh/', json={
+        'username': user.username,
+        'password': '1234'
+    })
+
+    assert response.status_code == 200
+    assert response.json()['token']
 
 def test_create_user(client):
     response = client.post('/auth/users/', json={

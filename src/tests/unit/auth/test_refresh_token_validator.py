@@ -1,3 +1,4 @@
+import pytest
 from auth.schemas import UserLogin
 from pydantic import ValidationError
 
