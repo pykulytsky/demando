@@ -1,8 +1,5 @@
-import pytest
 from auth.schemas import UserLogin
 from pydantic import ValidationError
-
-pytestmark = [pytest.mark.django_db]
 
 
 def test_refresh_token_with_no_enought_fields():
