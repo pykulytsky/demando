@@ -35,7 +35,7 @@ DB_DSN = config(
 )
 
 TEST_DB_DSN = config(
-    'DB_DSN',
+    'TEST_DB_DSN',
     cast=make_url,
     default=URL(
         drivername=DB_DRIVER,
@@ -43,7 +43,7 @@ TEST_DB_DSN = config(
         password=DB_USER_PASSWORD,
         host=DB_HOST,
         port=DB_PORT,
-        database=DB_NAME + '_test',
+        database=TEST_DB_NAME,
     )
 )
 
