@@ -15,7 +15,7 @@ ACCESS_TOKEN_EXPIRE_DAYS = 7
 
 DB_DRIVER = config("DB_DRIVER", default="postgresql")
 DB_NAME = config('DB_NAME', default='demando')
-TEST_DB_NAME = config('TEST_DB_NAME', default='demando_test')
+TEST_DB_NAME = config('TEST_DB_NAME', default='demando')
 DB_USER = config('DB_USER', default='demando')
 DB_USER_PASSWORD = config('DB_USER_PASSWORD', cast=Secret, default='1234')
 DB_HOST = config('DB_HOST', cast=str, default='db')
