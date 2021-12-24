@@ -85,7 +85,7 @@ jobs:
         shell: bash
         run: python -m poetry run pytest --cov=src/ --cov-report=xml
         env:
-          DB_NAME: demando
+          DB_NAME: demando_test
           DB_USER: demando
           DB_USER_PASSWORD: 1234
           DB_HOST: localhost
