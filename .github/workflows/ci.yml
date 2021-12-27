@@ -92,6 +92,7 @@ jobs:
           POSTGRES_DB_HOST: 127.0.0.1
           SENDGRID_API_KEY: ${{secrets.SENDGRID_API_KEY}}
           SENDGRID_BASE_URL: ${{secrets.SENDGRID_BASE_URL}}
+          SENDGRID_VERIFY_EMAIL_TEMPLATE_ID: ${{secrets.SENDGRID_VERIFY_TEMPLATE_ID}}
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
