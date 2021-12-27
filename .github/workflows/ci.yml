@@ -82,10 +82,6 @@ jobs:
         run: python -m poetry install
 
       - name: Run pytest
-        with:
-          SENDGRID_API_KEY: ${{secrets.SENDGRID_API_KEY}}
-          SENDGRID_BASE_URL: ${{secrets.SENDGRID_BASE_URL}}
-          
         shell: bash
         run: python -m poetry run pytest --cov=src/ --cov-report=xml
         env:
@@ -94,6 +90,8 @@ jobs:
           DB_USER_PASSWORD: 1234
           DB_HOST: localhost
           POSTGRES_DB_HOST: 127.0.0.1
+          SENDGRID_API_KEY: ${{secrets.SENDGRID_API_KEY}}
+          SENDGRID_BASE_URL: ${{secrets.SENDGRID_BASE_URL}}
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
