@@ -22,7 +22,7 @@ class UserLogin(BaseModel):
             )
         if len(v) < 1:
             raise ValidationError(
-                "At least one of the following fields must be passed: email, username"
+                "At least one of the following fields must be passed: email, username" # noqa
             )
 
         return values

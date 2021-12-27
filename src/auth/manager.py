@@ -48,7 +48,7 @@ class AuthManager(BaseManager):
             if self.verify_password(login_schema.password, user):
                 return user
             else:
-                raise WrongLoginCredentials("Password didnt match.")
+                raise WrongLoginCredentials("Password didn't match.")
         except ObjectDoesNotExists:
             raise WrongLoginCredentials("No user with such email was found.")
 

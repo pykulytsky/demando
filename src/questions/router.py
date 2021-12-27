@@ -126,7 +126,7 @@ class ItemRouter(CrudRouter):
             if field in model_fields:
                 if hasattr(models[model_fields.index(field)], 'manager'):
                     data.update({
-                        field: models[model_fields.index(field)].manager(db).get(pk=getattr(create_schema, field))
+                        field: models[model_fields.index(field)].manager(db).get(pk=getattr(create_schema, field)) # noqa
                     })
             else:
                 data.update({
