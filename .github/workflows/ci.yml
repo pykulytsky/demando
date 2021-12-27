@@ -93,6 +93,8 @@ jobs:
           SENDGRID_API_KEY: ${{secrets.SENDGRID_API_KEY}}
           SENDGRID_BASE_URL: ${{secrets.SENDGRID_BASE_URL}}
           SENDGRID_VERIFY_EMAIL_TEMPLATE_ID: ${{secrets.SENDGRID_VERIFY_EMAIL_TEMPLATE_ID}}
+          EMAIL_HOST_USER: pragmatic.once.lviv@gmail.com
+          EMAIL_HOST_USER_NAME: Oleh Pykulytsky
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
