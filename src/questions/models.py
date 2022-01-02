@@ -5,8 +5,10 @@ from base.database import Base
 
 from base.manager import BaseManagerModel
 
+from base.models import Timestamped
 
-class Event(Base, BaseManagerModel):
+
+class Event(Timestamped, BaseManagerModel):
 
     __tablename__ = 'events'
 
@@ -17,6 +19,10 @@ class Event(Base, BaseManagerModel):
     owner = relationship('User', back_populates='events')
 
     questions = relationship('Question', back_populates='event')
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'events',
+    }
 
 
 likes_table = Table('likes', Base.metadata,
@@ -33,7 +39,7 @@ likes_table = Table('likes', Base.metadata,
                     )
 
 
-class Question(Base, BaseManagerModel):
+class Question(Timestamped, BaseManagerModel):
 
     __tablename__ = 'questions'
 
@@ -54,7 +60,7 @@ class Question(Base, BaseManagerModel):
     )
 
 
-class Poll(Base, BaseManagerModel):
+class Poll(Timestamped, BaseManagerModel):
 
     __tablename__ = 'polls'
 
@@ -73,7 +79,7 @@ class Poll(Base, BaseManagerModel):
         return ratings
 
 
-class Option(Base, BaseManagerModel):
+class Option(Timestamped, BaseManagerModel):
 
     __tablename__ = 'options'
 
@@ -86,7 +92,7 @@ class Option(Base, BaseManagerModel):
     votes = relationship('Vote', back_populates='option')
 
 
-class Vote(Base, BaseManagerModel):
+class Vote(Timestamped, BaseManagerModel):
 
     __tablename__ = 'votes'
 

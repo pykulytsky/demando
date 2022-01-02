@@ -1,9 +1,10 @@
 from pydantic import BaseModel
 from auth.schemas import User
 from typing import List, Optional
+from .base import Timestamped
 
 
-class BaseOption(BaseModel):
+class BaseOption(Timestamped):
     pk: int
     name: str
 
@@ -13,7 +14,7 @@ class OptionCreate(BaseModel):
     poll: int
 
 
-class BaseVote(BaseModel):
+class BaseVote(Timestamped):
     pk: int
     option: BaseOption
 
@@ -21,7 +22,7 @@ class BaseVote(BaseModel):
         orm_mode = True
 
 
-class BasePoll(BaseModel):
+class BasePoll(Timestamped):
     pk: int
     name: str
 

@@ -1,14 +1,16 @@
 from typing import List, Optional
+from datetime import datetime
 from pydantic import BaseModel
 from auth.schemas import User
+from .base import Timestamped
 
-
-class Question(BaseModel):
+class Question(Timestamped):
     pk: int
     body: str
     author: User
     likes_count: int
     likes: Optional[List[User]]
+    created: datetime
 
     class Config:
         orm_mode = True
