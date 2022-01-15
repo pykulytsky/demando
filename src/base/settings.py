@@ -58,3 +58,6 @@ SENDGRID_VERIFY_EMAIL_TEMPLATE_ID = config('SENDGRID_VERIFY_EMAIL_TEMPLATE_ID', 
 
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', cast=str, default='demando@info.com')
 EMAIL_HOST_USER_NAME = config('EMAIL_HOST_USER_NAME', cast=str, default='Ivan Ivanov')
+
+MAILJET_API_KEY = config('MAILJET_API_KEY', cast=str, default='')
+MAILJET_SECRET = config('MAILJET_SECRET', cast=str, default='')

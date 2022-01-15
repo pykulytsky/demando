@@ -32,3 +32,11 @@ async def get_my_questions(
 ):
     questions = models.Question.manager(db).filter(author_pk=user.pk)
     return questions
+
+
+@questions_router.get('/event/{pk}', response_model=List[schemas.Question])
+async def get_questions_by_event(
+    pk: int,
+    db: Session = Depends(get_db)
+):
+    return models.Question.manager(db).filter(event_pk=pk)

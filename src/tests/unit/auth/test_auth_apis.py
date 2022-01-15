@@ -1,4 +1,4 @@
-from base.integrations.sendgrid.client import SendgridApp
+from base.integrations import mailjet
 
 
 def test_read_users_works(client, user):
@@ -60,7 +60,7 @@ def test_get_me(auth_client):
 
 
 def test_send_email_after_create_user(client, mocker):
-    mocker.patch('base.integrations.sendgrid.client.SendgridApp.send_verification_mail')
+    mocker.patch('base.integrations.mailjet.send')
     response = client.post('/auth/users/', json={
         'username': 'test',
         'email': 'test@py.com',
@@ -68,4 +68,4 @@ def test_send_email_after_create_user(client, mocker):
     })
 
     assert response.status_code == 201
-    SendgridApp.send_verification_mail.assert_called_once()
+    mailjet.send.assert_called_once()

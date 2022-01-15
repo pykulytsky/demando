@@ -35,6 +35,7 @@ class UserCreate(UserBase):
 class User(UserBase):
     pk: int
     role: Optional[int]
+    email_verified: bool
 
     class Config:
         orm_mode = True

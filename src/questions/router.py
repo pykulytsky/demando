@@ -2,7 +2,7 @@ from auth.models import User
 from base.router import CrudRouter
 from pydantic import BaseModel
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from base.database import Base, get_db, engine
 from sqlalchemy.orm import Session
 from typing import Dict, Optional, List, Type
@@ -57,14 +57,20 @@ class ItemRouter(CrudRouter):
             db: Session = Depends(get_db),
             user: User = Depends(authenticate)
         ):
-            instance = self.model.manager(db).create(
-                **self.get_create_data(
-                    create_schema=create_schema,
-                    user=user,
-                    db=db
+            if user.email_verified:
+                instance = self.model.manager(db).create(
+                    **self.get_create_data(
+                        create_schema=create_schema,
+                        user=user,
+                        db=db
+                    )
                 )
-            )
-            return instance
+                return instance
+            else:
+                raise HTTPException(
+                    status_code=403,
+                    detail="User must have verified email"
+                )
 
         return route
 

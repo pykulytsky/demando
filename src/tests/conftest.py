@@ -64,9 +64,12 @@ def user(db):
     _user = UserCreate(
         email='test1@test.py',
         username='test1',
-        password='1234'
+        password='1234',
     )
     user = User.manager(db).create_user(_user)
+    user.email_verified = True
+    db.commit()
+    db.refresh(user)
     yield user
 
 
@@ -78,6 +81,7 @@ def another_user(db):
         password='1234'
     )
     user = User.manager(db).create_user(_user)
+    user.email_verified = True
     yield user
 
 

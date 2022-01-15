@@ -21,8 +21,7 @@ class SendgridApp():
 
     async def send(self, mail: SendgridMail) -> Response:
         async with self.http as http:
-            resp = await http.post('mail/send', json=mail.to_json())
-            return resp
+            return await http.post('mail/send', json=mail.to_json())
 
     async def _send_email(
         self,

@@ -5,6 +5,7 @@ from base.router import CrudRouter
 from base.database import get_db
 
 from base.integrations.sendgrid.client import SendgridApp
+from base.integrations.mailjet import send
 
 from . import schemas
 from .exceptions import WrongLoginCredentials
@@ -37,7 +38,12 @@ async def create_user(
 
     client = SendgridApp(db)
 
-    background_tasks.add_task(client.send_verification_mail, new_user.pk)
+    background_tasks.add_task(
+        send,
+        new_user.username,
+        'http://localhost:8080/verify/' + str(new_user.verification_code),
+        new_user.email
+    )
 
     return {"token": new_user.token}
 

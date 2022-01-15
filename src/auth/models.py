@@ -41,6 +41,7 @@ class User(Base, AuthManagerModel):
     password = Column(String)
     email = Column(String, unique=True)
 
+    active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False, nullable=True)
 
     role_pk = Column(Integer, ForeignKey('roles.pk'))
@@ -56,6 +57,7 @@ class User(Base, AuthManagerModel):
     )
 
     verification_code = Column(UUID(as_uuid=True), default=uuid.uuid4())
+    email_verified = Column(Boolean, default=False)
 
     def __init__(
         self,
