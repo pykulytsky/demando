@@ -36,6 +36,10 @@ class Option(BaseOption):
         orm_mode = True
 
 
+class OptionUpdate(BaseModel):
+    name: Optional[str] = None
+
+
 class Vote(BaseVote):
     pk: int
     owner: User
@@ -69,5 +73,5 @@ class AuthenticatedPollCreate(PollCreate):
     owner: User
 
 
-class PollUpdate(PollCreate):
-    pass
+class PollUpdate(BaseModel):
+    name: Optional[str] = None

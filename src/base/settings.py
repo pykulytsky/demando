@@ -8,6 +8,13 @@ config = Config('settings.ini')
 
 DEBUG = config('DEBUG', cast=bool, default=True)
 
+SEND_EMAILS = config('SEND_EMAILS', cast=bool, default=True)
+
+ALLOW_EVERYONE_CREATE_ITEMS = config(
+    'ALLOW_EVERYONE_CREATE_ITEMS',
+    cast=bool,
+    default=False
+)
 
 SECRET_KEY = config('SECRET_KEY', default='')
 ALGORITHM = "HS256"

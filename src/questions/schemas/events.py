@@ -25,4 +25,4 @@ class Event(Timestamped):
 
 
 class EventUpdate(BaseModel):
-    name: str
+    name: Optional[str] = None

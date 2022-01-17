@@ -6,9 +6,12 @@ from fastapi import Depends, HTTPException
 from base.database import Base, get_db, engine
 from sqlalchemy.orm import Session
 from typing import Dict, Optional, List, Type
+
 from base.utils import get_class_by_table
+from base import settings
 
 from auth.backend import JWTAuthentication, authenticate
+from questions.models import Question
 
 
 class ItemRouter(CrudRouter):
@@ -57,7 +60,7 @@ class ItemRouter(CrudRouter):
             db: Session = Depends(get_db),
             user: User = Depends(authenticate)
         ):
-            if user.email_verified:
+            if user.email_verified or self.model == Question or settings.ALLOW_EVERYONE_CREATE_ITEMS:
                 instance = self.model.manager(db).create(
                     **self.get_create_data(
                         create_schema=create_schema,

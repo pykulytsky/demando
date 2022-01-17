@@ -1,6 +1,6 @@
 from auth import crud
 
-from auth.schemas import UserLogin, User
+from auth.schemas import User
 
 
 def test_get_user(user, db):

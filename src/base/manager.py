@@ -36,9 +36,6 @@ class BaseManager():
             )
         self.db.delete(instance)
         self.db.commit()
-        self.db.refresh(instance)
-
-        return instance
 
     def all(self, skip: int = 0, limit: int = 100) -> List[Type]:
         return self.db.query(self.model).offset(skip).limit(limit).all()
@@ -57,6 +54,18 @@ class BaseManager():
         raise ObjectDoesNotExists(
             f"No {self.model.__name__.lower()} with such parameters."
         )
+
+    def update(self, pk, **updated_fields):
+        self.check_fields(**updated_fields)
+        instance = self.get(pk=pk)
+
+        for field in updated_fields:
+            setattr(instance, field, updated_fields[field])
+
+        self.db.commit()
+        self.db.refresh(instance)
+
+        return instance
 
     def filter(self, **fields):
         self.check_fields(**fields)

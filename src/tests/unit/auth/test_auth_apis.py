@@ -1,14 +1,17 @@
 from base.integrations import mailjet
+import pytest
 
 
-def test_read_users_works(client, user):
-    response = client.get('/auth/users')
+@pytest.fixture
+def response(client, user):
+    return client.get('/auth/users')
 
+
+def test_read_users_works(response):
     assert response.status_code == 200
 
 
-def test_get_user_by_id(client, user):
-    response = client.get('/auth/users')
+def test_get_user_by_id(response, user):
 
     assert response.status_code == 200
     assert response.json()[0]['email'] == user.email
@@ -42,6 +45,7 @@ def test_refresh_token_with_username(client, user):
     assert response.status_code == 200
     assert response.json()['token']
 
+
 def test_create_user(client):
     response = client.post('/auth/users/', json={
         'username': 'test',
@@ -51,6 +55,11 @@ def test_create_user(client):
 
     assert response.status_code == 201
     assert response.json()['token']
+
+
+def test_delete_user(client, user):
+    response = client.delete('auth/users/' + str(user.pk))
+    assert response.status_code == 200
 
 
 def test_get_me(auth_client):
@@ -69,3 +78,11 @@ def test_send_email_after_create_user(client, mocker):
 
     assert response.status_code == 201
     mailjet.send.assert_called_once()
+
+
+@pytest.mark.xfail(strict=True)
+def test_verify_user(unverified_user, client):
+    response = client.patch(f'/auth/users/verify/{unverified_user.verification_code}')
+
+    assert response.status_code == 200
+    assert unverified_user.email_verified

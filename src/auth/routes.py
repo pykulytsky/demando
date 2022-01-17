@@ -1,12 +1,10 @@
 from auth.backend import authenticate
 from auth.models import User
-from base import settings
+from base.exceptions import ObjectDoesNotExists
 from base.router import CrudRouter
 from base.database import get_db
 
-from base.integrations.sendgrid.client import SendgridApp
-from base.integrations.mailjet import send
-
+from base.integrations import mailjet
 from . import schemas
 from .exceptions import WrongLoginCredentials
 
@@ -18,7 +16,7 @@ auth_router = CrudRouter(
     model=User,
     get_schema=schemas.User,
     create_schema=schemas.UserCreate,
-    update_schema=schemas.UserBase,
+    update_schema=schemas.UserPatch,
     prefix='/auth/users',
     tags=['auth']
 )
@@ -36,10 +34,8 @@ async def create_user(
         raise HTTPException(status_code=400, detail="Email already registered")
     new_user = manager.create_user(user)
 
-    client = SendgridApp(db)
-
     background_tasks.add_task(
-        send,
+        mailjet.send,
         new_user.username,
         'http://localhost:8080/verify/' + str(new_user.verification_code),
         new_user.email
@@ -67,3 +63,19 @@ async def get_me(
     user: auth_router.get_schema = Depends(authenticate),
 ):
     return user
+
+
+@auth_router.patch('/verify/{verification_code}', status_code=200)
+async def verify(verification_code, db: Session = Depends(get_db)):
+    try:
+        auth_router.model.manager(db).update(
+            auth_router.model.manager(db).get(
+                verification_code=verification_code
+            ).pk,
+            email_verified=True
+        )
+    except ObjectDoesNotExists:
+        raise HTTPException(
+            status_code=404,
+            detail="Wrong verification code"
+        )

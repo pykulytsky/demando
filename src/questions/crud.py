@@ -93,7 +93,6 @@ def delete_question(db: Session, question_pk: int):
 
     db.delete(question)
     db.refresh(question)
-    return 
 
 
 def delete_event(db: Session, event_pk: int):

@@ -86,5 +86,21 @@ def another_user(db):
 
 
 @pytest.fixture()
+def unverified_user(db):
+    _user = UserCreate(
+        email='test3@test.py',
+        username='test3',
+        password='1234'
+    )
+    user = User.manager(db).create_user(_user)
+    yield user
+
+
+@pytest.fixture()
 def auth_client(db, user):
     return JWTAuthTestClient(app, user=user, db=db)
+
+
+@pytest.fixture()
+def unverified_auth_client(db, unverified_user):
+    return JWTAuthTestClient(app, user=unverified_user, db=db)

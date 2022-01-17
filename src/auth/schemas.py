@@ -41,5 +41,10 @@ class User(UserBase):
         orm_mode = True
 
 
+class UserPatch(BaseModel):
+    email: Optional[EmailStr] = None
+    username: Optional[str] = None
+
+
 class Token(BaseModel):
     token: str

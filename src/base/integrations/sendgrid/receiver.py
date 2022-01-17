@@ -1,6 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
-import uuid
 
 from auth.models import User
 

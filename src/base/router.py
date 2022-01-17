@@ -288,13 +288,18 @@ class CrudRouter(BaseCrudRouter):
             update_schema: self.update_schema,
             db: Session = Depends(get_db)
         ):
-            return self.model.manager(db).update(pk, update_schema)
+            return self.model.manager(db).update(
+                pk,
+                **update_schema.dict(exclude_unset=True)
+            )
 
         return route
 
     def _delete(self) -> Callable:
         async def route(pk, db: Session = Depends(get_db)):
-            return self.model.manager(db).delete(pk=pk)
+            return self.model.manager(db).delete(
+                self.model.manager(db).get(pk=pk)
+            )
 
         return route
 

@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from auth.schemas import User
 from .base import Timestamped
 
+
 class Question(Timestamped):
     pk: int
     body: str
@@ -32,6 +33,6 @@ class AuthenticatedQuestionCreate(QuestionCreate):
 
 
 class QuestionPatch(BaseModel):
-    body: Optional[str]
-    likes_count: Optional[int]
-    likes: Optional[List[User]]
+    body: Optional[str] = None
+    likes_count: Optional[int] = None
+    likes: Optional[List[User]] = None

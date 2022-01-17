@@ -1,10 +1,16 @@
 from mailjet_rest import Client
-import os
-api_key = 'bb633c949705340d6cff042ffe8fe3b6'
-api_secret = '316967d68a1c03efd6bcbf9134ec2871'
+from base import settings
+
 
 def send(username, verification_link, email):
-    mailjet = Client(auth=(api_key, api_secret), version='v3.1')
+
+    if not settings.SEND_EMAILS:
+        return
+
+    mailjet = Client(auth=(
+        settings.MAILJET_API_KEY,
+        settings.MAILJET_SECRET
+    ), version='v3.1')
     data = {
         'Messages': [
             {
@@ -25,6 +31,4 @@ def send(username, verification_link, email):
             }
         ]
     }
-    result = mailjet.send.create(data=data)
-    print(result.status_code)
-    print(result.json())
+    mailjet.send.create(data=data)
