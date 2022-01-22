@@ -23,11 +23,15 @@ class ItemManager(BaseManager):
         }
         if fields.get('author', False):
             data.update({
-                'author': self.user_model.manager(self.db).get(pk=fields['author'])
+                'author': self.user_model.manager(
+                    self.db
+                ).get(pk=fields['author'])
             })
         if fields.get('owner', False):
             data.update({
-                'owner': self.user_model.manager(self.db).get(pk=fields['owner'])
+                'owner': self.user_model.manager(
+                    self.db
+                ).get(pk=fields['owner'])
             })
 
         return super().create(disable_check=True, **data)

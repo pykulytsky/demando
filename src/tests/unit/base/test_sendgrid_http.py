@@ -1,5 +1,8 @@
 from base.integrations.sendgrid.http import SendgridHTTP
-from base.integrations.sendgrid.exceptions import SendgridAuthenticationFailed, SendgridWrongResponse
+from base.integrations.sendgrid.exceptions import (
+    SendgridAuthenticationFailed,
+    SendgridWrongResponse
+)
 import pytest
 
 
@@ -29,10 +32,12 @@ async def test_http_send_email():
     async with SendgridHTTP() as http:
         resp = await http.post('mail/send', json={
             "personalizations": [{
-                "to": [{'email': 'stepan.bandera@example.com', 'name': 'Oleh'}],
+                "to": [
+                    {'email': 'stepan.bandera@example.com', 'name': 'Oleh'}
+                ],
                 "dynamic_template_data": {
                     'first_name': 'Oleh',
-                    'verification_link': 'http://loalhost:8080/verify/123121wefdsfdgd'
+                    'verification_link': 'http://test'
                 },
                 "subject": "Test message",
             }],

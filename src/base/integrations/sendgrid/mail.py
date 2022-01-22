@@ -18,7 +18,11 @@ class SendgridMail():
     def to_json(self):
         data = {
             "personalizations": [{
-                "to": [self.receiver.to_json()] if isinstance(self.receiver, Receiver) else [user.to_json for user in self.receiver],
+                "to": [
+                    self.receiver.to_json()
+                ] if isinstance(self.receiver, Receiver) else [
+                    user.to_json for user in self.receiver
+                ],
                 "dynamic_template_data": self.dynamic_template_data,
                 "subject": self.subject,
             }],

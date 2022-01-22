@@ -33,7 +33,10 @@ class BearerAuth(httpx.Auth):
     def __init__(self, token: str) -> None:
         self._auth_header = self._build_auth_header(token)
 
-    def auth_flow(self, request: Request) -> typing.AsyncGenerator[Request, Response]:
+    def auth_flow(
+        self,
+        request: Request
+    ) -> typing.AsyncGenerator[Request, Response]:
         request.headers['Authorization'] = self._auth_header
 
         yield request
@@ -120,8 +123,12 @@ class SendgridHTTP(httpx.AsyncClient):
         )
 
         if response.status_code in [403, 401]:
-            raise SendgridAuthenticationFailed(f"[{response.status_code}]: {response.text}")
+            raise SendgridAuthenticationFailed(
+                f"[{response.status_code}]: {response.text}"
+            )
         elif response.status_code > 299:
-            raise SendgridWrongResponse(f"[{response.status_code}]: {response.text}")
+            raise SendgridWrongResponse(
+                f"[{response.status_code}]: {response.text}"
+            )
         else:
             return response

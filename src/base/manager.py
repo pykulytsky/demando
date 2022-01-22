@@ -38,7 +38,14 @@ class BaseManager():
         self.db.commit()
 
     def all(self, skip: int = 0, limit: int = 100) -> List[Type]:
-        return self.db.query(self.model).offset(skip).limit(limit).all()
+        try:
+            return self.db.query(self.model) \
+                .order_by(
+                    self.model.created.desc()
+            ).offset(skip).limit(limit).all()
+        except AttributeError:
+            return self.db.query(self.model) \
+                .offset(skip).limit(limit).all()
 
     def get(self, **fields) -> Type:
         self.check_fields(**fields)

@@ -56,15 +56,26 @@ TEST_DB_DSN = config(
 
 SENTRY_DSN = config(
     'SENTRY_DSN',
-    default='https://e08875a22d804df08150988c6886b871@o504286.ingest.sentry.io/5673787'
+    default='https://e08875a22d804df08150988c6886b871@o504286.ingest.sentry.io/5673787' # noqa
 )
 
 SENDGRID_BASE_URL = config('SENDGRID_BASE_URL', cast=URLPath, default='')
 SENDGRID_API_KEY = config('SENDGRID_API_KEY', cast=str, default='')
-SENDGRID_VERIFY_EMAIL_TEMPLATE_ID = config('SENDGRID_VERIFY_EMAIL_TEMPLATE_ID', cast=str, default='')
+SENDGRID_VERIFY_EMAIL_TEMPLATE_ID = config(
+    'SENDGRID_VERIFY_EMAIL_TEMPLATE_ID',
+    cast=str, default=''
+)
 
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', cast=str, default='demando@info.com')
-EMAIL_HOST_USER_NAME = config('EMAIL_HOST_USER_NAME', cast=str, default='Ivan Ivanov')
+EMAIL_HOST_USER = config(
+    'EMAIL_HOST_USER',
+    cast=str,
+    default='demando@info.com'
+)
+EMAIL_HOST_USER_NAME = config(
+    'EMAIL_HOST_USER_NAME',
+    cast=str,
+    default='Ivan Ivanov'
+)
 
 MAILJET_API_KEY = config('MAILJET_API_KEY', cast=str, default='')
 MAILJET_SECRET = config('MAILJET_SECRET', cast=str, default='')

@@ -60,7 +60,7 @@ class ItemRouter(CrudRouter):
             db: Session = Depends(get_db),
             user: User = Depends(authenticate)
         ):
-            if user.email_verified or self.model == Question or settings.ALLOW_EVERYONE_CREATE_ITEMS:
+            if user.email_verified or self.model == Question or settings.ALLOW_EVERYONE_CREATE_ITEMS:# noqa
                 instance = self.model.manager(db).create(
                     **self.get_create_data(
                         create_schema=create_schema,
@@ -78,12 +78,12 @@ class ItemRouter(CrudRouter):
         return route
 
     def _get_schemas_diff(self, exclude: Optional[List] = None) -> List:
-        """Check get and create schema and return array of fields that are different"""
+        """Check get and create schema and return array of fields that are different""" # noqa
         fields = []
 
         for field in self.create_schema.__annotations__:
             try:
-                if self.get_schema.__annotations__[field] != self.create_schema.__annotations__[field]:
+                if self.get_schema.__annotations__[field] != self.create_schema.__annotations__[field]:# noqa
                     if (exclude and field not in exclude) or not exclude:
                         fields.append(field)
             except KeyError:

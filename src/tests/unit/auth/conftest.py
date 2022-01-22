@@ -12,4 +12,8 @@ def manager(db):
 
 @pytest.fixture
 def user_schema():
-    return UserCreate(username='stepan', email='bandera@ss.com', password='1488')
+    return UserCreate(
+        username='stepan',
+        email='bandera@ss.com',
+        password='1488'
+    )

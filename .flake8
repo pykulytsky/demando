@@ -1,5 +1,5 @@
 [flake8]
-ignore = B008, E501
+ignore = B008
 exclude =
     migrations,
     alembic

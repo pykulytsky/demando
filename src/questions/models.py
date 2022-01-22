@@ -18,7 +18,11 @@ class Event(Timestamped, BaseManagerModel):
     owner_pk = Column(Integer, ForeignKey('users.pk'))
     owner = relationship('User', back_populates='events')
 
-    questions = relationship('Question', back_populates='event')
+    questions = relationship(
+        'Question',
+        back_populates='event',
+        order_by="Question.likes_count.desc()"
+    )
 
     __mapper_args__ = {
         'polymorphic_identity': 'events',
@@ -56,7 +60,8 @@ class Question(Timestamped, BaseManagerModel):
 
     likes_count = Column(Integer, default=0)
     likes = relationship(
-        'User', secondary=likes_table, back_populates="liked_questions"
+        'User', secondary=likes_table,
+        back_populates="liked_questions"
     )
 
 
@@ -70,8 +75,16 @@ class Poll(Timestamped, BaseManagerModel):
     owner_pk = Column(Integer, ForeignKey('users.pk'))
     owner = relationship('User', back_populates='polls')
 
-    options = relationship('Option', back_populates='poll')
-    votes = relationship('Vote', back_populates='poll')
+    options = relationship(
+        'Option',
+        back_populates='poll',
+        order_by='Option.created.desc()'
+    )
+    votes = relationship(
+        'Vote',
+        back_populates='poll',
+        order_by='Vote.created.desc()'
+    )
 
     @property
     def rating(self):
@@ -89,7 +102,11 @@ class Option(Timestamped, BaseManagerModel):
     poll_pk = Column(Integer, ForeignKey('polls.pk'))
     poll = relationship('Poll', back_populates='options')
 
-    votes = relationship('Vote', back_populates='option')
+    votes = relationship(
+        'Vote',
+        back_populates='option',
+        order_by='Vote.created.desc()'
+    )
 
 
 class Vote(Timestamped, BaseManagerModel):

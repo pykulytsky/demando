@@ -82,7 +82,9 @@ def test_send_email_after_create_user(client, mocker):
 
 @pytest.mark.xfail(strict=True)
 def test_verify_user(unverified_user, client):
-    response = client.patch(f'/auth/users/verify/{unverified_user.verification_code}')
+    response = client.patch(
+        f'/auth/users/verify/{unverified_user.verification_code}'
+    )
 
     assert response.status_code == 200
     assert unverified_user.email_verified

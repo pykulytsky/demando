@@ -26,7 +26,7 @@ class AuthenticatedQuestionCreate(QuestionCreate):
 class QuestionPatch(BaseModel):
     body: Optional[str]
     likes_count: Optional[int]
-    likes: Optional[List[User]]
+    likes: Optional[int]
 
     class Config:
         orm_mode = True

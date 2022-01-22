@@ -26,7 +26,7 @@ def send(username, verification_link, email):
                 ],
                 "Subject": "Thank you for joining Demando!",
                 "TextPart": "",
-                "HTMLPart": f'<h3>Hello dear {username}, welcome to Demando! </h3><br /><h4>In order to fully use our service, you need to confirm your mail.</h4><br />To do this, just follow the link below:<br /><a href="{verification_link}">Verify your email</a>',
+                "HTMLPart": f'<h3>Hello dear {username}, welcome to Demando! </h3><br /><h4>In order to fully use our service, you need to confirm your mail.</h4><br />To do this, just follow the link below:<br /><a href="{verification_link}">Verify your email</a>',# noqa
                 "CustomID": "AppGettingStartedTest"
             }
         ]
