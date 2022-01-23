@@ -40,3 +40,17 @@ async def get_questions_by_event(
     db: Session = Depends(get_db)
 ):
     return models.Question.manager(db).filter(event_pk=pk)
+
+
+# @questions_router.patch('/event/{pk}', response_model=schemas.Question)
+# async def patch_question(
+#     pk: int,
+#     update_schema: schemas.QuestionPatch,
+#     db: Session = Depends(get_db),
+#     user: User = Depends(authenticate)
+# ):
+#     if 'likes_count' in update_schema.dict():
+#         _question = models.Question.manager(db).update(
+#             pk=pk,
+#             **update_schema
+#         )

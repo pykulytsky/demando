@@ -35,4 +35,4 @@ class AuthenticatedQuestionCreate(QuestionCreate):
 class QuestionPatch(BaseModel):
     body: Optional[str] = None
     likes_count: Optional[int] = None
-    likes: Optional[List[User]] = None
+    likes: Optional[int] = None

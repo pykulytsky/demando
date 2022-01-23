@@ -77,6 +77,14 @@ class ItemRouter(CrudRouter):
 
         return route
 
+    def _patch(self):
+        async def route(
+            update_schema: self.update_schema,
+            db: Session = Depends(get_db),
+            user: User = Depends(authenticate)
+        ):
+            pass
+
     def _get_schemas_diff(self, exclude: Optional[List] = None) -> List:
         """Check get and create schema and return array of fields that are different""" # noqa
         fields = []
