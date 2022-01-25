@@ -80,6 +80,14 @@ def authenticate(
 
     if paylaod.get('pk', False):
         user = get_user_or_false(db=db, user_id=paylaod['pk'])
+
+        if settings.EMAIL_VERIFICATION_IS_NEEDED:
+            if not user.email_verified:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Please verify your email"
+                )
+
         if user:
             return user
         else:

@@ -9,6 +9,11 @@ config = Config('settings.ini')
 DEBUG = config('DEBUG', cast=bool, default=True)
 
 SEND_EMAILS = config('SEND_EMAILS', cast=bool, default=True)
+EMAIL_VERIFICATION_IS_NEEDED = config(
+    'EMAIL_VERIFICATION_IS_NEEDED',
+    cast=bool,
+    default=False
+)
 
 ALLOW_EVERYONE_CREATE_ITEMS = config(
     'ALLOW_EVERYONE_CREATE_ITEMS',
