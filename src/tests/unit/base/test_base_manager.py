@@ -54,3 +54,20 @@ def test_create(manager):
     manager.create(username='hello', email='world', password='!!!')
 
     assert manager.exists(username='hello', email='world')
+
+
+def test_order_by(manager):
+    manager.create(
+        username='hello',
+        email='world',
+        password='!!!',
+        age=10
+    )
+    older_one = manager.create(
+        username='hello1',
+        email='world1',
+        password='!!!',
+        age=11
+    )
+
+    assert older_one == manager.all(order_by='age')[0]

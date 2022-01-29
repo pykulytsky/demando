@@ -18,7 +18,7 @@ EMAIL_VERIFICATION_IS_NEEDED = config(
 ALLOW_EVERYONE_CREATE_ITEMS = config(
     'ALLOW_EVERYONE_CREATE_ITEMS',
     cast=bool,
-    default=False
+    default=True
 )
 
 SECRET_KEY = config('SECRET_KEY', default='')

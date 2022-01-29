@@ -37,11 +37,16 @@ class BaseManager():
         self.db.delete(instance)
         self.db.commit()
 
-    def all(self, skip: int = 0, limit: int = 100) -> List[Type]:
+    def all(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        order_by: str = 'created'
+    ) -> List[Type]:
         try:
             return self.db.query(self.model) \
                 .order_by(
-                    self.model.created.desc()
+                    getattr(self.model, order_by).desc()
             ).offset(skip).limit(limit).all()
         except AttributeError:
             return self.db.query(self.model) \

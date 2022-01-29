@@ -15,8 +15,6 @@ from jwt.exceptions import InvalidAlgorithmError, InvalidSignatureError
 from questions.models import likes_table
 from .manager import AuthManagerModel
 
-from typing import Optional
-
 
 class Role(Base, AuthManagerModel):
 
@@ -58,20 +56,6 @@ class User(Base, AuthManagerModel):
 
     verification_code = Column(UUID(as_uuid=True), default=uuid.uuid4())
     email_verified = Column(Boolean, default=False)
-
-    def __init__(
-        self,
-        username: str,
-        password: str,
-        email: str,
-        first_name: Optional[str] = None,
-        last_name: Optional[str] = None,
-    ) -> None:
-        self.username = username
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
-        self.password = password
 
     @property
     def token(self) -> str:
