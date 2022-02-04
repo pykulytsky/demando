@@ -250,6 +250,7 @@ class CrudRouter(BaseCrudRouter):
         skip: int = 0,
         limit: int = 100,
         order_by: str = 'created',
+        desc: bool = False,
         db: Session = Depends(get_db)
     ) -> Callable:
         @self.get('/', response_model=List[self.get_schema])
@@ -261,7 +262,8 @@ class CrudRouter(BaseCrudRouter):
             return self.model.manager(db).all(
                 skip,
                 limit,
-                order_by
+                order_by,
+                desc
             )
 
         return await _get_all(skip, limit, db)

@@ -70,4 +70,4 @@ def test_order_by(manager):
         age=11
     )
 
-    assert older_one == manager.all(order_by='age')[0]
+    assert older_one == manager.all(order_by='age', desc=True)[0]

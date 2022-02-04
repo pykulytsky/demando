@@ -77,11 +77,12 @@ traitlets = "^5.0.5"
 typer = "0.3.2"
 typing-extensions = "3.7.4.3"
 urllib3 = "1.26.3"
-uvicorn = "0.13.4"
 wcwidth = "0.2.5"
 orm = "^0.1.5"
 mailjet-rest = "^1.3.4"
 pytest-env = "^0.6.2"
+websockets = "^10.1"
+uvicorn = {extras = ["standard"], version = "^0.17.1"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.2"
@@ -100,3 +101,5 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 dev = 'scripts.dev:main'
 prod = 'scripts.prod:main'
+truncate = 'scripts:truncate_db:main'
+truncate-test = 'scripts:truncate_test_db:main'

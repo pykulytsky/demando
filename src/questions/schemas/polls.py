@@ -1,10 +1,11 @@
 from pydantic import BaseModel
 from auth.schemas import User
 from typing import List, Optional
+
 from .base import Timestamped
 
 
-class BaseOption(Timestamped):
+class BaseOption(BaseModel):
     pk: int
     name: str
 
@@ -14,9 +15,9 @@ class OptionCreate(BaseModel):
     poll: int
 
 
-class BaseVote(Timestamped):
+class BaseVote(BaseModel):
     pk: int
-    option: BaseOption
+    owner: User
 
     class Config:
         orm_mode = True
@@ -28,7 +29,6 @@ class BasePoll(Timestamped):
 
 
 class Option(BaseOption):
-    pk: int
     name: str
     votes: Optional[List[BaseVote]]
 
@@ -41,15 +41,14 @@ class OptionUpdate(BaseModel):
 
 
 class Vote(BaseVote):
-    pk: int
     owner: User
+    option: Option
 
     class Config:
         orm_mode = True
 
 
 class VoteCreate(BaseModel):
-    pk: int
     poll: int
     option: int
 
@@ -58,13 +57,22 @@ class Poll(BaseModel):
     pk: int
     name: str
     owner: User
-    options: Optional[List[BaseOption]]
+    options: Optional[List[Option]]
     votes: Optional[List[BaseVote]]
 
     class Config:
         orm_mode = True
 
 
+class PollViaWeboscket(BaseModel):
+    pk: int
+    name: str
+    owner: User
+    options: Optional[List[Option]]
+    votes: Optional[List[BaseVote]]
+
+    class Config:
+        orm_mode = True
 class PollCreate(BaseModel):
     name: str
 

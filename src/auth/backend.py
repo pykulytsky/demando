@@ -50,14 +50,14 @@ class JWTAuthentication(HTTPBearer):
         valid: bool = False
 
         try:
-            paylaod = jwt.decode(
+            payload = jwt.decode(
                 jwt=token,
                 key=settings.SECRET_KEY,
                 algorithms=settings.ALGORITHM
             )
 
-            if paylaod.get('pk', False):
-                if get_user_or_false(db=self.db, user_id=paylaod['pk']):
+            if payload.get('pk', False):
+                if get_user_or_false(db=self.db, user_id=payload['pk']):
                     valid = True
 
         except DecodeError:
@@ -72,14 +72,14 @@ def authenticate(
     db: Session = Depends(get_db)
 ) -> Optional[User]:
 
-    paylaod = jwt.decode(
+    payload = jwt.decode(
         jwt=token,
         key=settings.SECRET_KEY,
         algorithms=settings.ALGORITHM
     )
 
-    if paylaod.get('pk', False):
-        user = get_user_or_false(db=db, user_id=paylaod['pk'])
+    if payload.get('pk', False):
+        user = get_user_or_false(db=db, user_id=payload['pk'])
 
         if settings.EMAIL_VERIFICATION_IS_NEEDED:
             if not user.email_verified:
@@ -92,3 +92,20 @@ def authenticate(
             return user
         else:
             raise HTTPException(status_code=403, detail="Not authenticated")
+
+
+def authenticate_via_websockets(
+    token: str,
+    db: Session = Depends(get_db),
+) -> Optional[User]:
+
+    payload = jwt.decode(
+        jwt=token,
+        key=settings.SECRET_KEY,
+        algorithms=settings.ALGORITHM
+    )
+
+    print(payload.get('pk', False))
+
+    if payload.get('pk', False):
+        return get_user_or_false(db=db, user_id=payload['pk'])

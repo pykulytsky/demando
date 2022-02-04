@@ -41,13 +41,20 @@ class BaseManager():
         self,
         skip: int = 0,
         limit: int = 100,
-        order_by: str = 'created'
+        order_by: str = 'created',
+        desc: bool = False
     ) -> List[Type]:
         try:
-            return self.db.query(self.model) \
-                .order_by(
-                    getattr(self.model, order_by).desc()
-            ).offset(skip).limit(limit).all()
+            if desc:
+                return self.db.query(self.model) \
+                    .order_by(
+                        getattr(self.model, order_by).desc()
+                ).offset(skip).limit(limit).all()
+            else:
+                return self.db.query(self.model) \
+                    .order_by(
+                        getattr(self.model, order_by)
+                ).offset(skip).limit(limit).all()
         except AttributeError:
             return self.db.query(self.model) \
                 .offset(skip).limit(limit).all()

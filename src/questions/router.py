@@ -60,6 +60,7 @@ class ItemRouter(CrudRouter):
             db: Session = Depends(get_db),
             user: User = Depends(authenticate)
         ):
+            print(self.get_create_data(create_schema, user, db))
             if user.email_verified or self.model == Question or settings.ALLOW_EVERYONE_CREATE_ITEMS:# noqa
                 instance = self.model.manager(db).create(
                     **self.get_create_data(

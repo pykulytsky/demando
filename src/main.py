@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, WebSocket, WebSocketDisconnect
 from base import settings
 import sentry_sdk
 from starlette.requests import Request
@@ -9,6 +9,14 @@ from auth.routes import auth_router
 
 from fastapi.middleware.cors import CORSMiddleware
 
+from questions.routes.websocket import manager
+from auth.backend import authenticate_via_websockets
+from auth import schemas as auth_schemas
+from questions.schemas import polls as polls_schemas
+from questions.models import Option, Poll, Vote
+from base.utils import sqlalchemy_to_pydantic
+
+
 Base.metadata.create_all(bind=engine)
 
 
@@ -16,6 +24,39 @@ app = FastAPI(dependencies=[Depends(get_db)])
 
 app.include_router(auth_router)
 app.include_router(questions_routes.router)
+
+
+@app.websocket('/ws/vote/{poll_id}')
+async def vote_websocket(
+    websocket: WebSocket,
+    poll_id: str,
+):
+    await manager.connect(websocket)
+    db = next(get_db())
+    try:
+        while True:
+            data = await websocket.receive_json()
+            user = authenticate_via_websockets(data['token'], db)
+            Vote.manager(db).create(
+                owner=user,
+                poll=Poll.manager(db).get(pk=data['poll_id']),
+                option=Option.manager(db).get(pk=data['option_id']),
+            )
+            await manager.send_personal_message(
+                polls_schemas.Poll.from_orm(
+                    Poll.manager(db).get(pk=poll_id)
+                ).dict(),
+                websocket
+            )
+            await manager.broadcast(
+                polls_schemas.Poll.from_orm(
+                    Poll.manager(db).get(pk=poll_id)
+                ).dict()
+            )
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        await manager.broadcast("Client left the chat")
+
 
 origins = [
     '*'
