@@ -31,8 +31,15 @@ async def vote_websocket(
     websocket: WebSocket,
     poll_id: str,
 ):
-    await manager.connect(websocket)
+    await manager.connect_to_room(websocket, poll_id)
     db = next(get_db())
+    await manager.send_personal_message_to_room(
+        poll_id,
+        polls_schemas.Poll.from_orm(
+            Poll.manager(db).get(pk=poll_id)
+        ).dict(),
+        websocket
+    )
     try:
         while True:
             data = await websocket.receive_json()
@@ -42,20 +49,14 @@ async def vote_websocket(
                 poll=Poll.manager(db).get(pk=data['poll_id']),
                 option=Option.manager(db).get(pk=data['option_id']),
             )
-            await manager.send_personal_message(
-                polls_schemas.Poll.from_orm(
-                    Poll.manager(db).get(pk=poll_id)
-                ).dict(),
-                websocket
-            )
-            await manager.broadcast(
+            await manager.broadcast_to_room(
+                poll_id,
                 polls_schemas.Poll.from_orm(
                     Poll.manager(db).get(pk=poll_id)
                 ).dict()
             )
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
-        await manager.broadcast("Client left the chat")
+        manager.disconnect_from_room(poll_id, websocket)
 
 
 origins = [
