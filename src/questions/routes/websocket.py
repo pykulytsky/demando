@@ -75,7 +75,6 @@ class ConnectionManager:
         websocket: WebSocket
     ):
         room = self.get_room(room_id)
-        print(room)
         await room.send_personal_message(data, websocket)
 
     async def broadcast(self, data: dict):
