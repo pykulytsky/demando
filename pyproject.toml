@@ -101,5 +101,3 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 dev = 'scripts.dev:main'
 prod = 'scripts.prod:main'
-truncate = 'scripts:truncate_db:main'
-truncate-test = 'scripts:truncate_test_db:main'
