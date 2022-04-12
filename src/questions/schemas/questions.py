@@ -1,7 +1,10 @@
-from typing import List, Optional
 from datetime import datetime
+from typing import List, Optional
+
 from pydantic import BaseModel
+
 from auth.schemas import User
+
 from .base import Timestamped
 
 

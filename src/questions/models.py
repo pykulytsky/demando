@@ -1,90 +1,74 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import Boolean
+
 from base.database import Base
-
 from base.manager import BaseManagerModel
-
 from base.models import Timestamped
 
 
 class Event(Timestamped, BaseManagerModel):
 
-    __tablename__ = 'events'
+    __tablename__ = "events"
 
     pk = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True)
 
-    owner_pk = Column(Integer, ForeignKey('users.pk'))
-    owner = relationship('User', back_populates='events')
+    owner_pk = Column(Integer, ForeignKey("users.pk"))
+    owner = relationship("User", back_populates="events")
 
     questions = relationship(
-        'Question',
-        back_populates='event',
-        order_by="Question.likes_count.desc()"
+        "Question", back_populates="event", order_by="Question.likes_count.desc()"
     )
 
     __mapper_args__ = {
-        'polymorphic_identity': 'events',
+        "polymorphic_identity": "events",
     }
 
 
-likes_table = Table('likes', Base.metadata,
-                    Column(
-                        'user_pk',
-                        Integer,
-                        ForeignKey('users.pk'),
-                        nullable=True),
-                    Column(
-                        'question_pk',
-                        Integer,
-                        ForeignKey('questions.pk'),
-                        nullable=True)
-                    )
+likes_table = Table(
+    "likes",
+    Base.metadata,
+    Column("user_pk", Integer, ForeignKey("users.pk"), nullable=True),
+    Column("question_pk", Integer, ForeignKey("questions.pk"), nullable=True),
+)
 
 
 class Question(Timestamped, BaseManagerModel):
 
-    __tablename__ = 'questions'
+    __tablename__ = "questions"
 
     pk = Column(Integer, primary_key=True, index=True)
     body = Column(String, nullable=False)
 
-    event_pk = Column(Integer, ForeignKey('events.pk'), nullable=True)
-    event = relationship('Event', back_populates="questions")
+    event_pk = Column(Integer, ForeignKey("events.pk"), nullable=True)
+    event = relationship("Event", back_populates="questions")
 
-    author_pk = Column(Integer, ForeignKey('users.pk'), nullable=True)
-    author = relationship('User', back_populates='questions')
+    author_pk = Column(Integer, ForeignKey("users.pk"), nullable=True)
+    author = relationship("User", back_populates="questions")
 
     answered = Column(Boolean, default=False)
 
     likes_count = Column(Integer, default=0)
     likes = relationship(
-        'User', secondary=likes_table,
-        back_populates="liked_questions"
+        "User", secondary=likes_table, back_populates="liked_questions"
     )
 
 
 class Poll(Timestamped, BaseManagerModel):
 
-    __tablename__ = 'polls'
+    __tablename__ = "polls"
 
     pk = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
 
-    owner_pk = Column(Integer, ForeignKey('users.pk'))
-    owner = relationship('User', back_populates='polls')
+    owner_pk = Column(Integer, ForeignKey("users.pk"))
+    owner = relationship("User", back_populates="polls")
 
     options = relationship(
-        'Option',
-        back_populates='poll',
-        order_by='Option.created.desc()'
+        "Option", back_populates="poll", order_by="Option.created.desc()"
     )
-    votes = relationship(
-        'Vote',
-        back_populates='poll',
-        order_by='Vote.created.desc()'
-    )
+    votes = relationship("Vote", back_populates="poll", order_by="Vote.created.desc()")
 
     @property
     def rating(self):
@@ -94,32 +78,30 @@ class Poll(Timestamped, BaseManagerModel):
 
 class Option(Timestamped, BaseManagerModel):
 
-    __tablename__ = 'options'
+    __tablename__ = "options"
 
     pk = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
 
-    poll_pk = Column(Integer, ForeignKey('polls.pk'))
-    poll = relationship('Poll', back_populates='options')
+    poll_pk = Column(Integer, ForeignKey("polls.pk"))
+    poll = relationship("Poll", back_populates="options")
 
     votes = relationship(
-        'Vote',
-        back_populates='option',
-        order_by='Vote.created.desc()'
+        "Vote", back_populates="option", order_by="Vote.created.desc()"
     )
 
 
 class Vote(Timestamped, BaseManagerModel):
 
-    __tablename__ = 'votes'
+    __tablename__ = "votes"
 
     pk = Column(Integer, primary_key=True, index=True)
 
-    poll_pk = Column(Integer, ForeignKey('polls.pk'))
-    poll = relationship('Poll', back_populates='votes')
+    poll_pk = Column(Integer, ForeignKey("polls.pk"))
+    poll = relationship("Poll", back_populates="votes")
 
-    owner_pk = Column(Integer, ForeignKey('users.pk'))
-    owner = relationship('User', back_populates='votes')
+    owner_pk = Column(Integer, ForeignKey("users.pk"))
+    owner = relationship("User", back_populates="votes")
 
-    option_pk = Column(Integer, ForeignKey('options.pk'))
-    option = relationship('Option', back_populates='votes')
+    option_pk = Column(Integer, ForeignKey("options.pk"))
+    option = relationship("Option", back_populates="votes")

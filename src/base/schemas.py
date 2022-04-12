@@ -1,9 +1,10 @@
+from typing import Optional, Type
+
 from pydantic import BaseConfig, BaseModel, create_model
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.properties import ColumnProperty
 
 from base.exceptions import NotValidModel
-from typing import Optional, Type
 
 
 class OrmConfig(BaseConfig):

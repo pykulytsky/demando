@@ -1,8 +1,11 @@
+import sys
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from base import settings
+from tests.test_database import TestSessionLocal
 
 SQLALCHEMY_DATABASE_URL = settings.DB_DSN
 
@@ -13,6 +16,21 @@ Base = declarative_base()
 
 
 def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+def get_db_for_websocket():
+    if len(sys.argv):
+        if "pytest" in sys.argv[0]:
+            try:
+                db = TestSessionLocal()
+                yield db
+            finally:
+                db.close()
     db = SessionLocal()
     try:
         yield db

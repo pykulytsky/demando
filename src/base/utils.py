@@ -1,8 +1,6 @@
-from typing import Type
-import sqlalchemy as sa
-
 from typing import Container, Optional, Type
 
+import sqlalchemy as sa
 from pydantic import BaseConfig, BaseModel, create_model
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.properties import ColumnProperty
@@ -22,17 +20,16 @@ def get_class_by_table(base, table, data=None):
     to return.
     """
     found_classes = set(
-        cls for cls in base._decl_class_registry.values()
-        if hasattr(cls, '__tablename__') and table == cls.__tablename__
+        cls
+        for cls in base._decl_class_registry.values()
+        if hasattr(cls, "__tablename__") and table == cls.__tablename__
     )
     if len(found_classes) > 1:
         if not data:
             raise ValueError(
                 "Multiple declarative classes found for table '{0}'. "
                 "Please provide data parameter for this function to be able "
-                "to determine polymorphic scenarios.".format(
-                    table.name
-                )
+                "to determine polymorphic scenarios.".format(table.name)
             )
         else:
             for cls in found_classes:
@@ -44,9 +41,7 @@ def get_class_by_table(base, table, data=None):
             raise ValueError(
                 "Multiple declarative classes found for table '{0}'. Given "
                 "data row does not match any polymorphic identity of the "
-                "found classes.".format(
-                    table.name
-                )
+                "found classes.".format(table.name)
             )
     elif found_classes:
         return found_classes.pop()

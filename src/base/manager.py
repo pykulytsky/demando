@@ -1,19 +1,19 @@
 from typing import List, Type, Union
 
-from sqlalchemy.orm import Session
-from sqlalchemy import MetaData
-from base.database import Base
-from base.exceptions import ObjectDoesNotExists, ImproperlyConfigured
-
 from fastapi import Depends
+from sqlalchemy import MetaData
+from sqlalchemy.orm import Session
+
+from base.database import Base
+from base.exceptions import ImproperlyConfigured, ObjectDoesNotExists
+
 from .database import get_db
 
 
-class BaseManager():
+class BaseManager:
     def __init__(self, klass: Type, db: Session = Depends(get_db)) -> None:
         if not issubclass(klass, Base):
-            raise ImproperlyConfigured(
-                f"Type {klass.__name__} is not suported.")
+            raise ImproperlyConfigured(f"Type {klass.__name__} is not suported.")
         self.model = klass
 
         self.db = db
@@ -31,9 +31,7 @@ class BaseManager():
 
     def delete(self, instance):
         if not isinstance(instance, self.model):
-            raise TypeError(
-                f"Instance must be {str(self.model)} not {type(instance)}"
-            )
+            raise TypeError(f"Instance must be {str(self.model)} not {type(instance)}")
         self.db.delete(instance)
         self.db.commit()
 
@@ -41,30 +39,33 @@ class BaseManager():
         self,
         skip: int = 0,
         limit: int = 100,
-        order_by: str = 'created',
-        desc: bool = False
+        order_by: str = "created",
+        desc: bool = False,
     ) -> List[Type]:
         try:
             if desc:
-                return self.db.query(self.model) \
-                    .order_by(
-                        getattr(self.model, order_by).desc()
-                ).offset(skip).limit(limit).all()
+                return (
+                    self.db.query(self.model)
+                    .order_by(getattr(self.model, order_by).desc())
+                    .offset(skip)
+                    .limit(limit)
+                    .all()
+                )
             else:
-                return self.db.query(self.model) \
-                    .order_by(
-                        getattr(self.model, order_by)
-                ).offset(skip).limit(limit).all()
+                return (
+                    self.db.query(self.model)
+                    .order_by(getattr(self.model, order_by))
+                    .offset(skip)
+                    .limit(limit)
+                    .all()
+                )
         except AttributeError:
-            return self.db.query(self.model) \
-                .offset(skip).limit(limit).all()
+            return self.db.query(self.model).offset(skip).limit(limit).all()
 
     def get(self, **fields) -> Type:
         self.check_fields(**fields)
 
-        expression = [
-            getattr(self.model, k) == fields[k] for k in fields.keys()
-        ]
+        expression = [getattr(self.model, k) == fields[k] for k in fields.keys()]
 
         instance = self.db.query(self.model).filter(*expression).first()
         if instance:
@@ -89,9 +90,7 @@ class BaseManager():
     def filter(self, **fields):
         self.check_fields(**fields)
 
-        expression = [
-            getattr(self.model, k) == fields[k] for k in fields.keys()
-        ]
+        expression = [getattr(self.model, k) == fields[k] for k in fields.keys()]
 
         return self.db.query(self.model).filter(*expression).all()
 
@@ -113,8 +112,10 @@ class BaseManager():
         fields = []
 
         for field in dir(self.model):
-            if not field.startswith('_'):
-                if not callable(getattr(self.model, field)) and not isinstance(getattr(self.model, field), MetaData): # noqa
+            if not field.startswith("_"):
+                if not callable(getattr(self.model, field)) and not isinstance(
+                    getattr(self.model, field), MetaData
+                ):  # noqa
                     fields.append(field)
 
         return fields
@@ -122,7 +123,9 @@ class BaseManager():
     def check_fields(self, **fields):
         for field in fields.keys():
             if field not in self._get_model_fields():
-                raise ValueError(f"Field {field} is not suported, suported fields: {self._get_model_fields()}") # noqa
+                raise ValueError(
+                    f"Field {field} is not suported, suported fields: {self._get_model_fields()}"
+                )  # noqa
 
     def refresh(self, instance):
         self.db.commit()
@@ -131,7 +134,7 @@ class BaseManager():
         return instance
 
 
-class BaseManagerModel():
+class BaseManagerModel:
     @classmethod
     def manager(cls, db):
         return BaseManager(cls, db)

@@ -1,9 +1,10 @@
 import typing
-from fastapi.testclient import TestClient
+
 import requests
+from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from starlette.testclient import (
-    ASGI2App, ASGI3App, Cookies, DataType, FileType, Params, TimeOut)
+from starlette.testclient import (ASGI2App, ASGI3App, Cookies, DataType,
+                                  FileType, Params, TimeOut)
 
 from auth import schemas
 from auth.models import User
@@ -22,13 +23,13 @@ class BearerAuth(requests.auth.AuthBase):
 
 class JWTAuthTestClient(TestClient):
     def __init__(
-            self,
-            app: typing.Union[ASGI2App, ASGI3App],
-            user: schemas.User,
-            db: Session,
-            base_url: str = "http://testserver",
-            raise_server_exceptions: bool = True,
-            root_path: str = "",
+        self,
+        app: typing.Union[ASGI2App, ASGI3App],
+        user: schemas.User,
+        db: Session,
+        base_url: str = "http://testserver",
+        raise_server_exceptions: bool = True,
+        root_path: str = "",
     ) -> None:
 
         self.db = db
@@ -38,7 +39,8 @@ class JWTAuthTestClient(TestClient):
             app,
             base_url=base_url,
             raise_server_exceptions=raise_server_exceptions,
-            root_path=root_path)
+            root_path=root_path,
+        )
 
     def request(
         self,
@@ -75,5 +77,5 @@ class JWTAuthTestClient(TestClient):
             stream=stream,
             verify=verify,
             cert=cert,
-            json=json
+            json=json,
         )

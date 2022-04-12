@@ -1,8 +1,8 @@
-from auth.manager import AuthManager
-from auth.schemas import UserCreate
-from auth.models import User
-
 import pytest
+
+from auth.manager import AuthManager
+from auth.models import User
+from auth.schemas import UserCreate
 
 
 @pytest.fixture
@@ -12,8 +12,4 @@ def manager(db):
 
 @pytest.fixture
 def user_schema():
-    return UserCreate(
-        username='stepan',
-        email='bandera@ss.com',
-        password='1488'
-    )
+    return UserCreate(username="stepan", email="bandera@ss.com", password="1488")

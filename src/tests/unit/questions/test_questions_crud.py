@@ -42,9 +42,9 @@ def test_update_question(db, question):
     body = question.body
 
     updated_question = crud.update_question(
-        db, question_pk=question.pk, patched_data=questions.QuestionPatch(
-            body='changed!!!!'
-        )
+        db,
+        question_pk=question.pk,
+        patched_data=questions.QuestionPatch(body="changed!!!!"),
     )
 
     assert updated_question.body != body

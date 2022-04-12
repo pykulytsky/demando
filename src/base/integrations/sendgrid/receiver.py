@@ -4,8 +4,9 @@ from auth.models import User
 
 
 @dataclass
-class Receiver():
+class Receiver:
     """Class implements the user model for the service Sendgrid."""
+
     first_name: str
     last_name: str
     email: str
@@ -19,7 +20,4 @@ class Receiver():
         )
 
     def to_json(self) -> dict:
-        return {
-            'name': f'{self.first_name} {self.last_name}',
-            'email': self.email
-        }
+        return {"name": f"{self.first_name} {self.last_name}", "email": self.email}

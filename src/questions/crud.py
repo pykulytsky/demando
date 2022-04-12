@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 
-from . import models
-from .schemas import events
-from .schemas import questions
 from auth.crud import get_user
+
+from . import models
+from .schemas import events, questions
 
 
 def get_events(db: Session, skip: int = 0, limit: int = 100):
@@ -15,10 +15,7 @@ def get_event(db: Session, pk: int):
 
 
 def create_event(db: Session, event: events.EventCreate):
-    _event = models.Event(
-        name=event.name,
-        owner=get_user(db, event.owner)
-    )
+    _event = models.Event(name=event.name, owner=get_user(db, event.owner))
 
     db.add(_event)
     db.commit()
@@ -27,9 +24,7 @@ def create_event(db: Session, event: events.EventCreate):
 
 
 def get_events_by_user(db: Session, user_pk):
-    return db.query(models.Event).filter(
-        models.Event.owner_pk == user_pk
-    ).all()
+    return db.query(models.Event).filter(models.Event.owner_pk == user_pk).all()
 
 
 def get_question(db: Session, pk: int):
@@ -37,24 +32,20 @@ def get_question(db: Session, pk: int):
 
 
 def get_events_questions(db: Session, event_pk):
-    return db.query(models.Question).filter(
-        models.Question.event_pk == event_pk
-    ).all()
+    return db.query(models.Question).filter(models.Question.event_pk == event_pk).all()
 
 
 def get_questions_by_author(db: Session, author_pk):
-    return db.query(models.Question).filter(
-        models.Question.author_pk == author_pk
-    ).all()
+    return (
+        db.query(models.Question).filter(models.Question.author_pk == author_pk).all()
+    )
 
 
-def create_qeustion(
-    db: Session, question: questions.AuthenticatedQuestionCreate
-):
+def create_qeustion(db: Session, question: questions.AuthenticatedQuestionCreate):
     _question = models.Question(
         body=question.body,
         author=get_user(db, question.author),
-        event=get_event(db, question.event)
+        event=get_event(db, question.event),
     )
 
     db.add(_question)
@@ -70,15 +61,15 @@ def get_questions(db: Session, skip: int = 0, limit: int = 100):
 def update_question(
     db: Session, question_pk: int, patched_data: questions.QuestionPatch
 ):
-    question = db.query(models.Question).filter(
-        models.Question.pk == question_pk
-    )
+    question = db.query(models.Question).filter(models.Question.pk == question_pk)
 
     if question:
-        question.update({
-            k: patched_data.__dict__[k]
-            for k in patched_data.__dict__.keys()
-            if patched_data.__dict__[k] is not None}
+        question.update(
+            {
+                k: patched_data.__dict__[k]
+                for k in patched_data.__dict__.keys()
+                if patched_data.__dict__[k] is not None
+            }
         )
         db.commit()
         db.refresh(question.first())
@@ -87,18 +78,16 @@ def update_question(
 
 
 def delete_question(db: Session, question_pk: int):
-    question = db.query(models.Question).filter(
-        models.Question.pk == question_pk
-    ).first()
+    question = (
+        db.query(models.Question).filter(models.Question.pk == question_pk).first()
+    )
 
     db.delete(question)
     db.refresh(question)
 
 
 def delete_event(db: Session, event_pk: int):
-    event = db.query(models.Event).filter(
-        models.Event.pk == event_pk
-    ).first()
+    event = db.query(models.Event).filter(models.Event.pk == event_pk).first()
 
     db.delete(event)
     db.refresh(event)

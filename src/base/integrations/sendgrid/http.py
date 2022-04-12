@@ -1,30 +1,15 @@
+import typing
+
+import httpcore
 import httpx
 from httpx import Request, Response
-from httpx._config import (
-    Limits,
-    DEFAULT_TIMEOUT_CONFIG,
-    DEFAULT_LIMITS,
-    DEFAULT_MAX_REDIRECTS,
-    UnsetType,
-    UNSET
-)
-from httpx._types import (
-    URLTypes,
-    VerifyTypes,
-    CertTypes,
-    ProxiesTypes,
-    QueryParamTypes,
-    HeaderTypes,
-    AuthTypes,
-    CookieTypes,
-    TimeoutTypes,
-    RequestContent,
-    RequestData,
-    RequestFiles,
-)
-import httpcore
+from httpx._config import (DEFAULT_LIMITS, DEFAULT_MAX_REDIRECTS,
+                           DEFAULT_TIMEOUT_CONFIG, UNSET, Limits, UnsetType)
+from httpx._types import (AuthTypes, CertTypes, CookieTypes, HeaderTypes,
+                          ProxiesTypes, QueryParamTypes, RequestContent,
+                          RequestData, RequestFiles, TimeoutTypes, URLTypes,
+                          VerifyTypes)
 
-import typing
 from ... import settings
 from .exceptions import SendgridAuthenticationFailed, SendgridWrongResponse
 
@@ -33,11 +18,8 @@ class BearerAuth(httpx.Auth):
     def __init__(self, token: str) -> None:
         self._auth_header = self._build_auth_header(token)
 
-    def auth_flow(
-        self,
-        request: Request
-    ) -> typing.AsyncGenerator[Request, Response]:
-        request.headers['Authorization'] = self._auth_header
+    def auth_flow(self, request: Request) -> typing.AsyncGenerator[Request, Response]:
+        request.headers["Authorization"] = self._auth_header
 
         yield request
 
@@ -88,7 +70,7 @@ class SendgridHTTP(httpx.AsyncClient):
             base_url=base_url,
             transport=transport,
             app=app,
-            trust_env=trust_env
+            trust_env=trust_env,
         )
 
     async def request(
@@ -119,7 +101,7 @@ class SendgridHTTP(httpx.AsyncClient):
             cookies=cookies,
             auth=auth,
             allow_redirects=allow_redirects,
-            timeout=timeout
+            timeout=timeout,
         )
 
         if response.status_code in [403, 401]:
@@ -127,8 +109,6 @@ class SendgridHTTP(httpx.AsyncClient):
                 f"[{response.status_code}]: {response.text}"
             )
         elif response.status_code > 299:
-            raise SendgridWrongResponse(
-                f"[{response.status_code}]: {response.text}"
-            )
+            raise SendgridWrongResponse(f"[{response.status_code}]: {response.text}")
         else:
             return response

@@ -1,6 +1,7 @@
 import pytest
-from auth.schemas import UserLogin
 from pydantic import ValidationError
+
+from auth.schemas import UserLogin
 
 
 def test_refresh_token_with_no_enought_fields():

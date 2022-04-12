@@ -1,19 +1,19 @@
 from fastapi import APIRouter
-from base.database import engine, Base
+
+from base.database import Base, engine
 
 from .events import event_router
-from .polls import polls_router
 from .options import options_router
+from .polls import polls_router
 from .questions import questions_router
 from .votes import votes_router
-
 
 Base.metadata.create_all(bind=engine)
 
 
 router = APIRouter(
-    prefix='/qa',
-    tags=['qa'],
+    prefix="/qa",
+    tags=["qa"],
 )
 
 

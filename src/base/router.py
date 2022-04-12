@@ -1,28 +1,24 @@
-from typing import (
-    Any, Callable, Dict, List,
-    Optional, Sequence, Set,
-    Type, Union
-)
-from fastapi.datastructures import Default, DefaultPlaceholder
+from typing import (Any, Callable, Dict, List, Optional, Sequence, Set, Type,
+                    Union)
 
+from fastapi import APIRouter, Depends, HTTPException, params
+from fastapi.datastructures import Default, DefaultPlaceholder
 from fastapi.encoders import DictIntStrAny, SetIntStr
 from fastapi.routing import APIRoute
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse, Response
 from starlette.routing import BaseRoute
 
 from auth.backend import JWTAuthentication
 
-from .exceptions import ImproperlyConfigured, ObjectDoesNotExists
-from fastapi import APIRouter, Depends, HTTPException, params
-
-from sqlalchemy.orm import Session
 from .database import get_db
-
-from pydantic import BaseModel
+from .exceptions import ImproperlyConfigured, ObjectDoesNotExists
 
 
 class BaseCrudRouter(APIRouter):
     """Base router implements methods for create and remove api routes."""
+
     model = None
     create_schema = None
     get_schema = None
@@ -37,12 +33,13 @@ class BaseCrudRouter(APIRouter):
         prefix: Optional[str] = None,
         tags: Optional[List] = list(),
         *args,
-        **kwargs
+        **kwargs,
     ) -> None:
-        if not hasattr(model, 'manager'):
+        if not hasattr(model, "manager"):
             raise AttributeError(
                 f"Model {model.__name__} not suported, \
-                    model must have a 'manager' field.")
+                    model must have a 'manager' field."
+            )
 
         self.model = model
 
@@ -52,36 +49,35 @@ class BaseCrudRouter(APIRouter):
 
         self.prefix = prefix
         if not prefix:
-            self.prefix = '/' + self.model.__name__.lower()
+            self.prefix = "/" + self.model.__name__.lower()
         self.tags = tags
 
-        if not all([
-            self.model, self.create_schema, self.get_schema
-        ]):
+        if not all([self.model, self.create_schema, self.get_schema]):
             raise ImproperlyConfigured(
                 "Please redifine fields model,\
-                create_schema, get_schema in your subclass")
+                create_schema, get_schema in your subclass"
+            )
 
         super().__init__(prefix=prefix, tags=tags, *args, **kwargs)
 
     def get(self, path, *args, **kwargs):
-        self.remove_api_route(path, ['GET'])
+        self.remove_api_route(path, ["GET"])
         return super().get(path, *args, **kwargs)
 
     def post(self, path, *args, **kwargs):
-        self.remove_api_route(path, ['POST'])
+        self.remove_api_route(path, ["POST"])
         return super().post(path, *args, **kwargs)
 
     def put(self, path, *args, **kwargs):
-        self.remove_api_route(path, ['PUT'])
+        self.remove_api_route(path, ["PUT"])
         return super().put(path, *args, **kwargs)
 
     def delete(self, path, *args, **kwargs):
-        self.remove_api_route(path, ['DELETE'])
+        self.remove_api_route(path, ["DELETE"])
         return super().delete(path, *args, **kwargs)
 
     def api_route(self, path: str, *args, **kwargs):
-        methods = kwargs['methods'] if 'methods' in kwargs else ['GET']
+        methods = kwargs["methods"] if "methods" in kwargs else ["GET"]
         self.remove_api_route(path, methods)
         return super().api_route(path, *args, **kwargs)
 
@@ -101,8 +97,12 @@ class BaseCrudRouter(APIRouter):
         deprecated: Optional[bool] = None,
         methods: Optional[Union[Set[str], List[str]]] = None,
         operation_id: Optional[str] = None,
-        response_model_include: Optional[Union[SetIntStr, DictIntStrAny]] = None, # noqa
-        response_model_exclude: Optional[Union[SetIntStr, DictIntStrAny]] = None, # noqa
+        response_model_include: Optional[
+            Union[SetIntStr, DictIntStrAny]
+        ] = None,  # noqa
+        response_model_exclude: Optional[
+            Union[SetIntStr, DictIntStrAny]
+        ] = None,  # noqa
         response_model_by_alias: bool = True,
         response_model_exclude_unset: bool = False,
         response_model_exclude_defaults: bool = False,
@@ -119,12 +119,11 @@ class BaseCrudRouter(APIRouter):
             self.remove_api_route(path, methods)
 
         if not summary:
-            _endpoint_name = endpoint.__name__.strip('_').\
-                replace('_', ' ').capitalize()
+            _endpoint_name = endpoint.__name__.strip("_").replace("_", " ").capitalize()
             if self.model.__name__.lower() in _endpoint_name:
                 summary = _endpoint_name
             else:
-                summary = _endpoint_name + ' ' + self.model.__name__
+                summary = _endpoint_name + " " + self.model.__name__
 
         if not response_description:
             response_description = f"{self.model.__name__} Successful Response"
@@ -132,7 +131,7 @@ class BaseCrudRouter(APIRouter):
         if not status_code:
             status_code = 200
             if methods:
-                if len(methods) == 1 and methods[0].upper() == 'POST':
+                if len(methods) == 1 and methods[0].upper() == "POST":
                     status_code = 201
 
         return super().add_api_route(
@@ -155,9 +154,12 @@ class BaseCrudRouter(APIRouter):
             response_model_exclude_unset=response_model_exclude_unset,
             response_model_exclude_defaults=response_model_exclude_defaults,
             response_model_exclude_none=response_model_exclude_none,
-            include_in_schema=include_in_schema, response_class=response_class,
-            name=name, route_class_override=route_class_override,
-            callbacks=callbacks)
+            include_in_schema=include_in_schema,
+            response_class=response_class,
+            name=name,
+            route_class_override=route_class_override,
+            callbacks=callbacks,
+        )
 
     def remove_api_route(self, path: str, methods: List[str]):
         methods = set(methods)
@@ -186,7 +188,7 @@ class CrudRouter(BaseCrudRouter):
         add_create_route: bool = True,
         override_routes: bool = False,
         *args,
-        **kwargs
+        **kwargs,
     ) -> None:
         if not override_routes:
             super().__init__(
@@ -197,49 +199,47 @@ class CrudRouter(BaseCrudRouter):
                 prefix=prefix,
                 tags=tags,
                 *args,
-                **kwargs
+                **kwargs,
             )
 
             super().add_api_route(
-                '/',
+                "/",
                 self._get_all,
                 response_model=List[self.get_schema],
                 dependencies=[Depends(get_db)],
-                summary=f"Get all {self.model.__name__}`s"
+                summary=f"Get all {self.model.__name__}`s",
             )
 
             if add_create_route:
                 super().add_api_route(
-                    '/',
+                    "/",
                     self._create(),
-                    methods=['POST'],
+                    methods=["POST"],
                     response_model=self.get_schema,
                     dependencies=[Depends(get_db)],
                     summary=f"Create {self.model.__name__}",
-                    status_code=201
-
+                    status_code=201,
                 )
             super().add_api_route(
-                '/{pk}',
+                "/{pk}",
                 self._get(),
-                methods=['GET'],
+                methods=["GET"],
                 response_model=self.get_schema,
                 dependencies=[Depends(get_db)],
                 summary=f"Get {self.model.__name__}",
-
             )
             super().add_api_route(
-                '/{pk}',
+                "/{pk}",
                 self._update(),
-                methods=['PATCH'],
+                methods=["PATCH"],
                 response_model=self.get_schema,
                 dependencies=[Depends(get_db)],
                 summary=f"Patch {self.model.__name__}",
             )
             super().add_api_route(
-                '/{pk}',
+                "/{pk}",
                 self._delete(),
-                methods=['DELETE'],
+                methods=["DELETE"],
                 response_model=self.get_schema,
                 dependencies=[Depends(get_db)],
                 summary=f"Delete {self.model.__name__}",
@@ -249,29 +249,21 @@ class CrudRouter(BaseCrudRouter):
         self,
         skip: int = 0,
         limit: int = 100,
-        order_by: str = 'created',
+        order_by: str = "created",
         desc: bool = False,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
     ) -> Callable:
-        @self.get('/', response_model=List[self.get_schema])
+        @self.get("/", response_model=List[self.get_schema])
         async def _get_all(
-            skip: int = 0,
-            limit: int = 100,
-            db: Session = Depends(get_db)
+            skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
         ):
-            return self.model.manager(db).all(
-                skip,
-                limit,
-                order_by,
-                desc
-            )
+            return self.model.manager(db).all(skip, limit, order_by, desc)
 
         return await _get_all(skip, limit, db)
 
     def _create(self) -> Callable:
         async def route(
-            instance_create_schema: self.create_schema,
-            db: Session = Depends(get_db)
+            instance_create_schema: self.create_schema, db: Session = Depends(get_db)
         ):
             return self.model.manager(db).create(instance_create_schema)
 
@@ -283,30 +275,24 @@ class CrudRouter(BaseCrudRouter):
                 return self.model.manager(db).get(pk=pk)
             except ObjectDoesNotExists:
                 raise HTTPException(
-                    status_code=400,
-                    detail=f"{self.model.__name__} does not exists"
+                    status_code=400, detail=f"{self.model.__name__} does not exists"
                 )
 
         return route
 
     def _update(self) -> Callable:
         async def route(
-            pk,
-            update_schema: self.update_schema,
-            db: Session = Depends(get_db)
+            pk, update_schema: self.update_schema, db: Session = Depends(get_db)
         ):
             return self.model.manager(db).update(
-                pk,
-                **update_schema.dict(exclude_unset=True)
+                pk, **update_schema.dict(exclude_unset=True)
             )
 
         return route
 
     def _delete(self) -> Callable:
         async def route(pk, db: Session = Depends(get_db)):
-            return self.model.manager(db).delete(
-                self.model.manager(db).get(pk=pk)
-            )
+            return self.model.manager(db).delete(self.model.manager(db).get(pk=pk))
 
         return route
 
@@ -326,7 +312,7 @@ class AuthenticatedCrudRouter(CrudRouter):
         auth_backend: Type = JWTAuthentication,
         add_create_route: bool = False,
         *args,
-        **kwargs
+        **kwargs,
     ) -> None:
         self.auth_backend = auth_backend
         super().__init__(
@@ -339,24 +325,24 @@ class AuthenticatedCrudRouter(CrudRouter):
             tags=tags,
             add_create_route=add_create_route,
             *args,
-            **kwargs
+            **kwargs,
         )
 
         super().add_api_route(
-            '/',
+            "/",
             self._create(),
-            methods=['POST'],
+            methods=["POST"],
             response_model=self.get_schema,
             dependencies=[Depends(get_db)],
             summary=f"Create {self.model.__name__}",
-            status_code=201
+            status_code=201,
         )
 
     def _create(self) -> Callable:
         async def route(
             instance_create_schema: self.create_schema,
             db: Session = Depends(get_db),
-            token: str = Depends(self.auth_backend())
+            token: str = Depends(self.auth_backend()),
         ):
             return self.model.manager(db).create(instance_create_schema)
 

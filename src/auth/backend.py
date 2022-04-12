@@ -1,16 +1,15 @@
 from typing import Optional
-from fastapi import Request, HTTPException, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 import jwt
+from fastapi import Depends, HTTPException, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt.exceptions import DecodeError
-from auth.models import User
-
-from base.database import SessionLocal, get_db
-from auth.crud import get_user_or_false
-
-from base import settings
 from sqlalchemy.orm import Session
+
+from auth.crud import get_user_or_false
+from auth.models import User
+from base import settings
+from base.database import SessionLocal, get_db
 
 
 class JWTAuthentication(HTTPBearer):
@@ -33,31 +32,25 @@ class JWTAuthentication(HTTPBearer):
         if credentials:
             if credentials.scheme != "Bearer":
                 raise HTTPException(
-                    status_code=403,
-                    detail="Invalid authentication scheme."
+                    status_code=403, detail="Invalid authentication scheme."
                 )
             if await self._verify_jwt_token(credentials.credentials):
                 return credentials.credentials
             else:
                 raise HTTPException(status_code=403, detail="Token not valid")
         else:
-            raise HTTPException(
-                status_code=401,
-                detail="Invalid authorization code."
-            )
+            raise HTTPException(status_code=401, detail="Invalid authorization code.")
 
     async def _verify_jwt_token(self, token: str) -> bool:
         valid: bool = False
 
         try:
             payload = jwt.decode(
-                jwt=token,
-                key=settings.SECRET_KEY,
-                algorithms=settings.ALGORITHM
+                jwt=token, key=settings.SECRET_KEY, algorithms=settings.ALGORITHM
             )
 
-            if payload.get('pk', False):
-                if get_user_or_false(db=self.db, user_id=payload['pk']):
+            if payload.get("pk", False):
+                if get_user_or_false(db=self.db, user_id=payload["pk"]):
                     valid = True
 
         except DecodeError:
@@ -69,24 +62,19 @@ class JWTAuthentication(HTTPBearer):
 def authenticate(
     request: Request,
     token: str = Depends(JWTAuthentication()),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ) -> Optional[User]:
 
     payload = jwt.decode(
-        jwt=token,
-        key=settings.SECRET_KEY,
-        algorithms=settings.ALGORITHM
+        jwt=token, key=settings.SECRET_KEY, algorithms=settings.ALGORITHM
     )
 
-    if payload.get('pk', False):
-        user = get_user_or_false(db=db, user_id=payload['pk'])
+    if payload.get("pk", False):
+        user = get_user_or_false(db=db, user_id=payload["pk"])
 
         if settings.EMAIL_VERIFICATION_IS_NEEDED:
             if not user.email_verified:
-                raise HTTPException(
-                    status_code=403,
-                    detail="Please verify your email"
-                )
+                raise HTTPException(status_code=403, detail="Please verify your email")
 
         if user:
             return user
@@ -100,12 +88,10 @@ def authenticate_via_websockets(
 ) -> Optional[User]:
 
     payload = jwt.decode(
-        jwt=token,
-        key=settings.SECRET_KEY,
-        algorithms=settings.ALGORITHM
+        jwt=token, key=settings.SECRET_KEY, algorithms=settings.ALGORITHM
     )
 
-    print(payload.get('pk', False))
+    print(payload.get("pk", False))
 
-    if payload.get('pk', False):
-        return get_user_or_false(db=db, user_id=payload['pk'])
+    if payload.get("pk", False):
+        return get_user_or_false(db=db, user_id=payload["pk"])

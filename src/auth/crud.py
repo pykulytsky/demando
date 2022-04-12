@@ -1,4 +1,5 @@
 from typing import Union
+
 from sqlalchemy.orm import Session
 
 from . import models, schemas
@@ -25,11 +26,7 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 
 
 def create_user(db: Session, user: schemas.UserCreate):
-    user = models.User(
-        email=user.email,
-        username=user.username,
-        password=user.password
-    )
+    user = models.User(email=user.email, username=user.username, password=user.password)
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -37,9 +34,7 @@ def create_user(db: Session, user: schemas.UserCreate):
 
 
 def delete_user(db: Session, user: schemas.User):
-    _user = db.query(models.User).filter(
-        models.User.email == user.email
-    ).first()
+    _user = db.query(models.User).filter(models.User.email == user.email).first()
 
     db.delete(_user)
     db.commit()
@@ -47,9 +42,7 @@ def delete_user(db: Session, user: schemas.User):
 
 
 def login(db: Session, user: schemas.UserLogin):
-    db_user = db.query(models.User).filter(
-        models.User.email == user.email
-    ).first()
+    db_user = db.query(models.User).filter(models.User.email == user.email).first()
     if user:
         if db_user.verify_password(user.password):
             return db_user

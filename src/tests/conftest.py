@@ -1,17 +1,14 @@
 import pytest
-from auth.models import User
-from main import app, get_db
 from fastapi.testclient import TestClient
-from .test_client import JWTAuthTestClient
+from sqlalchemy.engine import reflection
 
-from mixer.backend.sqlalchemy import Mixer
-
+from auth.models import User
+from auth.schemas import UserCreate
 from base.database import Base
+from main import app, get_db
 from tests.test_database import TestSessionLocal, engine
 
-from auth.schemas import UserCreate
-
-from sqlalchemy.engine import reflection
+from .test_client import JWTAuthTestClient
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -27,20 +24,12 @@ def override_get_db():
         db.close()
 
 
-_mixer = Mixer(session=TestSessionLocal(), commit=True)
-
-
 app.dependency_overrides[get_db] = override_get_db
 
 
 @pytest.fixture(scope="session")
 def client():
     return TestClient(app)
-
-
-@pytest.fixture(scope="session")
-def mixer():
-    return _mixer
 
 
 @pytest.fixture()
@@ -54,17 +43,17 @@ def db():
 
         con = engine.connect()
         for table in total_tables:
-            if table != 'alembic_version':
-                con.execute(f'DELETE FROM {table} CASCADE;')
+            if table != "alembic_version":
+                con.execute(f"DELETE FROM {table} CASCADE;")
         db.close()
 
 
 @pytest.fixture()
 def user(db):
     _user = UserCreate(
-        email='test1@test.py',
-        username='test1',
-        password='1234',
+        email="test1@test.py",
+        username="test1",
+        password="1234",
     )
     user = User.manager(db).create_user(_user)
     user.email_verified = True
@@ -75,11 +64,7 @@ def user(db):
 
 @pytest.fixture()
 def another_user(db):
-    _user = UserCreate(
-        email='test2@test.py',
-        username='test2',
-        password='1234'
-    )
+    _user = UserCreate(email="test2@test.py", username="test2", password="1234")
     user = User.manager(db).create_user(_user)
     user.email_verified = True
     yield user
@@ -87,11 +72,7 @@ def another_user(db):
 
 @pytest.fixture()
 def unverified_user(db):
-    _user = UserCreate(
-        email='test3@test.py',
-        username='test3',
-        password='1234'
-    )
+    _user = UserCreate(email="test3@test.py", username="test3", password="1234")
     user = User.manager(db).create_user(_user)
     yield user
 

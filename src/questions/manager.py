@@ -1,9 +1,9 @@
 from typing import Type
 
 from fastapi import Depends
-from base.database import get_db
 from sqlalchemy.orm import Session
 
+from base.database import get_db
 from base.manager import BaseManager
 
 
@@ -18,26 +18,20 @@ class ItemManager(BaseManager):
         super().__init__(klass, db=db)
 
     def create(self, **fields):
-        data = {
-            'name': fields['name']
-        }
-        if fields.get('author', False):
-            data.update({
-                'author': self.user_model.manager(
-                    self.db
-                ).get(pk=fields['author'])
-            })
-        if fields.get('owner', False):
-            data.update({
-                'owner': self.user_model.manager(
-                    self.db
-                ).get(pk=fields['owner'])
-            })
+        data = {"name": fields["name"]}
+        if fields.get("author", False):
+            data.update(
+                {"author": self.user_model.manager(self.db).get(pk=fields["author"])}
+            )
+        if fields.get("owner", False):
+            data.update(
+                {"owner": self.user_model.manager(self.db).get(pk=fields["owner"])}
+            )
 
         return super().create(disable_check=True, **data)
 
 
-class ItemManagerModel():
+class ItemManagerModel:
     @classmethod
     def manager(cls, db):
         return ItemManager(cls, db)

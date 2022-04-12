@@ -1,9 +1,10 @@
-import typer
-from base.database import engine
-from tests.test_database import engine as test_engine
 import time
+
+import typer
 from sqlalchemy.engine import reflection
 
+from base.database import engine
+from tests.test_database import engine as test_engine
 
 manager = typer.Typer()
 
@@ -20,8 +21,8 @@ def truncate_db():
     typer.echo("\n")
     with typer.progressbar(total_tables, fill_char="█") as progress:
         for table in progress:
-            if table != 'alembic_version':
-                con.execute(f'DELETE FROM {table} CASCADE;')
+            if table != "alembic_version":
+                con.execute(f"DELETE FROM {table} CASCADE;")
                 time.sleep(0.3)
                 total += 1
         typer.echo(f"Truncated {total} tables.")
@@ -39,8 +40,8 @@ def truncate_test_db():
     typer.echo("\n")
     with typer.progressbar(total_tables, fill_char="█") as progress:
         for table in progress:
-            if table != 'alembic_version':
-                con.execute(f'DELETE FROM {table} CASCADE;')
+            if table != "alembic_version":
+                con.execute(f"DELETE FROM {table} CASCADE;")
                 time.sleep(0.3)
                 total += 1
         typer.echo(f"Truncated {total} tables.")
@@ -53,5 +54,5 @@ def test():
             time.sleep(0.5)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     manager()

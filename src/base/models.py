@@ -1,6 +1,8 @@
-from .database import Base
-from sqlalchemy import Column, DateTime
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime
+
+from .database import Base
 
 
 class Timestamped(Base):

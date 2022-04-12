@@ -1,6 +1,8 @@
-from pydantic import BaseModel
-from auth.schemas import User
 from typing import List, Optional
+
+from pydantic import BaseModel
+
+from auth.schemas import User
 
 from .base import Timestamped
 
@@ -73,6 +75,8 @@ class PollViaWeboscket(BaseModel):
 
     class Config:
         orm_mode = True
+
+
 class PollCreate(BaseModel):
     name: str
 

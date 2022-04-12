@@ -1,9 +1,11 @@
 from typing import List, Optional
+
 from pydantic import BaseModel
+
 from auth.schemas import User
 
-from .questions import Question
 from .base import Timestamped
+from .questions import Question
 
 
 class EventCreate(BaseModel):

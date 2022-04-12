@@ -1,16 +1,15 @@
-from auth.models import User
-from base.router import CrudRouter
-from pydantic import BaseModel
+from typing import Dict, List, Optional, Type
 
 from fastapi import Depends, HTTPException
-from base.database import Base, get_db, engine
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from typing import Dict, Optional, List, Type
-
-from base.utils import get_class_by_table
-from base import settings
 
 from auth.backend import JWTAuthentication, authenticate
+from auth.models import User
+from base import settings
+from base.database import Base, engine, get_db
+from base.router import CrudRouter
+from base.utils import get_class_by_table
 from questions.models import Question
 
 
@@ -27,7 +26,7 @@ class ItemRouter(CrudRouter):
         auth_backend: Type = JWTAuthentication,
         add_create_route: bool = False,
         *args,
-        **kwargs
+        **kwargs,
     ) -> None:
         self.auth_backend = auth_backend
 
@@ -41,39 +40,40 @@ class ItemRouter(CrudRouter):
             tags=tags,
             add_create_route=add_create_route,
             *args,
-            **kwargs
+            **kwargs,
         )
 
         super().add_api_route(
-            '/',
+            "/",
             self._create(),
-            methods=['POST'],
+            methods=["POST"],
             response_model=self.get_schema,
             dependencies=[Depends(get_db)],
             summary=f"Create {self.model.__name__}",
-            status_code=201
+            status_code=201,
         )
 
     def _create(self):
         async def route(
             create_schema: self.create_schema,
             db: Session = Depends(get_db),
-            user: User = Depends(authenticate)
+            user: User = Depends(authenticate),
         ):
             print(self.get_create_data(create_schema, user, db))
-            if user.email_verified or self.model == Question or settings.ALLOW_EVERYONE_CREATE_ITEMS:# noqa
+            if (
+                user.email_verified
+                or self.model == Question
+                or settings.ALLOW_EVERYONE_CREATE_ITEMS
+            ):  # noqa
                 instance = self.model.manager(db).create(
                     **self.get_create_data(
-                        create_schema=create_schema,
-                        user=user,
-                        db=db
+                        create_schema=create_schema, user=user, db=db
                     )
                 )
                 return instance
             else:
                 raise HTTPException(
-                    status_code=403,
-                    detail="User must have verified email"
+                    status_code=403, detail="User must have verified email"
                 )
 
         return route
@@ -82,17 +82,20 @@ class ItemRouter(CrudRouter):
         async def route(
             update_schema: self.update_schema,
             db: Session = Depends(get_db),
-            user: User = Depends(authenticate)
+            user: User = Depends(authenticate),
         ):
             pass
 
     def _get_schemas_diff(self, exclude: Optional[List] = None) -> List:
-        """Check get and create schema and return array of fields that are different""" # noqa
+        """Check get and create schema and return array of fields that are different"""  # noqa
         fields = []
 
         for field in self.create_schema.__annotations__:
             try:
-                if self.get_schema.__annotations__[field] != self.create_schema.__annotations__[field]:# noqa
+                if (
+                    self.get_schema.__annotations__[field]
+                    != self.create_schema.__annotations__[field]
+                ):  # noqa
                     if (exclude and field not in exclude) or not exclude:
                         fields.append(field)
             except KeyError:
@@ -108,9 +111,9 @@ class ItemRouter(CrudRouter):
         models = list()
 
         for i in range(len(fields)):
-            fields[i] = fields[i] + 's'
-            if fields[i] == 'authors' or fields[i] == 'owners':
-                fields[i] = 'users'
+            fields[i] = fields[i] + "s"
+            if fields[i] == "authors" or fields[i] == "owners":
+                fields[i] = "users"
 
             models.append(get_class_by_table(Base, fields[i]))
 
@@ -119,12 +122,12 @@ class ItemRouter(CrudRouter):
     def _get_schema_diff_models_exclude_user(self) -> List:
         Base.metadata.create_all(engine)
 
-        fields = self._get_schemas_diff(exclude=['user', 'owner', 'author'])
+        fields = self._get_schemas_diff(exclude=["user", "owner", "author"])
 
         models = list()
 
         for i in range(len(fields)):
-            fields[i] = fields[i] + 's'
+            fields[i] = fields[i] + "s"
             models.append(get_class_by_table(Base, fields[i]))
 
         return models
@@ -135,23 +138,23 @@ class ItemRouter(CrudRouter):
     def get_create_data(self, create_schema, user, db) -> Dict:
         data = {}
 
-        model_fields = self._get_schemas_diff(
-            exclude=['user', 'owner', 'author']
-        )
+        model_fields = self._get_schemas_diff(exclude=["user", "owner", "author"])
         models = self._get_schema_diff_models_exclude_user()
 
         for field in create_schema.__dict__.keys():
             if field in model_fields:
-                if hasattr(models[model_fields.index(field)], 'manager'):
-                    data.update({
-                        field: models[model_fields.index(field)].manager(db).get(pk=getattr(create_schema, field)) # noqa
-                    })
+                if hasattr(models[model_fields.index(field)], "manager"):
+                    data.update(
+                        {
+                            field: models[model_fields.index(field)]
+                            .manager(db)
+                            .get(pk=getattr(create_schema, field))  # noqa
+                        }
+                    )
             else:
-                data.update({
-                    field: create_schema.__dict__[field]
-                })
+                data.update({field: create_schema.__dict__[field]})
 
-        for user_field in ['user', 'author', 'owner']:
+        for user_field in ["user", "author", "owner"]:
             if hasattr(self.model, user_field):
                 data.update({user_field: user})
 

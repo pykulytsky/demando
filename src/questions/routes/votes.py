@@ -1,9 +1,8 @@
-from base.database import engine, Base
+from base.database import Base, engine
 from questions.router import ItemRouter
-
-from .. import models
 from questions.schemas import polls as schemas
 
+from .. import models
 
 Base.metadata.create_all(bind=engine)
 
@@ -13,6 +12,6 @@ votes_router = ItemRouter(
     get_schema=schemas.Vote,
     create_schema=schemas.VoteCreate,
     update_schema=schemas.VoteCreate,
-    prefix='/votes',
-    tags=['votes'],
+    prefix="/votes",
+    tags=["votes"],
 )

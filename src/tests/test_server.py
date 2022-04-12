@@ -1,8 +1,7 @@
-from typing import List, Optional
 import asyncio
+from typing import List, Optional
 
 import pytest
-
 import uvicorn
 
 PORT = 8000
@@ -19,7 +18,7 @@ class UvicornTestServer(uvicorn.Server):
         await server.down()
     """
 
-    def __init__(self, app, host='127.0.0.1', port=PORT):
+    def __init__(self, app, host="127.0.0.1", port=PORT):
         """Create a Uvicorn test server
 
         Args:

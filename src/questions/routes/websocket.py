@@ -1,17 +1,13 @@
-from typing import List, Optional, Union
+from typing import List, Union
 
-from fastapi import WebSocket, WebSocketDisconnect
-from base.database import engine, Base, get_db
-from auth.backend import authenticate_via_websockets
-from auth import schemas as auth_schemas
-from questions.schemas import polls as polls_shcemas
-from questions.models import Poll, Vote
+from fastapi import WebSocket
 
+from base.database import Base, engine
 
 Base.metadata.create_all(bind=engine)
 
 
-class Room():
+class Room:
     def __init__(self, room_id: int) -> None:
         self.room_id = room_id
         self.active_connections: List[WebSocket] = []
@@ -69,10 +65,7 @@ class ConnectionManager:
         await websocket.send_json(data)
 
     async def send_personal_message_to_room(
-        self,
-        room_id: int,
-        data: dict,
-        websocket: WebSocket
+        self, room_id: int, data: dict, websocket: WebSocket
     ):
         room = self.get_room(room_id)
         await room.send_personal_message(data, websocket)

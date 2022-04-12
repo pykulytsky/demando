@@ -1,24 +1,22 @@
 from typing import Type
+
+from passlib.hash import pbkdf2_sha256
+
 from auth.exceptions import WrongLoginCredentials
 from base import settings
 from base.exceptions import ObjectDoesNotExists
 from base.manager import BaseManager, BaseManagerModel
 
-from passlib.hash import pbkdf2_sha256
-
 from . import schemas
 
 
 class AuthManager(BaseManager):
-
     def create_user(self, user_schema: schemas.UserCreate):
         fields = user_schema.__dict__
         self.check_fields(**fields)
-        fields['password'] = self.set_password(fields['password'])
+        fields["password"] = self.set_password(fields["password"])
 
-        instance = super().create(
-            disable_check=True, **fields
-        )
+        instance = super().create(disable_check=True, **fields)
 
         self.refresh(instance)
 
@@ -34,9 +32,7 @@ class AuthManager(BaseManager):
 
     @staticmethod
     def _hasher():
-        return pbkdf2_sha256.using(
-            salt=bytes(settings.SECRET_KEY.encode('utf-8'))
-        )
+        return pbkdf2_sha256.using(salt=bytes(settings.SECRET_KEY.encode("utf-8")))
 
     def login(self, login_schema: schemas.UserLogin):
         try:

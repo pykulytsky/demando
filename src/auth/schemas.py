@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr, ValidationError, root_validator
 from typing import Optional
+
+from pydantic import BaseModel, EmailStr, ValidationError, root_validator
 
 
 class UserBase(BaseModel):
@@ -15,14 +16,14 @@ class UserLogin(BaseModel):
     @root_validator(pre=True)
     def validate_login_credentials(cls, values):
         v = values.copy()
-        v.pop('password')
+        v.pop("password")
         if len(v) > 1:
             raise ValidationError(
                 "Only one of the following fields is allowed: email, username"
             )
         if len(v) < 1:
             raise ValidationError(
-                "At least one of the following fields must be passed: email, username" # noqa
+                "At least one of the following fields must be passed: email, username"  # noqa
             )
 
         return values
