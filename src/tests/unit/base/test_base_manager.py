@@ -63,3 +63,12 @@ def test_order_by(manager):
     )
 
     assert older_one == manager.all(order_by="age", desc=True)[0]
+
+
+def test_update(manager, user):
+    age = user.age
+
+    manager.update(user.pk, age=9999)
+
+    assert age != 9999
+    assert manager.get(pk=user.pk).age == 9999

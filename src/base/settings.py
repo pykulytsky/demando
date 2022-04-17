@@ -10,6 +10,7 @@ SEND_EMAILS = config("SEND_EMAILS", cast=bool, default=True)
 EMAIL_VERIFICATION_IS_NEEDED = config(
     "EMAIL_VERIFICATION_IS_NEEDED", cast=bool, default=False
 )
+SEND_VERIFICATION_MAIL = config("SEND_VERIFICATION_MAIL", cast=bool, default=True)
 
 ALLOW_EVERYONE_CREATE_ITEMS = config(
     "ALLOW_EVERYONE_CREATE_ITEMS", cast=bool, default=True
