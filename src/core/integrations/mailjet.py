@@ -1,6 +1,6 @@
 from mailjet_rest import Client
 
-from base import settings
+from core import settings
 
 
 def send(username, verification_link, email):

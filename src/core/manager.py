@@ -4,8 +4,8 @@ from fastapi import Depends
 from sqlalchemy import MetaData
 from sqlalchemy.orm import Session
 
-from base.database import Base
-from base.exceptions import ImproperlyConfigured, ObjectDoesNotExists
+from core.database import Base
+from core.exceptions import ImproperlyConfigured, ObjectDoesNotExists
 
 from .database import get_db
 

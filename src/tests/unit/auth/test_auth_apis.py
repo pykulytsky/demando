@@ -1,7 +1,7 @@
 import pytest
 
 from auth.models import User
-from base.integrations import mailjet
+from core.integrations import mailjet
 
 
 @pytest.fixture
@@ -68,7 +68,7 @@ def test_get_me(auth_client):
 
 
 def test_send_email_after_create_user(client, mocker):
-    mocker.patch("base.integrations.mailjet.MailService.send_verification_mail")
+    mocker.patch("core.integrations.mailjet.MailService.send_verification_mail")
     response = client.post(
         "/auth/users/",
         json={"username": "test", "email": "test@py.com", "password": "assword"},

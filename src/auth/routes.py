@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 
 from auth.backend import authenticate
 from auth.models import User
-from base.database import get_db
-from base.exceptions import ObjectDoesNotExists
-from base.integrations.mailjet import MailService
-from base.router import CrudRouter
+from core.database import get_db
+from core.exceptions import ObjectDoesNotExists
+from core.integrations.mailjet import MailService
+from core.router import CrudRouter
 
 from . import schemas
 from .exceptions import WrongLoginCredentials

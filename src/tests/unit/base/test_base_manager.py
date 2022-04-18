@@ -1,7 +1,7 @@
 import pytest
 
-from base.exceptions import ImproperlyConfigured
-from base.manager import BaseManager
+from core.exceptions import ImproperlyConfigured
+from core.manager import BaseManager
 
 
 class SomeClass:
@@ -43,7 +43,7 @@ def test_filter(manager, user):
 
 
 def test_check_fields(mocker, manager, user):
-    mocker.patch("base.manager.BaseManager.check_fields")
+    mocker.patch("core.manager.BaseManager.check_fields")
 
     manager.get(pk=user.pk)
 

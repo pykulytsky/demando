@@ -1,7 +1,7 @@
 import pytest
 
-from base import settings
-from base.integrations.sendgrid.client import SendgridApp
+from core import settings
+from core.integrations.sendgrid.client import SendgridApp
 
 
 @pytest.mark.asyncio

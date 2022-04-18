@@ -7,8 +7,8 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from base import settings
-from base.database import Base
+from core import settings
+from core.database import Base
 from questions.models import likes_table
 
 from .exceptions import JwtTokenError

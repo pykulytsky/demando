@@ -1,12 +1,12 @@
 from uuid import uuid4
 
-from base import settings
-from base.integrations.mailjet import MailService
+from core import settings
+from core.integrations.mailjet import MailService
 
 
 def test_mail_was_sent(mocker):
     settings.SEND_VERIFICATION_MAIL = True
-    mocker.patch("base.integrations.mailjet.MailService.send")
+    mocker.patch("core.integrations.mailjet.MailService.send")
     service = MailService()
 
     service.send_verification_mail("test", uuid4(), "test@test.com")
@@ -18,7 +18,7 @@ def test_mail_was_sent(mocker):
 
 def test_mail_was_send_and_response_ok(mocker):
     settings.SEND_VERIFICATION_MAIL = True
-    mocker.patch("base.integrations.mailjet.MailService.send")
+    mocker.patch("core.integrations.mailjet.MailService.send")
     service = MailService()
     code = uuid4()
 

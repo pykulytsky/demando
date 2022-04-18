@@ -1,7 +1,7 @@
 import pytest
 
 from auth.models import User
-from base.manager import BaseManager
+from core.manager import BaseManager
 
 
 @pytest.fixture

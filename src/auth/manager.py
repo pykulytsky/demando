@@ -3,9 +3,9 @@ from typing import Type
 from passlib.hash import pbkdf2_sha256
 
 from auth.exceptions import WrongLoginCredentials
-from base import settings
-from base.exceptions import ObjectDoesNotExists
-from base.manager import BaseManager, BaseManagerModel
+from core import settings
+from core.exceptions import ObjectDoesNotExists
+from core.manager import BaseManager, BaseManagerModel
 
 from . import schemas
 

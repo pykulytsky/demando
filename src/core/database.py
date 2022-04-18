@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from base import settings
+from core import settings
 from tests.test_database import TestSessionLocal
 
 SQLALCHEMY_DATABASE_URL = settings.DB_DSN

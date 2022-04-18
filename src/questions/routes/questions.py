@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from auth.backend import authenticate
 from auth.schemas import User
-from base.database import Base, engine, get_db
+from core.database import Base, engine, get_db
 from questions.router import ItemRouter
 from questions.schemas import questions as schemas
 

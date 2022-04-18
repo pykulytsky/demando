@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Union
 
-from base import settings
-from base.integrations.sendgrid.receiver import Receiver
+from core import settings
+from core.integrations.sendgrid.receiver import Receiver
 
 
 @dataclass

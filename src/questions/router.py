@@ -6,10 +6,10 @@ from sqlalchemy.orm import Session
 
 from auth.backend import JWTAuthentication, authenticate
 from auth.models import User
-from base import settings
-from base.database import Base, engine, get_db
-from base.router import CrudRouter
-from base.utils import get_class_by_table
+from core import settings
+from core.database import Base, engine, get_db
+from core.router import CrudRouter
+from core.utils import get_class_by_table
 from questions.models import Question
 
 

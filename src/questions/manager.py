@@ -3,8 +3,8 @@ from typing import Type
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from base.database import get_db
-from base.manager import BaseManager
+from core.database import get_db
+from core.manager import BaseManager
 
 
 class ItemManager(BaseManager):

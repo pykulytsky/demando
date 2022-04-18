@@ -2,8 +2,8 @@ from fastapi import Depends
 from httpx import Response
 
 from auth.models import User
-from base import settings
-from base.database import get_db
+from core import settings
+from core.database import get_db
 
 from .http import SendgridHTTP
 from .mail import SendgridMail

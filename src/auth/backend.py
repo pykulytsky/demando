@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 
 from auth.crud import get_user_or_false
 from auth.models import User
-from base import settings
-from base.database import SessionLocal, get_db
+from core import settings
+from core.database import SessionLocal, get_db
 
 
 class JWTAuthentication(HTTPBearer):

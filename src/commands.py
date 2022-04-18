@@ -3,7 +3,7 @@ import time
 import typer
 from sqlalchemy.engine import reflection
 
-from base.database import engine
+from core.database import engine
 from tests.test_database import engine as test_engine
 
 manager = typer.Typer()
