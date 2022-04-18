@@ -108,7 +108,7 @@ class SendgridHTTP(httpx.AsyncClient):
             raise SendgridAuthenticationFailed(
                 f"[{response.status_code}]: {response.text}"
             )
-        elif response.status_code > 299:
+        if response.status_code > 299:
             raise SendgridWrongResponse(f"[{response.status_code}]: {response.text}")
-        else:
-            return response
+
+        return response

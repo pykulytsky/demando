@@ -51,14 +51,13 @@ class BaseManager:
                     .limit(limit)
                     .all()
                 )
-            else:
-                return (
-                    self.db.query(self.model)
-                    .order_by(getattr(self.model, order_by))
-                    .offset(skip)
-                    .limit(limit)
-                    .all()
-                )
+            return (
+                self.db.query(self.model)
+                .order_by(getattr(self.model, order_by))
+                .offset(skip)
+                .limit(limit)
+                .all()
+            )
         except AttributeError:
             return self.db.query(self.model).offset(skip).limit(limit).all()
 

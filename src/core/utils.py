@@ -31,18 +31,17 @@ def get_class_by_table(base, table, data=None):
                 "Please provide data parameter for this function to be able "
                 "to determine polymorphic scenarios.".format(table.name)
             )
-        else:
-            for cls in found_classes:
-                mapper = sa.inspect(cls)
-                polymorphic_on = mapper.polymorphic_on.name
-                if polymorphic_on in data:
-                    if data[polymorphic_on] == mapper.polymorphic_identity:
-                        return cls
-            raise ValueError(
-                "Multiple declarative classes found for table '{0}'. Given "
-                "data row does not match any polymorphic identity of the "
-                "found classes.".format(table.name)
-            )
+        for cls in found_classes:
+            mapper = sa.inspect(cls)
+            polymorphic_on = mapper.polymorphic_on.name
+            if polymorphic_on in data:
+                if data[polymorphic_on] == mapper.polymorphic_identity:
+                    return cls
+        raise ValueError(
+            "Multiple declarative classes found for table '{0}'. Given "
+            "data row does not match any polymorphic identity of the "
+            "found classes.".format(table.name)
+        )
     elif found_classes:
         return found_classes.pop()
     return None
