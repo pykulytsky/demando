@@ -1,4 +1,4 @@
-from base import settings
+from core import settings
 
 
 def test_event_create_not_allowed(unverified_auth_client):

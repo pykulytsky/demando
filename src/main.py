@@ -7,8 +7,8 @@ from starlette.requests import Request
 
 from auth.backend import authenticate_via_websockets
 from auth.routes import auth_router
-from base import settings
-from base.database import Base, engine, get_db
+from core import settings
+from core.database import Base, engine, get_db
 from questions.models import Option, Poll, Vote
 from questions.routes import base as questions_routes
 from questions.routes.websocket import manager

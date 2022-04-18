@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Type
 
 from fastapi import Depends, HTTPException
@@ -6,11 +7,12 @@ from sqlalchemy.orm import Session
 
 from auth.backend import JWTAuthentication, authenticate
 from auth.models import User
-from base import settings
-from base.database import Base, engine, get_db
-from base.router import CrudRouter
-from base.utils import get_class_by_table
-from questions.models import Question
+from core import settings
+from core.database import Base, engine, get_db
+from core.router import CrudRouter
+from core.utils import get_class_by_table
+from questions.models import Event, Question
+from tasks.mails import notify_event_statistic
 
 
 class ItemRouter(CrudRouter):
@@ -59,7 +61,6 @@ class ItemRouter(CrudRouter):
             db: Session = Depends(get_db),
             user: User = Depends(authenticate),
         ):
-            print(self.get_create_data(create_schema, user, db))
             if (
                 user.email_verified
                 or self.model == Question
@@ -70,21 +71,18 @@ class ItemRouter(CrudRouter):
                         create_schema=create_schema, user=user, db=db
                     )
                 )
-                return instance
+                if instance:
+                    if self.model == Event:
+                        notify_event_statistic.apply_async(
+                            (instance.pk,), eta=datetime.utcnow() + timedelta(days=7)
+                        )
+                    return instance
             else:
                 raise HTTPException(
                     status_code=403, detail="User must have verified email"
                 )
 
         return route
-
-    def _patch(self):
-        async def route(
-            update_schema: self.update_schema,
-            db: Session = Depends(get_db),
-            user: User = Depends(authenticate),
-        ):
-            pass
 
     def _get_schemas_diff(self, exclude: Optional[List] = None) -> List:
         """Check get and create schema and return array of fields that are different"""  # noqa

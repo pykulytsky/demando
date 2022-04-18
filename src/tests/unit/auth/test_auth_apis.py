@@ -1,6 +1,7 @@
 import pytest
 
-from base.integrations import mailjet
+from auth.models import User
+from core.integrations import mailjet
 
 
 @pytest.fixture
@@ -67,19 +68,19 @@ def test_get_me(auth_client):
 
 
 def test_send_email_after_create_user(client, mocker):
-    mocker.patch("base.integrations.mailjet.send")
+    mocker.patch("core.integrations.mailjet.MailService.send_verification_mail")
     response = client.post(
         "/auth/users/",
         json={"username": "test", "email": "test@py.com", "password": "assword"},
     )
 
     assert response.status_code == 201
-    mailjet.send.assert_called_once()
+    mailjet.MailService.send_verification_mail.assert_called_once()
 
 
-@pytest.mark.xfail(strict=True)
-def test_verify_user(unverified_user, client):
+@pytest.mark.xfail(stric=True)
+def test_verify_user(unverified_user, client, db):
     response = client.patch(f"/auth/users/verify/{unverified_user.verification_code}")
 
     assert response.status_code == 200
-    assert unverified_user.email_verified
+    assert User.manager(db).get(pk=unverified_user.pk).email_verified

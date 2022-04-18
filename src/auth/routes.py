@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 
 from auth.backend import authenticate
 from auth.models import User
-from base.database import get_db
-from base.exceptions import ObjectDoesNotExists
-from base.integrations import mailjet
-from base.router import CrudRouter
+from core.database import get_db
+from core.exceptions import ObjectDoesNotExists
+from core.integrations.mailjet import MailService
+from core.router import CrudRouter
 
 from . import schemas
 from .exceptions import WrongLoginCredentials
@@ -32,11 +32,12 @@ async def create_user(
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     new_user = manager.create_user(user)
+    service = MailService()
 
     background_tasks.add_task(
-        mailjet.send,
+        service.send_verification_mail,
         new_user.username,
-        "http://localhost:8080/verify/" + str(new_user.verification_code),
+        new_user.verification_code,
         new_user.email,
     )
 

@@ -2,7 +2,7 @@ from typing import List, Union
 
 from fastapi import WebSocket
 
-from base.database import Base, engine
+from core.database import Base, engine
 
 Base.metadata.create_all(bind=engine)
 

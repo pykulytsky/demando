@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from base.database import Base, engine
+from core.database import Base, engine
 
 from .events import event_router
 from .options import options_router

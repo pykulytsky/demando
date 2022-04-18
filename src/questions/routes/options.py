@@ -1,4 +1,4 @@
-from base.database import Base, engine
+from core.database import Base, engine
 from questions.router import ItemRouter
 from questions.schemas import polls as schemas
 

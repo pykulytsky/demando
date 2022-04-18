@@ -2,9 +2,9 @@ from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import Boolean
 
-from base.database import Base
-from base.manager import BaseManagerModel
-from base.models import Timestamped
+from core.database import Base
+from core.manager import BaseManagerModel
+from core.models import Timestamped
 
 
 class Event(Timestamped, BaseManagerModel):

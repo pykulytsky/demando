@@ -4,7 +4,7 @@ from sqlalchemy.engine import reflection
 
 from auth.models import User
 from auth.schemas import UserCreate
-from base.database import Base
+from core.database import Base
 from main import app, get_db
 from tests.test_database import TestSessionLocal, engine
 

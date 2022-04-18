@@ -1,8 +1,8 @@
 import pytest
 
-from base.integrations.sendgrid.exceptions import (
+from core.integrations.sendgrid.exceptions import (
     SendgridAuthenticationFailed, SendgridWrongResponse)
-from base.integrations.sendgrid.http import SendgridHTTP
+from core.integrations.sendgrid.http import SendgridHTTP
 
 
 @pytest.mark.asyncio

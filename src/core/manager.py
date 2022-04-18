@@ -4,8 +4,8 @@ from fastapi import Depends
 from sqlalchemy import MetaData
 from sqlalchemy.orm import Session
 
-from base.database import Base
-from base.exceptions import ImproperlyConfigured, ObjectDoesNotExists
+from core.database import Base
+from core.exceptions import ImproperlyConfigured, ObjectDoesNotExists
 
 from .database import get_db
 
@@ -51,14 +51,13 @@ class BaseManager:
                     .limit(limit)
                     .all()
                 )
-            else:
-                return (
-                    self.db.query(self.model)
-                    .order_by(getattr(self.model, order_by))
-                    .offset(skip)
-                    .limit(limit)
-                    .all()
-                )
+            return (
+                self.db.query(self.model)
+                .order_by(getattr(self.model, order_by))
+                .offset(skip)
+                .limit(limit)
+                .all()
+            )
         except AttributeError:
             return self.db.query(self.model).offset(skip).limit(limit).all()
 

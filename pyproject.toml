@@ -25,7 +25,7 @@ autopep8 = "1.5.5"
 backcall = "0.2.0"
 certifi = "2020.12.5"
 chardet = "4.0.0"
-click = "8.0.0"
+click = "8.0.3"
 colorama = "0.4.4"
 coverage = "5.5"
 decorator = "4.4.2"
@@ -85,6 +85,7 @@ websockets = "^10.1"
 uvicorn = {extras = ["standard"], version = "^0.17.1"}
 hypercorn = "^0.13.2"
 black = "^22.3.0"
+celery = {extras = ["redis"], version = "^5.2.6"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.2"
@@ -105,3 +106,4 @@ dev = 'scripts.dev:main'
 prod = 'scripts.prod:main'
 truncate = 'scripts.truncate_db:main'
 truncate-test = 'scripts.truncate_test_db:main'
+celery = 'scripts.celery:main'
