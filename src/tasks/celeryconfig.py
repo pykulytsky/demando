@@ -1,1 +1,1 @@
-imports = ('tasks.mails',)
+imports = ("tasks.mails",)
