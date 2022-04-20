@@ -10,6 +10,7 @@ from sqlalchemy.orm import relationship
 from core import settings
 from core.database import Base
 from questions.models import likes_table
+from quiz.models import member_table
 
 from .exceptions import JwtTokenError
 from .manager import AuthManagerModel
@@ -48,6 +49,7 @@ class User(Base, AuthManagerModel):
     polls = relationship("Poll", back_populates="owner")
     votes = relationship("Vote", back_populates="owner")
     questions = relationship("Question", back_populates="author")
+    quizzes = relationship("Quiz", secondary=member_table, back_populates="owner")
 
     liked_questions = relationship(
         "Question", secondary=likes_table, back_populates="likes"

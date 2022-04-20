@@ -91,7 +91,5 @@ def authenticate_via_websockets(
         jwt=token, key=settings.SECRET_KEY, algorithms=settings.ALGORITHM
     )
 
-    print(payload.get("pk", False))
-
     if payload.get("pk", False):
         return get_user_or_false(db=db, user_id=payload["pk"])
