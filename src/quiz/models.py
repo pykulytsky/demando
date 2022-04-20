@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 
 from core.database import Base
 from core.manager import BaseManagerModel
+from quiz.manager import OptionManagerMixin
 from core.models import Timestamped
 
 member_table = Table(
@@ -54,12 +55,12 @@ class Step(Timestamped, BaseManagerModel):
     options = relationship("StepOption", back_populates="step")
 
 
-class StepOption(Timestamped, BaseManagerModel):
+class StepOption(Timestamped, OptionManagerMixin):
 
     __tablename__ = "step_option"
 
     pk = Column(Integer, primary_key=True, index=True)
-    title = Column(String, unique=False)
+    title = Column(String, unique=True)
     is_right = Column(Boolean)
 
     step_pk = Column(Integer, ForeignKey("step.pk"))
