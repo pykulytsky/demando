@@ -13,10 +13,10 @@ from questions.models import likes_table
 from quiz.models import member_table
 
 from .exceptions import JwtTokenError
-from .manager import AuthManagerModel
+from .manager import AuthManagerMixin
 
 
-class Role(Base, AuthManagerModel):
+class Role(Base, AuthManagerMixin):
 
     __tablename__ = "roles"
 
@@ -26,7 +26,7 @@ class Role(Base, AuthManagerModel):
     users = relationship("User", back_populates="role")
 
 
-class User(Base, AuthManagerModel):
+class User(Base, AuthManagerMixin):
 
     __tablename__ = "users"
 

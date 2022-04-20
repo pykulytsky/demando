@@ -1,4 +1,5 @@
 import pytest
+
 from core.exceptions import ImproperlyConfigured
 from quiz import models
 
@@ -28,9 +29,7 @@ def test_add_option(quiz, db):
     step = models.Step.manager(db).create(quiz=quiz, title="test")
 
     option = models.StepOption.manager(db).create(
-        title="option",
-        step=step,
-        is_right=True
+        title="option", step=step, is_right=True
     )
 
     assert option.step == step
@@ -40,15 +39,9 @@ def test_add_option(quiz, db):
 def test_only_one_right_option(quiz, db):
     step = models.Step.manager(db).create(quiz=quiz, title="test")
 
-    models.StepOption.manager(db).create(
-        title="option",
-        step=step,
-        is_right=True
-    )
+    models.StepOption.manager(db).create(title="option", step=step, is_right=True)
 
     with pytest.raises(ImproperlyConfigured):
         models.StepOption.manager(db).create(
-            title="second right option",
-            step=step,
-            is_right=True
+            title="second right option", step=step, is_right=True
         )

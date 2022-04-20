@@ -4,9 +4,9 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 
 from core.database import Base
-from core.manager import BaseManagerModel
-from quiz.manager import OptionManagerMixin
+from core.manager import BaseManagerMixin
 from core.models import Timestamped
+from quiz.manager import OptionManagerMixin
 
 member_table = Table(
     "quiz_members",
@@ -24,7 +24,7 @@ def _generate_enter_code() -> str:
     return resulted_code
 
 
-class Quiz(Timestamped, BaseManagerModel):
+class Quiz(Timestamped, BaseManagerMixin):
 
     __tablename__ = "quizzes"
 
@@ -41,7 +41,7 @@ class Quiz(Timestamped, BaseManagerModel):
     steps = relationship("Step", back_populates="quiz")
 
 
-class Step(Timestamped, BaseManagerModel):
+class Step(Timestamped, BaseManagerMixin):
 
     __tablename__ = "step"
 

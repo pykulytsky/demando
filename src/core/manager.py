@@ -133,7 +133,7 @@ class BaseManager:
         return instance
 
 
-class BaseManagerModel:
+class BaseManagerMixin:
     @classmethod
     def manager(cls, db):
         return BaseManager(cls, db)

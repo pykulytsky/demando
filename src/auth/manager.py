@@ -5,7 +5,7 @@ from passlib.hash import pbkdf2_sha256
 from auth.exceptions import WrongLoginCredentials
 from core import settings
 from core.exceptions import ObjectDoesNotExists
-from core.manager import BaseManager, BaseManagerModel
+from core.manager import BaseManager, BaseManagerMixin
 
 from . import schemas
 
@@ -49,7 +49,7 @@ class AuthManager(BaseManager):
             raise WrongLoginCredentials("No user with such email was found.")
 
 
-class AuthManagerModel(BaseManagerModel):
+class AuthManagerMixin(BaseManagerMixin):
     @classmethod
     def manager(cls, db):
         return AuthManager(cls, db)

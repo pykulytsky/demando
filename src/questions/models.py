@@ -3,11 +3,11 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import Boolean
 
 from core.database import Base
-from core.manager import BaseManagerModel
+from core.manager import BaseManagerMixin
 from core.models import Timestamped
 
 
-class Event(Timestamped, BaseManagerModel):
+class Event(Timestamped, BaseManagerMixin):
 
     __tablename__ = "events"
 
@@ -34,7 +34,7 @@ likes_table = Table(
 )
 
 
-class Question(Timestamped, BaseManagerModel):
+class Question(Timestamped, BaseManagerMixin):
 
     __tablename__ = "questions"
 
@@ -55,7 +55,7 @@ class Question(Timestamped, BaseManagerModel):
     )
 
 
-class Poll(Timestamped, BaseManagerModel):
+class Poll(Timestamped, BaseManagerMixin):
 
     __tablename__ = "polls"
 
@@ -76,7 +76,7 @@ class Poll(Timestamped, BaseManagerModel):
         return ratings
 
 
-class Option(Timestamped, BaseManagerModel):
+class Option(Timestamped, BaseManagerMixin):
 
     __tablename__ = "options"
 
@@ -91,7 +91,7 @@ class Option(Timestamped, BaseManagerModel):
     )
 
 
-class Vote(Timestamped, BaseManagerModel):
+class Vote(Timestamped, BaseManagerMixin):
 
     __tablename__ = "votes"
 
