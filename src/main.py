@@ -13,6 +13,7 @@ from questions.models import Option, Poll, Vote
 from questions.routes import base as questions_routes
 from questions.routes.websocket import manager
 from questions.schemas import polls as polls_schemas
+from quiz.routes import base as quizzes_router
 from tests.test_database import TestSessionLocal
 
 Base.metadata.create_all(bind=engine)
@@ -22,6 +23,7 @@ app = FastAPI(dependencies=[Depends(get_db)])
 
 app.include_router(auth_router)
 app.include_router(questions_routes.router)
+app.include_router(quizzes_router.router)
 
 
 @app.websocket("/ws/vote/{poll_id}")
