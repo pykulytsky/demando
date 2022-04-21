@@ -70,7 +70,27 @@ async def vote_websocket(
 
 @app.websocket("/ws/quiz/{enter_code}/{token}")
 async def quiz(websocket: WebSocket, enter_code: str, token: str):
-    await quiz_manager.connect_to_room(websocket, enter_code)
+    db = next(get_db())
+    if "pytest" in sys.argv[0]:
+        db = TestSessionLocal()
+    await quiz_manager.connect_to_room(websocket, enter_code, token, db)
+
+    try:
+        while True:
+            data = websocket.receive_json()
+            if data.get("action", False):
+                if data["action"] == "start":  # start quiz
+                    await quiz_manager.broadcast_next_step(enter_code, db, 0)
+                if data["action"] == "next":  # next step
+                    try:
+                        await quiz_manager.broadcast_next_step(
+                            enter_code, db, data["step"]
+                        )
+                    except IndexError:
+                        pass  # finish
+
+    except WebSocketDisconnect:
+        quiz_manager.disconnect_from_room(enter_code, websocket)
 
 
 origins = ["*"]

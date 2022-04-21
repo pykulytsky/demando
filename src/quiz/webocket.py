@@ -8,6 +8,8 @@ from auth.backend import authenticate_via_websockets
 from auth.models import User
 from core.database import Base, engine
 from questions.routes.websocket import ConnectionManager, Room
+from quiz.models import Quiz
+from quiz.schemas import steps
 
 Base.metadata.create_all(bind=engine)
 
@@ -19,8 +21,9 @@ class Connection:
 
 
 class QuizRoom(Room):
-    def __init__(self, enter_code: str) -> None:
-        self.enter_code = enter_code
+    def __init__(self, quiz: Quiz) -> None:
+        self.enter_code = quiz.enter_code
+        self.quiz = quiz
         self.active_connections: List[Connection] = []
 
     async def connect(self, webosocket: WebSocket, member: User):
@@ -31,6 +34,10 @@ class QuizRoom(Room):
         for connection in self.active_connections:
             if connection.websocket == websocket:
                 self.active_connections.remove(connection)
+
+    async def broadcast(self, data: dict):
+        for connection in self.active_connections:
+            await connection.websocket.send_json(data)
 
 
 class QuizConnectionManager(ConnectionManager):
@@ -49,7 +56,7 @@ class QuizConnectionManager(ConnectionManager):
                 await room.connect(websocket, member)
 
         if not connected:
-            room = QuizRoom(enter_code=enter_code)
+            room = QuizRoom(quiz=Quiz.manager(db).get(enter_code=enter_code))
             await room.connect(websocket, member)
             self.rooms.append(room)
         self.active_connections.append(websocket)
@@ -71,6 +78,18 @@ class QuizConnectionManager(ConnectionManager):
 
     async def broadcast_to_room(self, enter_code: str, data: dict) -> None:
         room = self.get_room(enter_code)
+        await room.broadcast(data)
+
+    async def broadcast_next_step(
+        self,
+        enter_code: str,
+        db: Session,
+        step: int = 0,
+    ):
+        room = self.get_room(enter_code)
+        current_step = room.quiz.steps[step]
+        data = steps.Step(**current_step)
+
         await room.broadcast(data)
 
 
