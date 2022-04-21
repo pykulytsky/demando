@@ -14,6 +14,7 @@ from questions.routes import base as questions_routes
 from questions.routes.websocket import manager
 from questions.schemas import polls as polls_schemas
 from quiz.routes import base as quizzes_router
+from quiz.webocket import quiz_manager
 from tests.test_database import TestSessionLocal
 
 Base.metadata.create_all(bind=engine)
@@ -65,6 +66,11 @@ async def vote_websocket(
     except WebSocketDisconnect:
         manager.disconnect_from_room(poll_id, websocket)
         db.close()
+
+
+@app.websocket("/ws/quiz/{enter_code}/{token}")
+async def quiz(websocket: WebSocket, enter_code: str, token: str):
+    await quiz_manager.connect_to_room(websocket, enter_code)
 
 
 origins = ["*"]
