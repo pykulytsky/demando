@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from core.database import Base
 from core.manager import BaseManagerMixin
 from core.models import Timestamped
-from quiz.manager import OptionManagerMixin
+from quiz.manager import OptionManagerMixin, QuizManagerMixin
 
 member_table = Table(
     "quiz_members",
@@ -24,21 +24,26 @@ def _generate_enter_code() -> str:
     return resulted_code
 
 
-class Quiz(Timestamped, BaseManagerMixin):
+class Quiz(Timestamped, QuizManagerMixin):
 
     __tablename__ = "quizzes"
 
     pk = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=False)
+    enter_code = Column(String, unique=True)
 
     owner_pk = Column(Integer, ForeignKey("users.pk"))
     owner = relationship("User", back_populates="quizzes")
 
     members = relationship("User", secondary=member_table)
 
-    enter_code = Column(String, unique=True, default=_generate_enter_code())
-
     steps = relationship("Step", back_populates="quiz")
+
+    @property
+    def done(self):
+        if self.steps:
+            return all([step.done for step in self.steps])
+        return False
 
 
 class Step(Timestamped, BaseManagerMixin):

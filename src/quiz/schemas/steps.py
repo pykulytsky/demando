@@ -17,5 +17,7 @@ class StepCreate(StepBase):
 class Step(StepBase, Timestamped):
     pk: int
     done: bool
-    quiz: int
     options: List[Option]
+
+    class Config:
+        orm_mode = True

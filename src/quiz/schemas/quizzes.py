@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -12,12 +12,16 @@ class QuizBase(BaseModel):
 
 
 class QuizCreate(QuizBase):
-    owner: int
+    enter_code: Optional[str]
 
 
 class Quiz(QuizBase, Timestamped):
     pk: int
     owner: User
-    members: List[User]
+    members: Optional[List[User]]
     enter_code: str
-    steps: List[Step]
+    steps: Optional[List[Step]]
+    done: bool
+
+    class Config:
+        orm_mode = True

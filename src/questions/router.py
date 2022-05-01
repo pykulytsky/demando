@@ -1,3 +1,4 @@
+import typing
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Type
 
@@ -87,7 +88,6 @@ class ItemRouter(CrudRouter):
     def _get_schemas_diff(self, exclude: Optional[List] = None) -> List:
         """Check get and create schema and return array of fields that are different"""  # noqa
         fields = []
-
         for field in self.create_schema.__annotations__:
             try:
                 if (
@@ -95,7 +95,11 @@ class ItemRouter(CrudRouter):
                     != self.create_schema.__annotations__[field]
                 ):  # noqa
                     if (exclude and field not in exclude) or not exclude:
-                        fields.append(field)
+                        if (
+                            self.create_schema.__annotations__[field]
+                            != typing.Union[str, None]
+                        ):
+                            fields.append(field)
             except KeyError:
                 if (exclude and field not in exclude) or not exclude:
                     fields.append(field)
