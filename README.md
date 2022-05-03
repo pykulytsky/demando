@@ -5,7 +5,7 @@ Application for questions, answers and voting.
 [![CodeFactor](https://www.codefactor.io/repository/github/pykulytsky/demando/badge)](https://www.codefactor.io/repository/github/pykulytsky/demando)
 [![codecov](https://codecov.io/gh/pykulytsky/demando/branch/master/graph/badge.svg?token=LJNM13PTQS)](https://codecov.io/gh/pykulytsky/demando)
 
-## Run with Docker
+## Run using Docker
 1. Install [docker](https://docs.docker.com/engine/install/) and [docker-compose](https://docs.docker.com/compose/install/) on your local machine.
 2. Clone this repository
 ```bash
@@ -24,12 +24,12 @@ docker-compose build app
 docker-compose up
 ```
 ---
-## Run with uvicorn
+## Run using uvicorn
 1. Clone this repository
 ```bash
 git clone https://github.com/pykulytsky/demando.git
 ```
-2. Go to directory with our project
+2. Follow to the directory with project
 ```bash
 cd demando
 ```
