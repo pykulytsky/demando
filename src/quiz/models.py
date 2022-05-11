@@ -31,6 +31,7 @@ class Quiz(Timestamped, QuizManagerMixin):
     pk = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=False)
     enter_code = Column(String, unique=True)
+    # seconds_per_answer = Column(Integer, default=30)
 
     owner_pk = Column(Integer, ForeignKey("users.pk"))
     owner = relationship("User", back_populates="quizzes")
@@ -48,7 +49,7 @@ class Quiz(Timestamped, QuizManagerMixin):
 
 class Step(Timestamped, BaseManagerMixin):
 
-    __tablename__ = "step"
+    __tablename__ = "steps"
 
     pk = Column(Integer, primary_key=True, index=True)
     title = Column(String, unique=False)
@@ -62,11 +63,28 @@ class Step(Timestamped, BaseManagerMixin):
 
 class StepOption(Timestamped, OptionManagerMixin):
 
-    __tablename__ = "step_option"
+    __tablename__ = "step_options"
 
     pk = Column(Integer, primary_key=True, index=True)
     title = Column(String, unique=True)
     is_right = Column(Boolean)
 
-    step_pk = Column(Integer, ForeignKey("step.pk"))
+    step_pk = Column(Integer, ForeignKey("steps.pk"))
     step = relationship("Step", back_populates="options")
+
+    answers = relationship("Answer", back_populates="step_option")
+
+
+class Answer(Timestamped, BaseManagerMixin):
+
+    __tablename__ = "answers"
+
+    pk = Column(Integer, primary_key=True, index=True)
+    member_pk = Column(Integer, ForeignKey("users.pk"))
+    member = relationship("User", back_populates="answers")
+
+    step_option_pk = Column(Integer, ForeignKey("step_options.pk"))
+    step_option = relationship("StepOption", back_populates="answers")
+
+    time_to_estimate = Column(Integer, nullable=False)
+    rank = Column(Integer, nullable=True)

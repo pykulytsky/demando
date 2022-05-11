@@ -13,6 +13,7 @@ from questions.models import Option, Poll, Vote
 from questions.routes import base as questions_routes
 from questions.routes.websocket import manager
 from questions.schemas import polls as polls_schemas
+from quiz.models import Answer, Step, StepOption
 from quiz.routes import base as quizzes_router
 from quiz.webocket import quiz_manager
 from tests.test_database import TestSessionLocal
@@ -70,14 +71,23 @@ async def vote_websocket(
 
 @app.websocket("/ws/quiz/{enter_code}/{token}")
 async def quiz(websocket: WebSocket, enter_code: str, token: str):
+
     db = next(get_db())
     if "pytest" in sys.argv[0]:
         db = TestSessionLocal()
-    await quiz_manager.connect_to_room(websocket, enter_code, token, db)
 
+    user = authenticate_via_websockets(token, db)
+    room = quiz_manager.get_room(enter_code)
+    if room:
+        for connection in room.active_connections:
+            if connection.member == user:
+                raise WebSocketDisconnect()
+
+    await quiz_manager.connect_to_room(websocket, enter_code, token, db)
+    await quiz_manager.broadcast_list_of_members(enter_code)
     try:
         while True:
-            data = websocket.receive_json()
+            data = await websocket.receive_json()
             if data.get("action", False):
                 if data["action"] == "start":  # start quiz
                     await quiz_manager.broadcast_next_step(enter_code, db, 0)
@@ -88,6 +98,23 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
                         )
                     except IndexError:
                         pass  # finish
+            if data.get("answer", False):
+                step_option = StepOption.manager(db).get(pk=data['answer']['option']['pk'])
+                rank = 0
+                if step_option.is_right:
+                    rank = round(int(data['answer']['time']) * 1000 / 30)
+                answer = Answer.manager(db).create(
+                    member=user,
+                    step_option=step_option,
+                    time_to_estimate=data['answer']['time'],
+                    rank=rank
+                )
+                await quiz_manager.send_personal_message(
+                    data={
+                        "results": rank
+                    },
+                    websocket=websocket
+                )
 
     except WebSocketDisconnect:
         quiz_manager.disconnect_from_room(enter_code, websocket)

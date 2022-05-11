@@ -113,9 +113,12 @@ class ItemRouter(CrudRouter):
         models = list()
 
         for i in range(len(fields)):
-            fields[i] = fields[i] + "s"
-            if fields[i] == "authors" or fields[i] == "owners":
-                fields[i] = "users"
+            if fields[i] == 'quiz':
+                fields[i] = 'quizzes'
+            else:
+                fields[i] = fields[i] + "s"
+                if fields[i] == "authors" or fields[i] == "owners":
+                    fields[i] = "users"
 
             models.append(get_class_by_table(Base, fields[i]))
 
@@ -125,13 +128,14 @@ class ItemRouter(CrudRouter):
         Base.metadata.create_all(engine)
 
         fields = self._get_schemas_diff(exclude=["user", "owner", "author"])
-
         models = list()
-
         for i in range(len(fields)):
-            fields[i] = fields[i] + "s"
-            models.append(get_class_by_table(Base, fields[i]))
+            if fields[i] == 'quiz':
+                fields[i] = 'quizzes'
+            else:
+                fields[i] = fields[i] + "s"
 
+            models.append(get_class_by_table(Base, fields[i]))
         return models
 
     def find_user_field(self):

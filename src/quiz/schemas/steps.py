@@ -1,9 +1,9 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
 from questions.schemas.base import Timestamped
-from quiz.schemas.options import Option
+from quiz.schemas.options import Option, OptionWebsocket
 
 
 class StepBase(BaseModel):
@@ -17,7 +17,16 @@ class StepCreate(StepBase):
 class Step(StepBase, Timestamped):
     pk: int
     done: bool
-    options: List[Option]
+    options: Optional[List[Option]]
+
+    class Config:
+        orm_mode = True
+
+
+class StepWebsocket(StepBase):
+    pk: int
+    done: bool
+    options: Optional[List[OptionWebsocket]]
 
     class Config:
         orm_mode = True

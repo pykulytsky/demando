@@ -14,7 +14,13 @@ class OptionCreate(OptionBase):
 
 class Option(OptionBase, Timestamped):
     pk: int
-    step: int
+
+    class Config:
+        orm_mode = True
+
+
+class OptionWebsocket(OptionBase):
+    pk: int
 
     class Config:
         orm_mode = True

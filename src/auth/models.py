@@ -50,6 +50,7 @@ class User(Base, AuthManagerMixin):
     votes = relationship("Vote", back_populates="owner")
     questions = relationship("Question", back_populates="author")
     quizzes = relationship("Quiz", secondary=member_table, back_populates="owner")
+    answers = relationship("Answer", back_populates="member")
 
     liked_questions = relationship(
         "Question", secondary=likes_table, back_populates="likes"
