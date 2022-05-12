@@ -31,3 +31,9 @@ async def test_many_connections(quiz, user, db):
         await quiz_manager.connect_to_room(websocket, quiz.enter_code, user.token, db)
 
     assert len(quiz_manager.get_room(quiz.enter_code).active_connections) == 5
+
+
+def test_count_results(quiz, db):
+    results = quiz_manager.get_quiz_results(quiz.enter_code, db)
+
+    assert results == {}

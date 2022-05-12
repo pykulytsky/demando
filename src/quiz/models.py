@@ -66,7 +66,7 @@ class StepOption(Timestamped, OptionManagerMixin):
     __tablename__ = "step_options"
 
     pk = Column(Integer, primary_key=True, index=True)
-    title = Column(String, unique=True)
+    title = Column(String, unique=False)
     is_right = Column(Boolean)
 
     step_pk = Column(Integer, ForeignKey("steps.pk"))

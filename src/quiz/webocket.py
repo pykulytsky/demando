@@ -49,7 +49,6 @@ class QuizRoom(Room):
         return members
 
     async def broadcast(self, data: dict, except_owner: bool = False):
-        print(f"{data=}")
         for connection in self.active_connections:
             await connection.websocket.send_json(data)
 
@@ -135,8 +134,28 @@ class QuizConnectionManager(ConnectionManager):
 
         await room.broadcast(data)
 
-    def get_quiz_owner(self, enter_code: str):
-        room = self.get_room(enter_code)
+    def get_quiz_results(
+        self,
+        enter_code: str,
+        db: Session
+    ):
+        quiz = Quiz.manager(db).get(enter_code=enter_code)
+        results = {}
+        for step in quiz.steps:
+            for option in step.options:
+                for answer in option.answers:
+                    if results.get(answer.member.username, False):
+                        results.update({
+                            answer.member.username: int(results[
+                                answer.member.username
+                            ]) + int(answer.rank)
+                        })
+                    else:
+                        results.update({
+                            answer.member.username: answer.rank
+                        })
+
+        return results
 
 
 quiz_manager = QuizConnectionManager()

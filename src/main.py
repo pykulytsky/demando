@@ -81,6 +81,7 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
     if room:
         for connection in room.active_connections:
             if connection.member == user:
+                print(f"member already exists - {user.username}")
                 raise WebSocketDisconnect()
 
     await quiz_manager.connect_to_room(websocket, enter_code, token, db)
@@ -94,21 +95,32 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
                 if data["action"] == "next":  # next step
                     try:
                         await quiz_manager.broadcast_next_step(
-                            enter_code, db, data["step"]
+                            enter_code, db, int(data["step"])
                         )
                     except IndexError:
-                        pass  # finish
+                        await quiz_manager.broadcast_to_room(
+                            enter_code,
+                            data={
+                                "action": "finish",
+                                "final_results": quiz_manager.get_quiz_results(
+                                    enter_code,
+                                    db
+                                )
+                            }
+                        )
+
             if data.get("answer", False):
                 step_option = StepOption.manager(db).get(pk=data['answer']['option']['pk'])
                 rank = 0
                 if step_option.is_right:
                     rank = round(int(data['answer']['time']) * 1000 / 30)
-                answer = Answer.manager(db).create(
+                Answer.manager(db).create(
                     member=user,
                     step_option=step_option,
                     time_to_estimate=data['answer']['time'],
                     rank=rank
                 )
+                print(f"{websocket=}, {rank=}")
                 await quiz_manager.send_personal_message(
                     data={
                         "results": rank
