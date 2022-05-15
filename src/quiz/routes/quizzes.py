@@ -10,7 +10,7 @@ quizzes_router = ItemRouter(
     model=Quiz,
     get_schema=quizzes.Quiz,
     create_schema=quizzes.QuizCreate,
-    update_schema=quizzes.QuizCreate,
+    update_schema=quizzes.QuizPatch,
     prefix="/quizzes",
     tags=["quizzes"],
 )

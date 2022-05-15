@@ -13,15 +13,29 @@ class QuizBase(BaseModel):
 
 class QuizCreate(QuizBase):
     enter_code: Optional[str]
+    seconds_per_answer: Optional[int]
+    is_private: Optional[bool]
+    delete_after_finish: Optional[bool]
+
+
+class QuizPatch(BaseModel):
+    name: Optional[str]
+    enter_code: Optional[str]
+    seconds_per_answer: Optional[int]
+    is_private: Optional[bool]
+    delete_after_finish: Optional[bool]
 
 
 class Quiz(QuizBase, Timestamped):
     pk: int
     owner: User
-    members: Optional[List[User]]
     enter_code: str
-    steps: Optional[List[Step]]
     done: bool
+    seconds_per_answer: int
+    is_private: Optional[bool]
+    delete_after_finish: Optional[bool]
+    members: Optional[List[User]]
+    steps: Optional[List[Step]]
 
     class Config:
         orm_mode = True

@@ -8,7 +8,7 @@ from auth.backend import authenticate_via_websockets
 from auth.models import User
 from core.database import Base, engine
 from questions.routes.websocket import ConnectionManager, Room
-from quiz.models import Quiz
+from quiz.models import Quiz, Step
 from quiz.schemas import steps
 
 Base.metadata.create_all(bind=engine)
@@ -124,6 +124,7 @@ class QuizConnectionManager(ConnectionManager):
     ):
         room = self.get_room(enter_code)
         current_step = room.quiz.steps[step]
+
         step_data = steps.StepWebsocket(
             pk=current_step.pk,
             title=current_step.title,
@@ -133,6 +134,8 @@ class QuizConnectionManager(ConnectionManager):
         data = {"step_number": step + 1, "step": step_data.dict()}
 
         await room.broadcast(data)
+
+        Step.manager(db).update(pk=current_step.pk, done=True)
 
     def get_quiz_results(
         self,

@@ -14,6 +14,11 @@ class StepCreate(StepBase):
     quiz: int
 
 
+class StepPatch(BaseModel):
+    title: Optional[str]
+    done: Optional[bool]
+
+
 class Step(StepBase, Timestamped):
     pk: int
     done: bool

@@ -10,7 +10,7 @@ steps_router = ItemRouter(
     model=Step,
     get_schema=steps.Step,
     create_schema=steps.StepCreate,
-    update_schema=steps.StepCreate,
+    update_schema=steps.StepPatch,
     prefix="/steps",
     tags=["steps"],
 )

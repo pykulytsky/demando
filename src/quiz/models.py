@@ -31,7 +31,9 @@ class Quiz(Timestamped, QuizManagerMixin):
     pk = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=False)
     enter_code = Column(String, unique=True)
-    # seconds_per_answer = Column(Integer, default=30)
+    seconds_per_answer = Column(Integer, default=30)
+    is_private = Column(Boolean, default=False)
+    delete_after_finish = Column(Boolean, default=False)
 
     owner_pk = Column(Integer, ForeignKey("users.pk"))
     owner = relationship("User", back_populates="quizzes")

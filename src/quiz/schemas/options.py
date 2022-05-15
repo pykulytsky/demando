@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
 
 from questions.schemas.base import Timestamped
@@ -11,6 +12,11 @@ class OptionBase(BaseModel):
 class OptionCreate(OptionBase):
     step: int
 
+
+class OptionPatch(BaseModel):
+    title: Optional[str]
+    is_right: Optional[bool]
+    
 
 class Option(OptionBase, Timestamped):
     pk: int

@@ -14,7 +14,7 @@ from questions.models import Option, Poll, Vote
 from questions.routes import base as questions_routes
 from questions.routes.websocket import manager
 from questions.schemas import polls as polls_schemas
-from quiz.models import Answer, Step, StepOption
+from quiz.models import Answer, StepOption
 from quiz.routes import base as quizzes_router
 from quiz.webocket import quiz_manager
 from tests.test_database import TestSessionLocal
@@ -114,7 +114,7 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
                 step_option = StepOption.manager(db).get(pk=data['answer']['option']['pk'])
                 rank = 0
                 if step_option.is_right:
-                    rank = round(int(data['answer']['time']) * 1000 / 30)
+                    rank = round(int(data['answer']['time']) * 1000 / step_option.step.quiz.seconds_per_answer)
                 Answer.manager(db).create(
                     member=user,
                     step_option=step_option,

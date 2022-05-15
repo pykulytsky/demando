@@ -10,7 +10,7 @@ options_router = ItemRouter(
     model=StepOption,
     get_schema=options.Option,
     create_schema=options.OptionCreate,
-    update_schema=options.OptionCreate,
+    update_schema=options.OptionPatch,
     prefix="/options",
     tags=["options"],
 )
