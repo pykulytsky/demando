@@ -144,16 +144,19 @@ class QuizConnectionManager(ConnectionManager):
         for step in quiz.steps:
             for option in step.options:
                 for answer in option.answers:
-                    if results.get(answer.member.username, False):
-                        results.update({
-                            answer.member.username: int(results[
-                                answer.member.username
-                            ]) + int(answer.rank)
-                        })
-                    else:
-                        results.update({
-                            answer.member.username: answer.rank
-                        })
+                    try:
+                        if results.get(answer.member.username, False):
+                            results.update({
+                                answer.member.username: int(results[
+                                    answer.member.username
+                                ]) + int(answer.rank)
+                            })
+                        else:
+                            results.update({
+                                answer.member.username: answer.rank
+                            })
+                    except AttributeError:
+                        continue
 
         return results
 

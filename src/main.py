@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
 from auth.backend import authenticate_via_websockets
+from auth.models import User
 from auth.routes import auth_router
 from core import settings
 from core.database import Base, engine, get_db
@@ -129,6 +130,8 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
                 )
 
     except WebSocketDisconnect:
+        if user.email == "temp.email.quiz@temp.quiz":
+            User.manager(db).delete(user)
         quiz_manager.disconnect_from_room(enter_code, websocket)
 
 

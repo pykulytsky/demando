@@ -32,14 +32,15 @@ async def create_user(
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     new_user = manager.create_user(user)
-    service = MailService()
+    if new_user.email != "temp.user.quiz.@temp.quiz":
+        service = MailService()
 
-    background_tasks.add_task(
-        service.send_verification_mail,
-        new_user.username,
-        new_user.verification_code,
-        new_user.email,
-    )
+        background_tasks.add_task(
+            service.send_verification_mail,
+            new_user.username,
+            new_user.verification_code,
+            new_user.email,
+        )
 
     return {"token": new_user.token}
 
