@@ -15,7 +15,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "3.8.1"
 gino = {extras = ["pg", "starlette"], version = "^1.0.1"}
 alembic = "1.5.7"
 psycopg2 = "2.8.6"
