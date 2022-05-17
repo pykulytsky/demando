@@ -1,1 +1,1 @@
-web: poetry run prod
+web: uvicorn --app-dir src/ main:app --workers 4
