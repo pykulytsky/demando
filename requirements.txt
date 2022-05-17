@@ -24,7 +24,6 @@ colorama==0.4.4
 coverage==5.5
 databases==0.4.3
 decorator==4.4.2
-demando==0.1.0
 Deprecated==1.2.13
 dnspython==2.1.0
 email-validator==1.1.2
