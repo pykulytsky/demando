@@ -40,6 +40,7 @@ async def vote_websocket(
     if "pytest" in sys.argv[0]:
         db = TestSessionLocal()
 
+    print(websocket.client.host)
     await manager.send_personal_message_to_room(
         poll_id,
         polls_schemas.Poll.from_orm(Poll.manager(db).get(pk=poll_id)).dict(),
@@ -49,13 +50,38 @@ async def vote_websocket(
         while True:
             data = await websocket.receive_json()
             try:
-                user = authenticate_via_websockets(data["token"], db)
-
-                Vote.manager(db).create(
-                    owner=user,
-                    poll=Poll.manager(db).get(pk=data["poll_id"]),
-                    option=Option.manager(db).get(pk=data["option_id"]),
-                )
+                try:
+                    user = authenticate_via_websockets(data["token"], db)
+                except KeyError:
+                    user = False
+                if user:
+                    if data.get("multiply", False):
+                        for option in data["options"]:
+                            Vote.manager(db).create(
+                                owner=user,
+                                poll=Poll.manager(db).get(pk=data["poll_id"]),
+                                option=Option.manager(db).get(pk=option),
+                            )
+                    else:
+                        Vote.manager(db).create(
+                            owner=user,
+                            poll=Poll.manager(db).get(pk=data["poll_id"]),
+                            option=Option.manager(db).get(pk=data["option_id"]),
+                        )
+                elif data.get("ip_address", False):
+                    if data.get("multiply", False):
+                        for option in data["options"]:
+                            Vote.manager(db).create(
+                                owner_host=data["ip_address"],
+                                poll=Poll.manager(db).get(pk=data["poll_id"]),
+                                option=Option.manager(db).get(pk=option),
+                            )
+                    else:
+                        Vote.manager(db).create(
+                            owner_host=data["ip_address"],
+                            poll=Poll.manager(db).get(pk=data["poll_id"]),
+                            option=Option.manager(db).get(pk=data["option_id"]),
+                        )
                 await manager.broadcast_to_room(
                     poll_id,
                     polls_schemas.Poll.from_orm(
@@ -82,6 +108,7 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
     if room:
         for connection in room.active_connections:
             if connection.member == user:
+                websocket.close()
                 print(f"member already exists - {user.username}")
                 raise WebSocketDisconnect()
 

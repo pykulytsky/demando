@@ -61,6 +61,8 @@ class Poll(Timestamped, BaseManagerMixin):
 
     pk = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
+    multiply_votes = Column(Boolean, default=False)
+    allowed_votes = Column(Integer, default=1)
 
     owner_pk = Column(Integer, ForeignKey("users.pk"))
     owner = relationship("User", back_populates="polls")
@@ -102,6 +104,8 @@ class Vote(Timestamped, BaseManagerMixin):
 
     owner_pk = Column(Integer, ForeignKey("users.pk"))
     owner = relationship("User", back_populates="votes")
+
+    owner_host = Column(String, nullable=True)
 
     option_pk = Column(Integer, ForeignKey("options.pk"))
     option = relationship("Option", back_populates="votes")

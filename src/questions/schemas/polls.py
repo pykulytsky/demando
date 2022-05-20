@@ -19,7 +19,8 @@ class OptionCreate(BaseModel):
 
 class BaseVote(BaseModel):
     pk: int
-    owner: User
+    owner: Optional[User]
+    owner_host: Optional[str]
 
     class Config:
         orm_mode = True
@@ -43,7 +44,7 @@ class OptionUpdate(BaseModel):
 
 
 class Vote(BaseVote):
-    owner: User
+    owner: Optional[User]
     option: Option
 
     class Config:
@@ -58,6 +59,8 @@ class VoteCreate(BaseModel):
 class Poll(BaseModel):
     pk: int
     name: str
+    multiply_votes: bool
+    allowed_votes: int
     owner: User
     options: Optional[List[Option]]
     votes: Optional[List[BaseVote]]
@@ -69,7 +72,8 @@ class Poll(BaseModel):
 class PollViaWeboscket(BaseModel):
     pk: int
     name: str
-    owner: User
+    multiply_votes: bool
+    allowed_votes: int
     options: Optional[List[Option]]
     votes: Optional[List[BaseVote]]
 
@@ -79,6 +83,8 @@ class PollViaWeboscket(BaseModel):
 
 class PollCreate(BaseModel):
     name: str
+    multiply_votes: Optional[bool] = False
+    allowed_votes: Optional[int] = 1
 
 
 class AuthenticatedPollCreate(PollCreate):
@@ -87,3 +93,5 @@ class AuthenticatedPollCreate(PollCreate):
 
 class PollUpdate(BaseModel):
     name: Optional[str] = None
+    multiply_votes: Optional[bool] = False
+    allowed_votes: Optional[int] = 1
