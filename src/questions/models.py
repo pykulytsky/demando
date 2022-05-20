@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Table
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import Boolean
 
@@ -63,6 +63,8 @@ class Poll(Timestamped, BaseManagerMixin):
     name = Column(String, nullable=False)
     multiply_votes = Column(Boolean, default=False)
     allowed_votes = Column(Integer, default=1)
+    limited_time = Column(Boolean, default=False)
+    time_to_vote = Column(DateTime, nullable=True)
 
     owner_pk = Column(Integer, ForeignKey("users.pk"))
     owner = relationship("User", back_populates="polls")
@@ -71,11 +73,6 @@ class Poll(Timestamped, BaseManagerMixin):
         "Option", back_populates="poll", order_by="Option.created.desc()"
     )
     votes = relationship("Vote", back_populates="poll", order_by="Vote.created.desc()")
-
-    @property
-    def rating(self):
-        ratings = {}
-        return ratings
 
 
 class Option(Timestamped, BaseManagerMixin):

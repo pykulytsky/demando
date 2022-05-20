@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Union
 
 from fastapi import WebSocket
@@ -68,6 +69,9 @@ class ConnectionManager:
         self, room_id: int, data: dict, websocket: WebSocket
     ):
         room = self.get_room(room_id)
+        for k in data:
+            if isinstance(data[k], datetime):
+                data[k] = str(data[k])
         await room.send_personal_message(data, websocket)
 
     async def broadcast(self, data: dict):
@@ -76,6 +80,9 @@ class ConnectionManager:
 
     async def broadcast_to_room(self, room_id: int, data: dict) -> None:
         room = self.get_room(room_id)
+        for k in data:
+            if isinstance(data[k], datetime):
+                data[k] = str(data[k])
         await room.broadcast(data)
 
 

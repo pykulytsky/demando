@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel
@@ -61,6 +62,8 @@ class Poll(BaseModel):
     name: str
     multiply_votes: bool
     allowed_votes: int
+    limited_time: bool
+    time_to_vote: Optional[datetime]
     owner: User
     options: Optional[List[Option]]
     votes: Optional[List[BaseVote]]
@@ -85,6 +88,8 @@ class PollCreate(BaseModel):
     name: str
     multiply_votes: Optional[bool] = False
     allowed_votes: Optional[int] = 1
+    limited_time: Optional[bool] = False
+    time_to_vote: Optional[datetime]
 
 
 class AuthenticatedPollCreate(PollCreate):
@@ -93,5 +98,7 @@ class AuthenticatedPollCreate(PollCreate):
 
 class PollUpdate(BaseModel):
     name: Optional[str] = None
-    multiply_votes: Optional[bool] = False
-    allowed_votes: Optional[int] = 1
+    multiply_votes: Optional[bool]
+    allowed_votes: Optional[int]
+    limited_time: Optional[bool]
+    time_to_vote: Optional[datetime]
