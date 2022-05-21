@@ -2,7 +2,6 @@ from questions.router import ItemRouter
 from quiz.models import QuizAnonUser
 from quiz.schemas import anon_users
 
-
 anon_users_router = ItemRouter(
     model=QuizAnonUser,
     get_schema=anon_users.QuizAnonUser,

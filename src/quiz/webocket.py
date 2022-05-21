@@ -29,10 +29,7 @@ class QuizRoom(Room):
         self.active_connections: List[Connection] = []
 
     async def connect(
-        self,
-        webosocket: WebSocket,
-        member: Union[User, str],
-        is_owner: bool = False
+        self, webosocket: WebSocket, member: Union[User, str], is_owner: bool = False
     ):
         await webosocket.accept()
         self.active_connections.append(Connection(webosocket, member, is_owner))
@@ -68,7 +65,7 @@ class QuizConnectionManager(ConnectionManager):
         self, websocket: WebSocket, enter_code: str, token: str, db: Session
     ):
         if "username:" in token:
-            member = QuizAnonUser.manager(db).get(username=token.split(':')[1])
+            member = QuizAnonUser.manager(db).get(username=token.split(":")[1])
         else:
             member = authenticate_via_websockets(token, db)
         quiz = Quiz.manager(db).get(enter_code=enter_code)
@@ -141,11 +138,7 @@ class QuizConnectionManager(ConnectionManager):
 
         Step.manager(db).update(pk=current_step.pk, done=True)
 
-    def get_quiz_results(
-        self,
-        enter_code: str,
-        db: Session
-    ):
+    def get_quiz_results(self, enter_code: str, db: Session):
         quiz = Quiz.manager(db).get(enter_code=enter_code)
         results = {}
         for step in quiz.steps:
@@ -154,26 +147,30 @@ class QuizConnectionManager(ConnectionManager):
                     try:
                         if answer.member is not None:
                             if results.get(answer.member.username, False):
-                                results.update({
-                                    answer.member.username: int(results[
-                                        answer.member.username
-                                    ]) + int(answer.rank)
-                                })
+                                results.update(
+                                    {
+                                        answer.member.username: int(
+                                            results[answer.member.username]
+                                        )
+                                        + int(answer.rank)
+                                    }
+                                )
                             else:
-                                results.update({
-                                    answer.member.username: answer.rank
-                                })
+                                results.update({answer.member.username: answer.rank})
                         else:
                             if results.get(answer.anon_member.username, False):
-                                results.update({
-                                    answer.anon_member.username: int(results[
-                                        answer.anon_member.username
-                                    ]) + int(answer.rank)
-                                })
+                                results.update(
+                                    {
+                                        answer.anon_member.username: int(
+                                            results[answer.anon_member.username]
+                                        )
+                                        + int(answer.rank)
+                                    }
+                                )
                             else:
-                                results.update({
-                                    answer.anon_member.username: answer.rank
-                                })
+                                results.update(
+                                    {answer.anon_member.username: answer.rank}
+                                )
                     except AttributeError:
                         continue
 

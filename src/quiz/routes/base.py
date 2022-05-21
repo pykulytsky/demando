@@ -2,10 +2,10 @@ from fastapi import APIRouter
 
 from core.database import Base, engine
 
+from .anon_users import anon_users_router
 from .options import options_router
 from .quizzes import quizzes_router
 from .steps import steps_router
-from .anon_users import anon_users_router
 
 Base.metadata.create_all(bind=engine)
 

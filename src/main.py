@@ -104,15 +104,13 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
         db = TestSessionLocal()
 
     if "username:" in token:
-        _user = QuizAnonUser.manager(db).get_or_false(username=token.split(':')[1])
+        _user = QuizAnonUser.manager(db).get_or_false(username=token.split(":")[1])
         if _user:
-            await websocket.send_json({
-                "type": "username"
-            })
+            await websocket.send_json({"type": "username"})
             await websocket.close(code=1007)
             raise WebSocketDisconnect()
-        else:
-            user = QuizAnonUser.manager(db).create(username=token.split(':')[1])
+
+        user = QuizAnonUser.manager(db).create(username=token.split(":")[1])
     else:
         user = authenticate_via_websockets(token, db)
     room = quiz_manager.get_room(enter_code)
@@ -141,37 +139,39 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
                             data={
                                 "action": "finish",
                                 "final_results": quiz_manager.get_quiz_results(
-                                    enter_code,
-                                    db
-                                )
-                            }
+                                    enter_code, db
+                                ),
+                            },
                         )
 
             if data.get("answer", False):
-                step_option = StepOption.manager(db).get(pk=data['answer']['option']['pk'])
+                step_option = StepOption.manager(db).get(
+                    pk=data["answer"]["option"]["pk"]
+                )
                 rank = 0
                 if step_option.is_right:
-                    rank = round(int(data['answer']['time']) * 1000 / step_option.step.quiz.seconds_per_answer)
+                    rank = round(
+                        int(data["answer"]["time"])
+                        * 1000
+                        / step_option.step.quiz.seconds_per_answer
+                    )
                 if isinstance(user, User):
                     Answer.manager(db).create(
                         member=user,
                         step_option=step_option,
-                        time_to_estimate=data['answer']['time'],
-                        rank=rank
+                        time_to_estimate=data["answer"]["time"],
+                        rank=rank,
                     )
                 else:
                     Answer.manager(db).create(
                         anon_member=user,
                         step_option=step_option,
-                        time_to_estimate=data['answer']['time'],
-                        rank=rank
+                        time_to_estimate=data["answer"]["time"],
+                        rank=rank,
                     )
                 print(f"{websocket=}, {rank=}")
                 await quiz_manager.send_personal_message(
-                    data={
-                        "results": rank
-                    },
-                    websocket=websocket
+                    data={"results": rank}, websocket=websocket
                 )
 
     except WebSocketDisconnect:

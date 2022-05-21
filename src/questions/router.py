@@ -113,8 +113,8 @@ class ItemRouter(CrudRouter):
         models = list()
 
         for i in range(len(fields)):
-            if fields[i] == 'quiz':
-                fields[i] = 'quizzes'
+            if fields[i] == "quiz":
+                fields[i] = "quizzes"
             else:
                 fields[i] = fields[i] + "s"
                 if fields[i] == "authors" or fields[i] == "owners":
@@ -130,8 +130,8 @@ class ItemRouter(CrudRouter):
         fields = self._get_schemas_diff(exclude=["user", "owner", "author"])
         models = list()
         for i in range(len(fields)):
-            if fields[i] == 'quiz':
-                fields[i] = 'quizzes'
+            if fields[i] == "quiz":
+                fields[i] = "quizzes"
             else:
                 fields[i] = fields[i] + "s"
 
