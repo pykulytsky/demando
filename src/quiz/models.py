@@ -77,6 +77,16 @@ class StepOption(Timestamped, OptionManagerMixin):
     answers = relationship("Answer", back_populates="step_option")
 
 
+class QuizAnonUser(Timestamped, BaseManagerMixin):
+
+    __tablename__ = "quiz_anon_users"
+
+    pk = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True)
+
+    answers = relationship("Answer", back_populates="anon_member")
+
+
 class Answer(Timestamped, BaseManagerMixin):
 
     __tablename__ = "answers"
@@ -84,6 +94,9 @@ class Answer(Timestamped, BaseManagerMixin):
     pk = Column(Integer, primary_key=True, index=True)
     member_pk = Column(Integer, ForeignKey("users.pk"))
     member = relationship("User", back_populates="answers")
+
+    anon_member_pk = Column(Integer, ForeignKey("quiz_anon_users.pk"))
+    anon_member = relationship("QuizAnonUser", back_populates="answers")
 
     step_option_pk = Column(Integer, ForeignKey("step_options.pk"))
     step_option = relationship("StepOption", back_populates="answers")
