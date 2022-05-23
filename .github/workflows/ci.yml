@@ -76,7 +76,7 @@ jobs:
 
       - name: Run pytest
         shell: bash
-        run: python -m poetry run pytest --cov=src/ --cov-report=xml
+        run: python -m poetry run pytest -x --cov=src/ --cov-report=xml
         env:
           TEST_DB_NAME: demando
           DB_USER: demando
