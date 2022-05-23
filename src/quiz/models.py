@@ -82,7 +82,7 @@ class QuizAnonUser(Timestamped, BaseManagerMixin):
     __tablename__ = "quiz_anon_users"
 
     pk = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True)
+    username = Column(String, unique=False)
 
     answers = relationship("Answer", back_populates="anon_member")
 

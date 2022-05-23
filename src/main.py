@@ -104,11 +104,11 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
         db = TestSessionLocal()
 
     if "username:" in token:
-        _user = QuizAnonUser.manager(db).get_or_false(username=token.split(":")[1])
-        if _user:
-            await websocket.send_json({"type": "username"})
-            await websocket.close(code=1007)
-            raise WebSocketDisconnect()
+        # _user = QuizAnonUser.manager(db).get_or_false(username=token.split(":")[1])
+        # if _user:
+        #     await websocket.send_json({"type": "username"})
+        #     await websocket.close(code=1007)
+        #     raise WebSocketDisconnect()
 
         user = QuizAnonUser.manager(db).create(username=token.split(":")[1])
     else:
@@ -118,6 +118,10 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
         for connection in room.active_connections:
             if connection.member == user:
                 await websocket.close()
+                raise WebSocketDisconnect()
+            if connection.member.username == user.username:
+                await websocket.send_json({"type": "username"})
+                await websocket.close(code=1007)
                 raise WebSocketDisconnect()
 
     await quiz_manager.connect_to_room(websocket, enter_code, token, db)
