@@ -86,9 +86,9 @@ class PollViaWeboscket(BaseModel):
 
 class PollCreate(BaseModel):
     name: str
-    multiply_votes: Optional[bool] = False
-    allowed_votes: Optional[int] = 1
-    limited_time: Optional[bool] = False
+    multiply_votes: Optional[bool]
+    allowed_votes: Optional[int]
+    limited_time: Optional[bool]
     time_to_vote: Optional[datetime]
 
 

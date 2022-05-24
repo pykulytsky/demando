@@ -46,6 +46,21 @@ class QuizRoom(Room):
 
         return members
 
+    @property
+    def owner_in_room(self) -> bool:
+        for connection in self.active_connections:
+            if connection.is_owner:
+                return True
+
+        return False
+
+    def is_owner(self, user) -> bool:
+        print(f"{user=}")
+        print(f"{self.quiz.owner=}")
+        if self.quiz.owner.pk == user.pk:
+            return True
+        return False
+
     async def broadcast(self, data: dict, except_owner: bool = False):
         for connection in self.active_connections:
             await connection.websocket.send_json(data)
@@ -73,14 +88,14 @@ class QuizConnectionManager(ConnectionManager):
         for room in self.rooms:
             if enter_code == room.enter_code:
                 connected = True
-                if member == quiz.owner:
+                if member.pk == quiz.owner.pk:
                     await room.connect(websocket, member, is_owner=True)
                 else:
                     await room.connect(websocket, member)
 
         if not connected:
             room = QuizRoom(quiz)
-            if member == quiz.owner:
+            if member.pk == quiz.owner.pk:
                 await room.connect(websocket, member, is_owner=True)
             else:
                 await room.connect(websocket, member)
