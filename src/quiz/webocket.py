@@ -27,6 +27,7 @@ class QuizRoom(Room):
         self.enter_code = quiz.enter_code
         self.quiz = quiz
         self.active_connections: List[Connection] = []
+        self.current_step_iter = 0
 
     async def connect(
         self, webosocket: WebSocket, member: Union[User, str], is_owner: bool = False
@@ -55,9 +56,7 @@ class QuizRoom(Room):
         return False
 
     def is_owner(self, user) -> bool:
-        print(f"{user=}")
-        print(f"{self.quiz.owner=}")
-        if self.quiz.owner.pk == user.pk:
+        if self.quiz.owner == user:
             return True
         return False
 
@@ -88,14 +87,15 @@ class QuizConnectionManager(ConnectionManager):
         for room in self.rooms:
             if enter_code == room.enter_code:
                 connected = True
-                if member.pk == quiz.owner.pk:
+                if member == quiz.owner:
                     await room.connect(websocket, member, is_owner=True)
                 else:
                     await room.connect(websocket, member)
 
         if not connected:
             room = QuizRoom(quiz)
-            if member.pk == quiz.owner.pk:
+            print(f"{member==quiz.owner}")
+            if member == quiz.owner:
                 await room.connect(websocket, member, is_owner=True)
             else:
                 await room.connect(websocket, member)
@@ -139,7 +139,7 @@ class QuizConnectionManager(ConnectionManager):
         step: int = 0,
     ):
         room = self.get_room(enter_code)
-        current_step = room.quiz.steps[step]
+        current_step = room.quiz.steps[room.current_step_iter]
 
         step_data = steps.StepWebsocket(
             pk=current_step.pk,
@@ -147,11 +147,12 @@ class QuizConnectionManager(ConnectionManager):
             done=current_step.done,
             options=[option.__dict__ for option in current_step.options],
         )
-        data = {"step_number": step + 1, "step": step_data.dict()}
+        data = {"step_number": room.current_step_iter + 1, "step": step_data.dict()}
 
         await room.broadcast(data)
 
         Step.manager(db).update(pk=current_step.pk, done=True)
+        room.current_step_iter += 1
 
     def get_quiz_results(self, enter_code: str, db: Session):
         quiz = Quiz.manager(db).get(enter_code=enter_code)

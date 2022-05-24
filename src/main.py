@@ -108,12 +108,11 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
     else:
         user = authenticate_via_websockets(token, db)
     room = quiz_manager.get_room(enter_code)
-
     if room:
-        if not room.is_owner(user):
-            if not room.owner_in_room:
-                await websocket.close(code=1007)
-                raise WebSocketDisconnect()
+        # if not room.is_owner(user):
+        #     if not room.owner_in_room:
+        #         await websocket.close(code=1007)
+        #         raise WebSocketDisconnect()
         for connection in room.active_connections:
             if connection.member == user:
                 await websocket.close()
