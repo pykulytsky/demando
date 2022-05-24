@@ -1,11 +1,14 @@
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy.engine import reflection
+from calendar import c
 
+import pytest
 from auth.models import User
 from auth.schemas import UserCreate
 from core.database import Base
+from fastapi.testclient import TestClient
 from main import app, get_db
+from psycopg2.errors import ForeignKeyViolation
+from sqlalchemy.engine import reflection
+
 from tests.test_database import TestSessionLocal, engine
 
 from .test_client import JWTAuthTestClient
@@ -44,7 +47,10 @@ def db():
         con = engine.connect()
         for table in total_tables:
             if table != "alembic_version":
-                con.execute(f"DELETE FROM {table} CASCADE;")
+                try:
+                    con.execute(f"DELETE FROM {table} CASCADE;")
+                except ForeignKeyViolation:
+                    continue
         db.close()
 
 

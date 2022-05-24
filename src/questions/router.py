@@ -13,6 +13,7 @@ from core.database import Base, engine, get_db
 from core.router import CrudRouter
 from core.utils import get_class_by_table
 from questions.models import Event, Question
+from questions.schemas.polls import PollCreate
 from tasks.mails import notify_event_statistic
 
 
@@ -99,7 +100,8 @@ class ItemRouter(CrudRouter):
                             self.create_schema.__annotations__[field]
                             != typing.Union[str, None]
                         ):
-                            fields.append(field)
+                            if self.create_schema != PollCreate:
+                                fields.append(field)
             except KeyError:
                 if (exclude and field not in exclude) or not exclude:
                     fields.append(field)
@@ -113,8 +115,8 @@ class ItemRouter(CrudRouter):
         models = list()
 
         for i in range(len(fields)):
-            if fields[i] == 'quiz':
-                fields[i] = 'quizzes'
+            if fields[i] == "quiz":
+                fields[i] = "quizzes"
             else:
                 fields[i] = fields[i] + "s"
                 if fields[i] == "authors" or fields[i] == "owners":
@@ -130,8 +132,8 @@ class ItemRouter(CrudRouter):
         fields = self._get_schemas_diff(exclude=["user", "owner", "author"])
         models = list()
         for i in range(len(fields)):
-            if fields[i] == 'quiz':
-                fields[i] = 'quizzes'
+            if fields[i] == "quiz":
+                fields[i] = "quizzes"
             else:
                 fields[i] = fields[i] + "s"
 

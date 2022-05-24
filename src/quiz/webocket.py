@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List, Optional, Union
 
 from fastapi import WebSocket
 from sqlalchemy.orm import Session
@@ -8,7 +8,7 @@ from auth.backend import authenticate_via_websockets
 from auth.models import User
 from core.database import Base, engine
 from questions.routes.websocket import ConnectionManager, Room
-from quiz.models import Quiz, Step
+from quiz.models import Quiz, QuizAnonUser, Step
 from quiz.schemas import steps
 
 Base.metadata.create_all(bind=engine)
@@ -17,7 +17,8 @@ Base.metadata.create_all(bind=engine)
 @dataclass()
 class Connection:
     websocket: WebSocket
-    member: User
+    member: Union[User, QuizAnonUser]
+    host: Optional[str] = None
     is_owner: bool = False
 
 
@@ -28,10 +29,7 @@ class QuizRoom(Room):
         self.active_connections: List[Connection] = []
 
     async def connect(
-        self,
-        webosocket: WebSocket,
-        member: User,
-        is_owner: bool = False
+        self, webosocket: WebSocket, member: Union[User, str], is_owner: bool = False
     ):
         await webosocket.accept()
         self.active_connections.append(Connection(webosocket, member, is_owner))
@@ -47,6 +45,21 @@ class QuizRoom(Room):
             members.append(connection.member.username)
 
         return members
+
+    @property
+    def owner_in_room(self) -> bool:
+        for connection in self.active_connections:
+            if connection.is_owner:
+                return True
+
+        return False
+
+    def is_owner(self, user) -> bool:
+        print(f"{user=}")
+        print(f"{self.quiz.owner=}")
+        if self.quiz.owner.pk == user.pk:
+            return True
+        return False
 
     async def broadcast(self, data: dict, except_owner: bool = False):
         for connection in self.active_connections:
@@ -66,20 +79,23 @@ class QuizConnectionManager(ConnectionManager):
     async def connect_to_room(
         self, websocket: WebSocket, enter_code: str, token: str, db: Session
     ):
-        member = authenticate_via_websockets(token, db)
+        if "username:" in token:
+            member = QuizAnonUser.manager(db).get(username=token.split(":")[1])
+        else:
+            member = authenticate_via_websockets(token, db)
         quiz = Quiz.manager(db).get(enter_code=enter_code)
         connected = False
         for room in self.rooms:
             if enter_code == room.enter_code:
                 connected = True
-                if member == quiz.owner:
+                if member.pk == quiz.owner.pk:
                     await room.connect(websocket, member, is_owner=True)
                 else:
                     await room.connect(websocket, member)
 
         if not connected:
             room = QuizRoom(quiz)
-            if member == quiz.owner:
+            if member.pk == quiz.owner.pk:
                 await room.connect(websocket, member, is_owner=True)
             else:
                 await room.connect(websocket, member)
@@ -137,27 +153,39 @@ class QuizConnectionManager(ConnectionManager):
 
         Step.manager(db).update(pk=current_step.pk, done=True)
 
-    def get_quiz_results(
-        self,
-        enter_code: str,
-        db: Session
-    ):
+    def get_quiz_results(self, enter_code: str, db: Session):
         quiz = Quiz.manager(db).get(enter_code=enter_code)
         results = {}
         for step in quiz.steps:
             for option in step.options:
                 for answer in option.answers:
                     try:
-                        if results.get(answer.member.username, False):
-                            results.update({
-                                answer.member.username: int(results[
-                                    answer.member.username
-                                ]) + int(answer.rank)
-                            })
+                        if answer.member is not None:
+                            if results.get(answer.member.username, False):
+                                results.update(
+                                    {
+                                        answer.member.username: int(
+                                            results[answer.member.username]
+                                        )
+                                        + int(answer.rank)
+                                    }
+                                )
+                            else:
+                                results.update({answer.member.username: answer.rank})
                         else:
-                            results.update({
-                                answer.member.username: answer.rank
-                            })
+                            if results.get(answer.anon_member.username, False):
+                                results.update(
+                                    {
+                                        answer.anon_member.username: int(
+                                            results[answer.anon_member.username]
+                                        )
+                                        + int(answer.rank)
+                                    }
+                                )
+                            else:
+                                results.update(
+                                    {answer.anon_member.username: answer.rank}
+                                )
                     except AttributeError:
                         continue
 

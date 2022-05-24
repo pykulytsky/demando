@@ -34,6 +34,7 @@ class Quiz(Timestamped, QuizManagerMixin):
     seconds_per_answer = Column(Integer, default=30)
     is_private = Column(Boolean, default=False)
     delete_after_finish = Column(Boolean, default=False)
+    cover = Column(String, nullable=True)
 
     owner_pk = Column(Integer, ForeignKey("users.pk"))
     owner = relationship("User", back_populates="quizzes")
@@ -77,6 +78,16 @@ class StepOption(Timestamped, OptionManagerMixin):
     answers = relationship("Answer", back_populates="step_option")
 
 
+class QuizAnonUser(Timestamped, BaseManagerMixin):
+
+    __tablename__ = "quiz_anon_users"
+
+    pk = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=False)
+
+    answers = relationship("Answer", back_populates="anon_member")
+
+
 class Answer(Timestamped, BaseManagerMixin):
 
     __tablename__ = "answers"
@@ -84,6 +95,9 @@ class Answer(Timestamped, BaseManagerMixin):
     pk = Column(Integer, primary_key=True, index=True)
     member_pk = Column(Integer, ForeignKey("users.pk"))
     member = relationship("User", back_populates="answers")
+
+    anon_member_pk = Column(Integer, ForeignKey("quiz_anon_users.pk"))
+    anon_member = relationship("QuizAnonUser", back_populates="answers")
 
     step_option_pk = Column(Integer, ForeignKey("step_options.pk"))
     step_option = relationship("StepOption", back_populates="answers")

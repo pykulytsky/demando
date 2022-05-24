@@ -14,7 +14,7 @@ from questions.models import Option, Poll, Vote
 from questions.routes import base as questions_routes
 from questions.routes.websocket import manager
 from questions.schemas import polls as polls_schemas
-from quiz.models import Answer, StepOption
+from quiz.models import Answer, QuizAnonUser, StepOption
 from quiz.routes import base as quizzes_router
 from quiz.webocket import quiz_manager
 from tests.test_database import TestSessionLocal
@@ -103,13 +103,24 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
     if "pytest" in sys.argv[0]:
         db = TestSessionLocal()
 
-    user = authenticate_via_websockets(token, db)
+    if "username:" in token:
+        user = QuizAnonUser.manager(db).create(username=token.split(":")[1])
+    else:
+        user = authenticate_via_websockets(token, db)
     room = quiz_manager.get_room(enter_code)
+
     if room:
+        if not room.is_owner(user):
+            if not room.owner_in_room:
+                await websocket.close(code=1007)
+                raise WebSocketDisconnect()
         for connection in room.active_connections:
             if connection.member == user:
-                websocket.close()
-                print(f"member already exists - {user.username}")
+                await websocket.close()
+                raise WebSocketDisconnect()
+            if connection.member.username == user.username:
+                await websocket.send_json({"type": "username"})
+                await websocket.close(code=1007)
                 raise WebSocketDisconnect()
 
     await quiz_manager.connect_to_room(websocket, enter_code, token, db)
@@ -131,34 +142,45 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
                             data={
                                 "action": "finish",
                                 "final_results": quiz_manager.get_quiz_results(
-                                    enter_code,
-                                    db
-                                )
-                            }
+                                    enter_code, db
+                                ),
+                            },
                         )
 
             if data.get("answer", False):
-                step_option = StepOption.manager(db).get(pk=data['answer']['option']['pk'])
+                step_option = StepOption.manager(db).get(
+                    pk=data["answer"]["option"]["pk"]
+                )
                 rank = 0
                 if step_option.is_right:
-                    rank = round(int(data['answer']['time']) * 1000 / step_option.step.quiz.seconds_per_answer)
-                Answer.manager(db).create(
-                    member=user,
-                    step_option=step_option,
-                    time_to_estimate=data['answer']['time'],
-                    rank=rank
-                )
+                    rank = round(
+                        int(data["answer"]["time"])
+                        * 1000
+                        / step_option.step.quiz.seconds_per_answer
+                    )
+                if isinstance(user, User):
+                    Answer.manager(db).create(
+                        member=user,
+                        step_option=step_option,
+                        time_to_estimate=data["answer"]["time"],
+                        rank=rank,
+                    )
+                else:
+                    Answer.manager(db).create(
+                        anon_member=user,
+                        step_option=step_option,
+                        time_to_estimate=data["answer"]["time"],
+                        rank=rank,
+                    )
                 print(f"{websocket=}, {rank=}")
                 await quiz_manager.send_personal_message(
-                    data={
-                        "results": rank
-                    },
-                    websocket=websocket
+                    data={"results": rank}, websocket=websocket
                 )
 
     except WebSocketDisconnect:
-        if user.email == "temp.email.quiz@temp.quiz":
-            User.manager(db).delete(user)
+        if isinstance(user, User):
+            if user.email == "temp.email.quiz@temp.quiz":
+                User.manager(db).delete(user)
         quiz_manager.disconnect_from_room(enter_code, websocket)
 
 
