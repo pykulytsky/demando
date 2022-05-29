@@ -68,6 +68,7 @@ class ItemRouter(CrudRouter):
                 or self.model == Question
                 or settings.ALLOW_EVERYONE_CREATE_ITEMS
             ):  # noqa
+
                 instance = self.model.manager(db).create(
                     **self.get_create_data(
                         create_schema=create_schema, user=user, db=db
@@ -101,7 +102,8 @@ class ItemRouter(CrudRouter):
                             != typing.Union[str, None]
                         ):
                             if self.create_schema != PollCreate:
-                                fields.append(field)
+                                if self.create_schema.__annotations__[field] != typing.Union[int, None]:
+                                    fields.append(field)
             except KeyError:
                 if (exclude and field not in exclude) or not exclude:
                     fields.append(field)
@@ -149,6 +151,8 @@ class ItemRouter(CrudRouter):
         model_fields = self._get_schemas_diff(exclude=["user", "owner", "author"])
         models = self._get_schema_diff_models_exclude_user()
 
+        print(f"{model_fields=}")
+
         for field in create_schema.__dict__.keys():
             if field in model_fields:
                 if hasattr(models[model_fields.index(field)], "manager"):
@@ -166,4 +170,5 @@ class ItemRouter(CrudRouter):
             if hasattr(self.model, user_field):
                 data.update({user_field: user})
 
+        print(data)
         return data

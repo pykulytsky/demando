@@ -70,3 +70,5 @@ EMAIL_HOST_USER_NAME = config("EMAIL_HOST_USER_NAME", cast=str, default="Ivan Iv
 
 MAILJET_API_KEY = config("MAILJET_API_KEY", cast=str, default="")
 MAILJET_SECRET = config("MAILJET_SECRET", cast=str, default="")
+
+LOGTAIL_TOKEN = config("LOGTAIL_TOKEN", cast=str, default="")

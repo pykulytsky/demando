@@ -24,6 +24,7 @@ class QuizPatch(BaseModel):
     seconds_per_answer: Optional[int]
     is_private: Optional[bool]
     delete_after_finish: Optional[bool]
+    cover: Optional[str]
 
 
 class Quiz(QuizBase, Timestamped):
@@ -34,6 +35,7 @@ class Quiz(QuizBase, Timestamped):
     seconds_per_answer: int
     is_private: Optional[bool]
     delete_after_finish: Optional[bool]
+    cover: Optional[str]
     members: Optional[List[User]]
     steps: Optional[List[Step]]
 

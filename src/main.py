@@ -1,3 +1,4 @@
+from datetime import datetime
 import sys
 
 import sentry_sdk
@@ -18,8 +19,17 @@ from quiz.models import Answer, QuizAnonUser, StepOption
 from quiz.routes import base as quizzes_router
 from quiz.webocket import quiz_manager
 from tests.test_database import TestSessionLocal
+from logtail import LogtailHandler
+import logging
 
 Base.metadata.create_all(bind=engine)
+
+handler = LogtailHandler(source_token=settings.LOGTAIL_TOKEN)
+
+logger = logging.getLogger(__name__)
+logger.handlers = []
+logger.setLevel(logging.INFO)
+logger.addHandler(handler)
 
 
 app = FastAPI(dependencies=[Depends(get_db)])
@@ -209,4 +219,18 @@ async def sentry_exception(request: Request, call_next):
                     "ip_address": request.client.host,
                 }
                 sentry_sdk.capture_exception(e)
+        raise e
+
+
+@app.middleware("http")
+async def logtail(request: Request, call_next):
+    try:
+        response = await call_next(request)
+        logger.info(
+            f"[{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}][{request.client.host}] Request: {request.method} {request.url} {request}"
+        )
+        return response
+    except Exception as e:
+        logger.error(f"[{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}][request.client.host] Error: {e.with_traceback()}")
+
         raise e
