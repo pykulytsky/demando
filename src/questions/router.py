@@ -151,8 +151,6 @@ class ItemRouter(CrudRouter):
         model_fields = self._get_schemas_diff(exclude=["user", "owner", "author"])
         models = self._get_schema_diff_models_exclude_user()
 
-        print(f"{model_fields=}")
-
         for field in create_schema.__dict__.keys():
             if field in model_fields:
                 if hasattr(models[model_fields.index(field)], "manager"):
@@ -170,5 +168,4 @@ class ItemRouter(CrudRouter):
             if hasattr(self.model, user_field):
                 data.update({user_field: user})
 
-        print(data)
         return data

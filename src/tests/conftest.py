@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from main import app, get_db
 from psycopg2.errors import ForeignKeyViolation
 from sqlalchemy.engine import reflection
+from sqlalchemy.exc import IntegrityError
 
 from tests.test_database import TestSessionLocal, engine
 
@@ -45,11 +46,12 @@ def db():
         total_tables = insp.get_table_names()[::-1]
 
         con = engine.connect()
+        con.execute("DELETE FROM likes CASCADE;")
         for table in total_tables:
             if table != "alembic_version":
                 try:
                     con.execute(f"DELETE FROM {table} CASCADE;")
-                except ForeignKeyViolation:
+                except (ForeignKeyViolation, IntegrityError):
                     continue
         db.close()
 

@@ -41,7 +41,7 @@ class Quiz(Timestamped, QuizManagerMixin):
 
     members = relationship("User", secondary=member_table)
 
-    steps = relationship("Step", back_populates="quiz")
+    steps = relationship("Step", back_populates="quiz", order_by="Step.pk")
 
     @property
     def done(self):

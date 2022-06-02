@@ -27,3 +27,37 @@ def test_get_my_questions(auth_client, question):
 
     assert response.status_code == 200
     assert response.json()[0]["body"] == question.body
+
+
+def test_like_question(auth_client, question, user, db):
+    response = auth_client.patch(f"/qa/questions/{question.pk}/like/")
+
+    assert response.status_code == 200
+
+    question.likes.remove(user)
+    db.commit()
+    db.refresh(question)
+
+
+def test_like_question_without_auth(client, question):
+    response = client.patch(f"/qa/questions/{question.pk}/like/")
+
+    assert response.status_code == 403
+
+
+def test_like_question_twice(auth_client, question, user, db):
+    auth_client.patch(f"/qa/questions/{question.pk}/like/")
+
+    response = auth_client.patch(f"/qa/questions/{question.pk}/like/")
+
+    assert response.status_code == 400
+
+    question.likes.remove(user)
+    db.commit()
+    db.refresh(question)
+
+
+def test_like_non_existent_question(auth_client):
+    response = auth_client.patch("/qa/questions/999999/like/")
+
+    assert response.status_code == 404

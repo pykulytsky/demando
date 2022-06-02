@@ -50,7 +50,6 @@ async def vote_websocket(
     if "pytest" in sys.argv[0]:
         db = TestSessionLocal()
 
-    print(websocket.client.host)
     await manager.send_personal_message_to_room(
         poll_id,
         polls_schemas.Poll.from_orm(Poll.manager(db).get(pk=poll_id)).dict(),
@@ -231,6 +230,6 @@ async def logtail(request: Request, call_next):
         )
         return response
     except Exception as e:
-        logger.error(f"[{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}][request.client.host] Error: {e.with_traceback()}")
+        logger.error(f"[{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}][request.client.host] Error: {str(e)}")
 
         raise e
