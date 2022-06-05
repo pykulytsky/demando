@@ -1,9 +1,10 @@
-from datetime import datetime
+import logging
 import sys
 
 import sentry_sdk
 from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from logtail import LogtailHandler
 from starlette.requests import Request
 
 from auth.backend import authenticate_via_websockets
@@ -19,24 +20,30 @@ from quiz.models import Answer, QuizAnonUser, StepOption
 from quiz.routes import base as quizzes_router
 from quiz.webocket import quiz_manager
 from tests.test_database import TestSessionLocal
-from logtail import LogtailHandler
-import logging
+import requests
+
 
 Base.metadata.create_all(bind=engine)
 
-handler = LogtailHandler(source_token=settings.LOGTAIL_TOKEN)
-
-logger = logging.getLogger(__name__)
-logger.handlers = []
-logger.setLevel(logging.INFO)
-logger.addHandler(handler)
-
-
 app = FastAPI(dependencies=[Depends(get_db)])
+
+
+def logtail_ready():
+    handler = LogtailHandler(source_token=settings.LOGTAIL_TOKEN)
+
+    app.logger = logging.getLogger(__name__)
+    app.logger.handlers = [handler]
+    app.logger.setLevel(logging.INFO)
+
+    app.logger.info("logtail is ready")
+    app.logger.critical("test")
+
 
 app.include_router(auth_router)
 app.include_router(questions_routes.router)
 app.include_router(quizzes_router.router)
+
+app.add_event_handler("startup", logtail_ready)
 
 
 @app.websocket("/ws/vote/{poll_id}")
@@ -225,11 +232,30 @@ async def sentry_exception(request: Request, call_next):
 async def logtail(request: Request, call_next):
     try:
         response = await call_next(request)
-        logger.info(
-            f"[{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}][{request.client.host}] Request: {request.method} {request.url} {request}"
+        requests.post(
+            url="https://in.logtail.com/",
+            headers={
+                "Authorization": "Bearer FP25Asv4WbHzs4oPPx7jf3na",
+                "Content-Type": "application/json"
+            },
+            json={
+                "level": "info",
+                "message": f"[{request.client.host}] | {request.method} {request.url} | {response.status_code}"
+            }
         )
         return response
     except Exception as e:
-        logger.error(f"[{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}][request.client.host] Error: {str(e)}")
+        if request["headers"][1][1] != b"testclient":
+            requests.post(
+                url="https://in.logtail.com/",
+                headers={
+                    "Authorization": "Bearer FP25Asv4WbHzs4oPPx7jf3na",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "level": "error",
+                    "message": f"[{request.client.host}] | {request.method} {request.url} | {str(e)}"
+                }
+            )
 
         raise e

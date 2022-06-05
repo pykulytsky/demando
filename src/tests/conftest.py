@@ -1,15 +1,13 @@
-from calendar import c
-
 import pytest
-from auth.models import User
-from auth.schemas import UserCreate
-from core.database import Base
 from fastapi.testclient import TestClient
-from main import app, get_db
 from psycopg2.errors import ForeignKeyViolation
 from sqlalchemy.engine import reflection
 from sqlalchemy.exc import IntegrityError
 
+from auth.models import User
+from auth.schemas import UserCreate
+from core.database import Base
+from main import app, get_db
 from tests.test_database import TestSessionLocal, engine
 
 from .test_client import JWTAuthTestClient

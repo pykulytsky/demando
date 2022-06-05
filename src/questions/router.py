@@ -102,7 +102,10 @@ class ItemRouter(CrudRouter):
                             != typing.Union[str, None]
                         ):
                             if self.create_schema != PollCreate:
-                                if self.create_schema.__annotations__[field] != typing.Union[int, None]:
+                                if (
+                                    self.create_schema.__annotations__[field]
+                                    != typing.Union[int, None]
+                                ):
                                     fields.append(field)
             except KeyError:
                 if (exclude and field not in exclude) or not exclude:

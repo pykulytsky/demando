@@ -11,9 +11,10 @@ from core.router import CrudRouter
 from . import schemas
 from .exceptions import WrongLoginCredentials
 
+
 auth_router = CrudRouter(
     model=User,
-    get_schema=schemas.User,
+    get_schema=schemas.UserDetail,
     create_schema=schemas.UserCreate,
     update_schema=schemas.UserPatch,
     prefix="/auth/users",
@@ -56,7 +57,7 @@ async def refresh_token(user: schemas.UserLogin, db: Session = Depends(get_db)):
     return {"token": db_user.token}
 
 
-@auth_router.get("/me/", response_model=schemas.User)
+@auth_router.get("/me/", response_model=schemas.UserDetail)
 async def get_me(
     user: auth_router.get_schema = Depends(authenticate),
 ):
