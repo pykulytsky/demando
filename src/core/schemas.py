@@ -1,5 +1,6 @@
 from typing import Optional, Type
 
+from fastapi import File, UploadFile
 from pydantic import BaseConfig, BaseModel, create_model
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.properties import ColumnProperty
@@ -40,3 +41,12 @@ class OrmModel(BaseModel):
             return pydantic_model
         except TypeError as e:
             raise NotValidModel(e)
+
+
+class PydanticFile(BaseModel):
+    file: UploadFile = File(...)
+
+
+class Properties(BaseModel):
+    language: str = None
+    author: str = None

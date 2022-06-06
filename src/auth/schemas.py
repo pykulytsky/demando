@@ -98,12 +98,15 @@ class User(UserBase):
     first_name: Optional[str]
     last_name: Optional[str]
     age: Optional[int]
+    country: Optional[str]
 
     class Config:
         orm_mode = True
 
 
 class UserDetail(User):
+    avatar: Optional[str]
+
     events: List[EventNested]
     questions: List[QuestionNested]
     polls: List[PollNested]
@@ -121,6 +124,7 @@ class UserPatch(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     age: Optional[int] = None
+    country: Optional[str] = None
 
 
 class Token(BaseModel):

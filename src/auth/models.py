@@ -9,6 +9,7 @@ from sqlalchemy.orm import relationship
 
 from core import settings
 from core.database import Base
+from core.manager import BaseManagerMixin
 from questions.models import likes_table
 from quiz.models import member_table
 
@@ -38,6 +39,8 @@ class User(Base, AuthManagerMixin):
 
     password = Column(String)
     email = Column(String, unique=True)
+    country = Column(String, nullable=True)
+    avatar = Column(String, nullable=True)
 
     active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False, nullable=True)
@@ -51,6 +54,7 @@ class User(Base, AuthManagerMixin):
     questions = relationship("Question", back_populates="author")
     quizzes = relationship("Quiz", secondary=member_table, back_populates="owner")
     answers = relationship("Answer", back_populates="member")
+    # links = relationship("SocialMediaLink", back_populates="profile")
 
     liked_questions = relationship(
         "Question", secondary=likes_table, back_populates="likes"
@@ -83,3 +87,14 @@ class User(Base, AuthManagerMixin):
 
     def __str__(self) -> str:
         return f"<User: {self.username}>"
+
+
+class SocialMediaLink(Base, BaseManagerMixin):
+
+    __tablename__ = "links"
+
+    pk = Column(Integer, primary_key=True, index=True)
+    link = Column(String, nullable=False)
+    social_media = Column(String, nullable=False)
+    # profile = Column(Integer, ForeignKey("users.pk"))
+    # profile_pk = relationship("User", back_populates="links")

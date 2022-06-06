@@ -1,13 +1,17 @@
 import logging
 import sys
 
+import aiofiles
+import requests
 import sentry_sdk
-from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import (Depends, FastAPI, File, UploadFile, WebSocket,
+                     WebSocketDisconnect)
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from logtail import LogtailHandler
 from starlette.requests import Request
 
-from auth.backend import authenticate_via_websockets
+from auth.backend import authenticate, authenticate_via_websockets
 from auth.models import User
 from auth.routes import auth_router
 from core import settings
@@ -20,12 +24,14 @@ from quiz.models import Answer, QuizAnonUser, StepOption
 from quiz.routes import base as quizzes_router
 from quiz.webocket import quiz_manager
 from tests.test_database import TestSessionLocal
-import requests
+from sqlalchemy.orm import Session
 
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(dependencies=[Depends(get_db)])
+
+app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
 
 def logtail_ready():
@@ -236,12 +242,12 @@ async def logtail(request: Request, call_next):
             url="https://in.logtail.com/",
             headers={
                 "Authorization": "Bearer FP25Asv4WbHzs4oPPx7jf3na",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             },
             json={
                 "level": "info",
-                "message": f"[{request.client.host}] | {request.method} {request.url} | {response.status_code}"
-            }
+                "message": f"[{request.client.host}] | {request.method} {request.url} | {response.status_code}",
+            },
         )
         return response
     except Exception as e:
@@ -250,12 +256,31 @@ async def logtail(request: Request, call_next):
                 url="https://in.logtail.com/",
                 headers={
                     "Authorization": "Bearer FP25Asv4WbHzs4oPPx7jf3na",
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
                 json={
                     "level": "error",
-                    "message": f"[{request.client.host}] | {request.method} {request.url} | {str(e)}"
-                }
+                    "message": f"[{request.client.host}] | {request.method} {request.url} | {str(e)}",
+                },
             )
 
         raise e
+
+
+@app.post("/uploadfile/")
+async def create_upload_file(
+    request: Request,
+    user: auth_router.get_schema = Depends(authenticate),
+    db: Session = Depends(get_db),
+    file: UploadFile = File(...)
+):
+    print(request.url._url[0:-11])
+    async with aiofiles.open(f"src/static/{file.filename}", "wb") as out_file:
+        content = await file.read()  # async read
+        await out_file.write(content)  # async write
+
+    user = User.manager(db).update(
+        pk=user.pk,
+        avatar=request.url._url[0:-11] + "static/" + file.filename
+    )
+    return {"filename": user.avatar}

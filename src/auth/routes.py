@@ -11,7 +11,6 @@ from core.router import CrudRouter
 from . import schemas
 from .exceptions import WrongLoginCredentials
 
-
 auth_router = CrudRouter(
     model=User,
     get_schema=schemas.UserDetail,

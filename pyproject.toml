@@ -89,6 +89,7 @@ celery = {extras = ["redis"], version = "^5.2.6"}
 python-multipart = "^0.0.5"
 logtail-python = "^0.1.3"
 loguru = "^0.6.0"
+aiofiles = "^0.8.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.2"
