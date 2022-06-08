@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Union
 
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import WebSocket
 from logger import http_logger
 
 from core.database import Base, engine
@@ -34,8 +34,17 @@ class Room:
         await websocket.send_json(data)
 
     async def disconnect(self, websocket: WebSocket):
+
         await websocket.close()
         self.active_connections.remove(websocket)
+
+        http_logger.websocket_info(
+            websocket,
+            extra_data={
+                "connections": len(self.active_connections),
+                "status": "DISCONNECTED"
+            }
+        )
 
 
 class ConnectionManager:
