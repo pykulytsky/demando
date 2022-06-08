@@ -110,9 +110,21 @@ async def vote_websocket(
                     ).dict(),
                 )
             except TypeError:
+                http_logger.websocket_info(
+                    websocket,
+                    extra_data={
+                        "status": "DISCONNECTED"
+                    }
+                )
                 await manager.disconnect_from_room(poll_id, websocket)
                 db.close()
     except WebSocketDisconnect:
+        http_logger.websocket_info(
+            websocket,
+            extra_data={
+                "status": "DISCONNECTED"
+            }
+        )
         await manager.disconnect_from_room(poll_id, websocket)
         db.close()
 
