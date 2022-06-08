@@ -2,13 +2,13 @@ import logging
 import sys
 
 import aiofiles
-import requests
 import sentry_sdk
 from fastapi import (Depends, FastAPI, File, UploadFile, WebSocket,
                      WebSocketDisconnect)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from logtail import LogtailHandler
+from sqlalchemy.orm import Session
 from starlette.requests import Request
 
 from auth.backend import authenticate, authenticate_via_websockets
@@ -16,6 +16,7 @@ from auth.models import User
 from auth.routes import auth_router
 from core import settings
 from core.database import Base, engine, get_db
+from logger import http_logger
 from questions.models import Option, Poll, Vote
 from questions.routes import base as questions_routes
 from questions.routes.websocket import manager
@@ -24,8 +25,6 @@ from quiz.models import Answer, QuizAnonUser, StepOption
 from quiz.routes import base as quizzes_router
 from quiz.webocket import quiz_manager
 from tests.test_database import TestSessionLocal
-from sqlalchemy.orm import Session
-
 
 Base.metadata.create_all(bind=engine)
 
@@ -111,10 +110,10 @@ async def vote_websocket(
                     ).dict(),
                 )
             except TypeError:
-                manager.disconnect_from_room(poll_id, websocket)
+                await manager.disconnect_from_room(poll_id, websocket)
                 db.close()
     except WebSocketDisconnect:
-        manager.disconnect_from_room(poll_id, websocket)
+        await manager.disconnect_from_room(poll_id, websocket)
         db.close()
 
 
@@ -238,32 +237,11 @@ async def sentry_exception(request: Request, call_next):
 async def logtail(request: Request, call_next):
     try:
         response = await call_next(request)
-        requests.post(
-            url="https://in.logtail.com/",
-            headers={
-                "Authorization": "Bearer FP25Asv4WbHzs4oPPx7jf3na",
-                "Content-Type": "application/json",
-            },
-            json={
-                "level": "info",
-                "message": f"[{request.client.host}] | {request.method} {request.url} | {response.status_code}",
-            },
-        )
+        http_logger.info(request, response)
         return response
     except Exception as e:
         if request["headers"][1][1] != b"testclient":
-            requests.post(
-                url="https://in.logtail.com/",
-                headers={
-                    "Authorization": "Bearer FP25Asv4WbHzs4oPPx7jf3na",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "level": "error",
-                    "message": f"[{request.client.host}] | {request.method} {request.url} | {str(e)}",
-                },
-            )
-
+            http_logger.error(request, e)
         raise e
 
 

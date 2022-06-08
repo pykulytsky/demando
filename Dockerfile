@@ -11,5 +11,4 @@ RUN pip3 install -r requirements.txt --no-cache-dir
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-
 COPY . /app/

@@ -1,6 +1,9 @@
+from calendar import c
 import logging
 import sys
 from pprint import pformat
+from typing import Optional
+from fastapi import Request, Response, WebSocket
 
 from logtail import LogtailHandler
 # if you dont like imports of private modules
@@ -9,6 +12,7 @@ from loguru import logger
 from loguru._defaults import LOGURU_FORMAT
 
 from core import settings
+import requests
 
 
 class InterceptHandler(logging.Handler):
@@ -96,3 +100,61 @@ def init_logging():
     logger.configure(
         handlers=[{"sink": sys.stdout, "level": logging.DEBUG, "format": format_record}]
     )
+
+
+class HTTPLogger:
+    def __init__(self) -> None:
+        self.token = settings.LOGTAIL_TOKEN
+        self.url = "https://in.logtail.com/"
+
+    def info(self, request: Request, response: Response) -> None:
+        self.send(
+            data={
+                "message": f"[{request.client.host}] | {request.method} {request.url} | {response.status_code}",
+            },
+            level="info"
+        )
+
+    def error(self, request: Request, e) -> None:
+        self.send(
+            data={
+                "message": f"[{request.client.host}] | {request.method} {request.url} | {str(e)}",
+            },
+            level="error"
+        )
+
+    def send(self, data: dict, level: str) -> None:
+        requests.post(
+            url=self.url,
+            headers={
+                "Authorization": f"Bearer {self.token}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "level": level,
+                **data
+            },
+        )
+
+    def websocket_info(
+        self,
+        websocket: WebSocket,
+        extra_data: Optional[dict] = None
+    ) -> None:
+        self.send(
+            data={
+                "message": f"[{websocket.client.host}:{websocket.client.port}] {websocket.path_params} {websocket.scope['path']} | {str(extra_data)}"
+            },
+            level="info"
+        )
+
+    def websocket_error(self, websocket: WebSocket) -> None:
+        self.send(
+            data={
+                "message": f"[{websocket.client.host}:{websocket.client.port}] {websocket.path_params} {websocket.scope['path']}"
+            },
+            level="error"
+        )
+
+
+http_logger = HTTPLogger()
