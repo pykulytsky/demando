@@ -59,6 +59,7 @@ class ConnectionManager:
         self.active_connections.append(websocket)
 
     async def connect_to_room(self, websocket: WebSocket, room_id: int):
+        print(f"{self.rooms=}")
         connected = False
         already_connected = False
         for room in self.rooms:
