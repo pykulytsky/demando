@@ -98,15 +98,15 @@ class QuizConnectionManager(ConnectionManager):
 
         if not connected:
             room = QuizRoom(quiz)
+            self.rooms.append(room)
             print(f"{member==quiz.owner}")
+            print(self.rooms)
             if member == quiz.owner:
                 print(f"OWNER CONNECTED TO NEW ROOM: {room.quiz}")
                 await room.connect(websocket, member, is_owner=True)
             else:
                 print(f"USER {member} CONNECTED TO NEW ROOM: {room.quiz}")
                 await room.connect(websocket, member)
-            self.rooms.append(room)
-        print(self.rooms)
         self.active_connections.append(websocket)
 
     def get_room(self, enter_code: str) -> Union[QuizRoom, None]:
