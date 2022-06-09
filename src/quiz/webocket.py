@@ -85,6 +85,7 @@ class QuizConnectionManager(ConnectionManager):
         quiz = Quiz.manager(db).get(enter_code=enter_code)
         connected = False
         for room in self.rooms:
+            print(f"{room=}")
             if enter_code == room.enter_code:
                 connected = True
                 if member == quiz.owner:
