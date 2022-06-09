@@ -1,4 +1,3 @@
-from calendar import c
 import logging
 import sys
 from pprint import pformat
@@ -12,7 +11,8 @@ from loguru import logger
 from loguru._defaults import LOGURU_FORMAT
 
 from core import settings
-import requests
+
+import httpx
 
 
 class InterceptHandler(logging.Handler):
@@ -107,49 +107,50 @@ class HTTPLogger:
         self.token = settings.LOGTAIL_TOKEN
         self.url = "https://in.logtail.com/"
 
-    def info(self, request: Request, response: Response) -> None:
-        self.send(
+    async def info(self, request: Request, response: Response) -> None:
+        await self.send(
             data={
                 "message": f"[{request.client.host}] | {request.method} {request.url} | {response.status_code}",
             },
             level="info"
         )
 
-    def error(self, request: Request, e) -> None:
-        self.send(
+    async def error(self, request: Request, e) -> None:
+        await self.send(
             data={
                 "message": f"[{request.client.host}] | {request.method} {request.url} | {str(e)}",
             },
             level="error"
         )
 
-    def send(self, data: dict, level: str) -> None:
-        requests.post(
-            url=self.url,
-            headers={
-                "Authorization": f"Bearer {self.token}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "level": level,
-                **data
-            },
-        )
+    async def send(self, data: dict, level: str) -> None:
+        async with httpx.AsyncClient() as client:
+            await client.post(
+                url=self.url,
+                headers={
+                    "Authorization": f"Bearer {self.token}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "level": level,
+                    **data
+                },
+            )
 
-    def websocket_info(
+    async def websocket_info(
         self,
         websocket: WebSocket,
         extra_data: Optional[dict] = None
     ) -> None:
-        self.send(
+        await self.send(
             data={
                 "message": f"[{websocket.client.host}:{websocket.client.port}] {websocket.path_params} {websocket.scope['path']} | {str(extra_data)}"
             },
             level="info"
         )
 
-    def websocket_error(self, websocket: WebSocket) -> None:
-        self.send(
+    async def websocket_error(self, websocket: WebSocket) -> None:
+        await self.send(
             data={
                 "message": f"[{websocket.client.host}:{websocket.client.port}] {websocket.path_params} {websocket.scope['path']}"
             },

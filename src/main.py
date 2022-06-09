@@ -110,19 +110,21 @@ async def vote_websocket(
                     ).dict(),
                 )
             except TypeError:
-                http_logger.websocket_info(
+                await http_logger.websocket_info(
                     websocket,
                     extra_data={
-                        "status": "DISCONNECTED"
+                        "status": "TypeError",
+                        "websocket": websocket
                     }
                 )
                 await manager.disconnect_from_room(poll_id, websocket)
                 db.close()
     except WebSocketDisconnect:
-        http_logger.websocket_info(
+        await http_logger.websocket_info(
             websocket,
             extra_data={
-                "status": "DISCONNECTED"
+                "status": "DISCONNECTED",
+                "websocket": websocket
             }
         )
         await manager.disconnect_from_room(poll_id, websocket)
@@ -249,11 +251,11 @@ async def sentry_exception(request: Request, call_next):
 async def logtail(request: Request, call_next):
     try:
         response = await call_next(request)
-        http_logger.info(request, response)
+        await http_logger.info(request, response)
         return response
     except Exception as e:
         if request["headers"][1][1] != b"testclient":
-            http_logger.error(request, e)
+            await http_logger.error(request, e)
         raise e
 
 

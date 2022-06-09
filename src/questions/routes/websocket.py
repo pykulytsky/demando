@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Union
 
-from fastapi import WebSocket
+from fastapi import WebSocket, WebSocketDisconnect
 from logger import http_logger
 
 from core.database import Base, engine
@@ -24,24 +24,26 @@ class Room:
             await self.send_personal_message(data, connection)
 
     async def send_personal_message(self, data: dict, websocket: WebSocket):
-        http_logger.websocket_info(
+        await http_logger.websocket_info(
             websocket,
             extra_data={
                 "connections": len(self.active_connections),
-                "status": "SENDED"
+                "websocket": websocket,
+                "status": "SENDED",
+                "poll": data["pk"]
             }
         )
         await websocket.send_json(data)
 
     async def disconnect(self, websocket: WebSocket):
 
-        await websocket.close()
         self.active_connections.remove(websocket)
 
-        http_logger.websocket_info(
+        await http_logger.websocket_info(
             websocket,
             extra_data={
                 "connections": len(self.active_connections),
+                "websocket": websocket,
                 "status": "DISCONNECTED"
             }
         )
@@ -58,41 +60,44 @@ class ConnectionManager:
 
     async def connect_to_room(self, websocket: WebSocket, room_id: int):
         connected = False
-        # already_connected = False
+        already_connected = False
         for room in self.rooms:
             if room_id == room.room_id:
-                connected = True
-                http_logger.websocket_info(
+                # connected = True
+                # await room.connect(websocket)
+                await http_logger.websocket_info(
                     websocket,
                     extra_data={
                         "connections": len(self.active_connections),
-                        "status": "CONNECTED TO EXISTED ROOM"
+                        "status": "CONNECTED TO EXISTED ROOM",
+                        "websocket": websocket
                     }
                 )
-                await room.connect(websocket)
+                for conn in room.active_connections:
+                    if conn == websocket:
+                        already_connected = True
+                        raise WebSocketDisconnect()
 
-                # for conn in room.active_connections:
-                #     if conn.client.host == websocket.client.host:
-                #         already_connected = True
-                #         raise WebSocketDisconnect()
+                if not already_connected:
+                    connected = True
+                    await room.connect(websocket)
 
-                # if not already_connected:
-                #     connected = True
-                #     await room.connect(websocket)
+                print(room.active_connections)
 
         if not connected:
             print("Created new room")
             room = Room(room_id=room_id)
             await room.connect(websocket)
             self.rooms.append(room)
-            http_logger.websocket_info(
+            await http_logger.websocket_info(
                 websocket,
                 extra_data={
                     "connections": len(self.active_connections),
-                    "status": "CREATED NEW ROOM"
+                    "status": "CREATED NEW ROOM",
+                    "websocket": websocket
                 }
             )
-        self.active_connections.append(websocket)
+            print(room.active_connections)
 
     def get_room(self, room_id: int) -> Union[Room, None]:
         for room in self.rooms:
