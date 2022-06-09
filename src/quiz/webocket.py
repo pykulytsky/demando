@@ -100,7 +100,6 @@ class QuizConnectionManager(ConnectionManager):
             room = QuizRoom(quiz)
             print(f"{member==quiz.owner}")
             if member == quiz.owner:
-
                 print(f"OWNER CONNECTED TO NEW ROOM: {room.quiz}")
                 await room.connect(websocket, member, is_owner=True)
             else:
