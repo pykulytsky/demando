@@ -118,6 +118,9 @@ class QuizConnectionManager(ConnectionManager):
         room = self.get_room(enter_code)
         room.disconnect(websocket)
 
+        if len(room.active_connections) == 0:
+            self.rooms.remove(room)
+
     async def send_personal_message_to_room(
         self, enter_code: str, data: dict, websocket: WebSocket
     ):
