@@ -63,6 +63,7 @@ class ConnectionManager:
         connected = False
         already_connected = False
         for room in self.rooms:
+            print(f"{room.room_id=}")
             if room_id == room.room_id:
                 # connected = True
                 # await room.connect(websocket)
