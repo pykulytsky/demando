@@ -88,16 +88,21 @@ class QuizConnectionManager(ConnectionManager):
             if enter_code == room.enter_code:
                 connected = True
                 if member == quiz.owner:
+                    print(f"OWNER CONNECTED TO EXISTED ROOM: {room.quiz}")
                     await room.connect(websocket, member, is_owner=True)
                 else:
+                    print(f"USER {member} CONNECTED TO ROOM: {room.quiz}")
                     await room.connect(websocket, member)
 
         if not connected:
             room = QuizRoom(quiz)
             print(f"{member==quiz.owner}")
             if member == quiz.owner:
+
+                print(f"OWNER CONNECTED TO NEW ROOM: {room.quiz}")
                 await room.connect(websocket, member, is_owner=True)
             else:
+                print(f"USER {member} CONNECTED TO NEW ROOM: {room.quiz}")
                 await room.connect(websocket, member)
             self.rooms.append(room)
         self.active_connections.append(websocket)

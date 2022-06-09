@@ -139,10 +139,13 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
         db = TestSessionLocal()
 
     if "username:" in token:
+        print("ANON USER")
         user = QuizAnonUser.manager(db).create(username=token.split(":")[1])
     else:
+        print("AUTH USER")
         user = authenticate_via_websockets(token, db)
     room = quiz_manager.get_room(enter_code)
+    print(f"ROOM: {room}")
     if room:
         # if not room.is_owner(user):
         #     if not room.owner_in_room:
@@ -150,10 +153,11 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
         #         raise WebSocketDisconnect()
         for connection in room.active_connections:
             if connection.member == user:
+                print("AUTH USER IN ROOM")
                 await websocket.close()
                 raise WebSocketDisconnect()
             if connection.member.username == user.username:
-                await websocket.send_json({"type": "username"})
+                print("ANON USER IN ROOM")
                 await websocket.close(code=1007)
                 raise WebSocketDisconnect()
 
