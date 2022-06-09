@@ -83,6 +83,7 @@ class QuizConnectionManager(ConnectionManager):
         else:
             member = authenticate_via_websockets(token, db)
         quiz = Quiz.manager(db).get(enter_code=enter_code)
+        print(self.rooms)
         connected = False
         for room in self.rooms:
             print(f"{room=}")
@@ -106,6 +107,7 @@ class QuizConnectionManager(ConnectionManager):
                 print(f"USER {member} CONNECTED TO NEW ROOM: {room.quiz}")
                 await room.connect(websocket, member)
             self.rooms.append(room)
+        print(self.rooms)
         self.active_connections.append(websocket)
 
     def get_room(self, enter_code: str) -> Union[QuizRoom, None]:
