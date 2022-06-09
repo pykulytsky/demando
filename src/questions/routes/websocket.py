@@ -74,14 +74,14 @@ class ConnectionManager:
                         "websocket": websocket
                     }
                 )
-                for conn in room.active_connections:
-                    if conn == websocket:
-                        already_connected = True
-                        raise WebSocketDisconnect()
+                # for conn in room.active_connections:
+                #     if conn == websocket:
+                #         already_connected = True
+                #         raise WebSocketDisconnect()
 
-                if not already_connected:
-                    connected = True
-                    await room.connect(websocket)
+                # if not already_connected:
+                connected = True
+                await room.connect(websocket)
 
                 print(room.active_connections)
 
