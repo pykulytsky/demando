@@ -58,6 +58,8 @@ async def vote_websocket(
 ):
     await manager.connect_to_room(websocket, poll_id)
 
+    print(f"{manager.rooms}")
+
     db = next(get_db())
     if "pytest" in sys.argv[0]:
         db = TestSessionLocal()
