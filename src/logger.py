@@ -2,8 +2,9 @@ import logging
 import sys
 from pprint import pformat
 from typing import Optional
-from fastapi import Request, Response, WebSocket
 
+import httpx
+from fastapi import Request, Response, WebSocket
 from logtail import LogtailHandler
 # if you dont like imports of private modules
 # you can move it to typing.py module
@@ -11,8 +12,6 @@ from loguru import logger
 from loguru._defaults import LOGURU_FORMAT
 
 from core import settings
-
-import httpx
 
 
 class InterceptHandler(logging.Handler):
@@ -112,7 +111,7 @@ class HTTPLogger:
             data={
                 "message": f"[{request.client.host}] | {request.method} {request.url} | {response.status_code}",
             },
-            level="info"
+            level="info",
         )
 
     async def error(self, request: Request, e) -> None:
@@ -120,7 +119,7 @@ class HTTPLogger:
             data={
                 "message": f"[{request.client.host}] | {request.method} {request.url} | {str(e)}",
             },
-            level="error"
+            level="error",
         )
 
     async def send(self, data: dict, level: str) -> None:
@@ -131,22 +130,17 @@ class HTTPLogger:
                     "Authorization": f"Bearer {self.token}",
                     "Content-Type": "application/json",
                 },
-                json={
-                    "level": level,
-                    **data
-                },
+                json={"level": level, **data},
             )
 
     async def websocket_info(
-        self,
-        websocket: WebSocket,
-        extra_data: Optional[dict] = None
+        self, websocket: WebSocket, extra_data: Optional[dict] = None
     ) -> None:
         await self.send(
             data={
                 "message": f"[{websocket.client.host}:{websocket.client.port}] {websocket.path_params} {websocket.scope['path']} | {str(extra_data)}"
             },
-            level="info"
+            level="info",
         )
 
     async def websocket_error(self, websocket: WebSocket) -> None:
@@ -154,7 +148,7 @@ class HTTPLogger:
             data={
                 "message": f"[{websocket.client.host}:{websocket.client.port}] {websocket.path_params} {websocket.scope['path']}"
             },
-            level="error"
+            level="error",
         )
 
 

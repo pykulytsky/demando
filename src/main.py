@@ -1,4 +1,3 @@
-import logging
 import sys
 
 import aiofiles
@@ -7,7 +6,6 @@ from fastapi import (Depends, FastAPI, File, UploadFile, WebSocket,
                      WebSocketDisconnect)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from logtail import LogtailHandler
 from sqlalchemy.orm import Session
 from starlette.requests import Request
 
@@ -16,14 +14,15 @@ from auth.models import User
 from auth.routes import auth_router
 from core import settings
 from core.database import Base, engine, get_db
+from core.exceptions import ObjectDoesNotExists
 from logger import http_logger
 from questions.models import Option, Poll, Vote
 from questions.routes import base as questions_routes
-from questions.routes.websocket import manager
+from questions.routes.websocket import ConnectionManager
 from questions.schemas import polls as polls_schemas
 from quiz.models import Answer, QuizAnonUser, StepOption
 from quiz.routes import base as quizzes_router
-from quiz.webocket import quiz_manager
+from quiz.webocket import QuizConnectionManager
 from tests.test_database import TestSessionLocal
 
 Base.metadata.create_all(bind=engine)
@@ -33,22 +32,17 @@ app = FastAPI(dependencies=[Depends(get_db)])
 app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
 
-def logtail_ready():
-    handler = LogtailHandler(source_token=settings.LOGTAIL_TOKEN)
-
-    app.logger = logging.getLogger(__name__)
-    app.logger.handlers = [handler]
-    app.logger.setLevel(logging.INFO)
-
-    app.logger.info("logtail is ready")
-    app.logger.critical("test")
+def ws_ready():
+    app.quiz_manager = QuizConnectionManager()
+    app.manager = ConnectionManager()
+    print(f"Created managers: [{app.quiz_manager}, {app.manager}]")
 
 
 app.include_router(auth_router)
 app.include_router(questions_routes.router)
 app.include_router(quizzes_router.router)
 
-app.add_event_handler("startup", logtail_ready)
+app.add_event_handler("startup", ws_ready)
 
 
 @app.websocket("/ws/vote/{poll_id}")
@@ -56,13 +50,13 @@ async def vote_websocket(
     websocket: WebSocket,
     poll_id: str,
 ):
-    await manager.connect_to_room(websocket, poll_id)
+    await app.manager.connect_to_room(websocket, poll_id)
 
     db = next(get_db())
     if "pytest" in sys.argv[0]:
         db = TestSessionLocal()
 
-    await manager.send_personal_message_to_room(
+    await app.manager.send_personal_message_to_room(
         poll_id,
         polls_schemas.Poll.from_orm(Poll.manager(db).get(pk=poll_id)).dict(),
         websocket,
@@ -103,7 +97,7 @@ async def vote_websocket(
                             poll=Poll.manager(db).get(pk=data["poll_id"]),
                             option=Option.manager(db).get(pk=data["option_id"]),
                         )
-                await manager.broadcast_to_room(
+                await app.manager.broadcast_to_room(
                     poll_id,
                     polls_schemas.Poll.from_orm(
                         Poll.manager(db).get(pk=poll_id)
@@ -112,22 +106,15 @@ async def vote_websocket(
             except TypeError:
                 await http_logger.websocket_info(
                     websocket,
-                    extra_data={
-                        "status": "TypeError",
-                        "websocket": websocket
-                    }
+                    extra_data={"status": "TypeError", "websocket": websocket},
                 )
-                await manager.disconnect_from_room(poll_id, websocket)
+                await app.manager.disconnect_from_room(poll_id, websocket)
                 db.close()
     except WebSocketDisconnect:
         await http_logger.websocket_info(
-            websocket,
-            extra_data={
-                "status": "DISCONNECTED",
-                "websocket": websocket
-            }
+            websocket, extra_data={"status": "DISCONNECTED", "websocket": websocket}
         )
-        await manager.disconnect_from_room(poll_id, websocket)
+        await app.manager.disconnect_from_room(poll_id, websocket)
         db.close()
 
 
@@ -139,13 +126,13 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
         db = TestSessionLocal()
 
     if "username:" in token:
-        print("ANON USER")
         user = QuizAnonUser.manager(db).create(username=token.split(":")[1])
     else:
-        print("AUTH USER")
-        user = authenticate_via_websockets(token, db)
-    room = quiz_manager.get_room(enter_code)
-    print(f"ROOM: {room}")
+        try:
+            user = authenticate_via_websockets(token, db)
+        except ObjectDoesNotExists:
+            raise WebSocketDisconnect()
+    room = app.quiz_manager.get_room(enter_code)
     if room:
         # if not room.is_owner(user):
         #     if not room.owner_in_room:
@@ -153,33 +140,31 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
         #         raise WebSocketDisconnect()
         for connection in room.active_connections:
             if connection.member == user:
-                print("AUTH USER IN ROOM")
                 await websocket.close()
                 raise WebSocketDisconnect()
             if connection.member.username == user.username:
-                print("ANON USER IN ROOM")
                 await websocket.close(code=1007)
                 raise WebSocketDisconnect()
 
-    await quiz_manager.connect_to_room(websocket, enter_code, token, db)
-    await quiz_manager.broadcast_list_of_members(enter_code)
+    await app.quiz_manager.connect_to_room(websocket, enter_code, token, db)
+    await app.quiz_manager.broadcast_list_of_members(enter_code)
     try:
         while True:
             data = await websocket.receive_json()
             if data.get("action", False):
                 if data["action"] == "start":  # start quiz
-                    await quiz_manager.broadcast_next_step(enter_code, db, 0)
+                    await app.quiz_manager.broadcast_next_step(enter_code, db, 0)
                 if data["action"] == "next":  # next step
                     try:
-                        await quiz_manager.broadcast_next_step(
+                        await app.quiz_manager.broadcast_next_step(
                             enter_code, db, int(data["step"])
                         )
                     except IndexError:
-                        await quiz_manager.broadcast_to_room(
+                        await app.quiz_manager.broadcast_to_room(
                             enter_code,
                             data={
                                 "action": "finish",
-                                "final_results": quiz_manager.get_quiz_results(
+                                "final_results": app.quiz_manager.get_quiz_results(
                                     enter_code, db
                                 ),
                             },
@@ -211,7 +196,7 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
                         rank=rank,
                     )
                 print(f"{websocket=}, {rank=}")
-                await quiz_manager.send_personal_message(
+                await app.quiz_manager.send_personal_message(
                     data={"results": rank}, websocket=websocket
                 )
 
@@ -219,7 +204,7 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
         if isinstance(user, User):
             if user.email == "temp.email.quiz@temp.quiz":
                 User.manager(db).delete(user)
-        quiz_manager.disconnect_from_room(enter_code, websocket)
+        app.quiz_manager.disconnect_from_room(enter_code, websocket)
 
 
 origins = ["*"]
@@ -268,7 +253,7 @@ async def create_upload_file(
     request: Request,
     user: auth_router.get_schema = Depends(authenticate),
     db: Session = Depends(get_db),
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
 ):
     print(request.url._url[0:-11])
     async with aiofiles.open(f"src/static/{file.filename}", "wb") as out_file:
@@ -276,7 +261,6 @@ async def create_upload_file(
         await out_file.write(content)  # async write
 
     user = User.manager(db).update(
-        pk=user.pk,
-        avatar=request.url._url[0:-11] + "static/" + file.filename
+        pk=user.pk, avatar=request.url._url[0:-11] + "static/" + file.filename
     )
     return {"filename": user.avatar}

@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import List, Union
 
-from fastapi import WebSocket, WebSocketDisconnect
-from logger import http_logger
+from fastapi import WebSocket
 
 from core.database import Base, engine
+from logger import http_logger
 
 Base.metadata.create_all(bind=engine)
 
@@ -30,8 +30,8 @@ class Room:
                 "connections": len(self.active_connections),
                 "websocket": websocket,
                 "status": "SENDED",
-                "poll": data["pk"]
-            }
+                "poll": data["pk"],
+            },
         )
         await websocket.send_json(data)
 
@@ -44,8 +44,8 @@ class Room:
             extra_data={
                 "connections": len(self.active_connections),
                 "websocket": websocket,
-                "status": "DISCONNECTED"
-            }
+                "status": "DISCONNECTED",
+            },
         )
 
 
@@ -61,7 +61,7 @@ class ConnectionManager:
     async def connect_to_room(self, websocket: WebSocket, room_id: int):
         print(f"{self.rooms=}")
         connected = False
-        already_connected = False
+        # already_connected = False
         for room in self.rooms:
             print(f"{room.room_id=}, {room.active_connections=}")
             if room_id == room.room_id:
@@ -73,8 +73,8 @@ class ConnectionManager:
                     extra_data={
                         "connections": len(self.active_connections),
                         "status": "CONNECTED TO EXISTED ROOM",
-                        "websocket": websocket
-                    }
+                        "websocket": websocket,
+                    },
                 )
                 # for conn in room.active_connections:
                 #     if conn == websocket:
@@ -97,8 +97,8 @@ class ConnectionManager:
                 extra_data={
                     "connections": len(self.active_connections),
                     "status": "CREATED NEW ROOM",
-                    "websocket": websocket
-                }
+                    "websocket": websocket,
+                },
             )
             print(room.active_connections)
 
