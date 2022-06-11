@@ -19,7 +19,6 @@ class Room:
         self.active_connections.append(websocket)
 
     async def broadcast(self, data: dict):
-        print(self.active_connections)
         for connection in self.active_connections:
             await self.send_personal_message(data, connection)
 
@@ -59,13 +58,10 @@ class ConnectionManager:
         self.active_connections.append(websocket)
 
     async def connect_to_room(self, websocket: WebSocket, room_id: int):
-        print(f"{self.rooms=}")
         connected = False
         # already_connected = False
         for room in self.rooms:
-            print(f"{room.room_id=}, {room.active_connections=}")
             if room_id == room.room_id:
-                print(f"Connected to room {room}")
                 # connected = True
                 # await room.connect(websocket)
                 await http_logger.websocket_info(
@@ -85,10 +81,7 @@ class ConnectionManager:
                 connected = True
                 await room.connect(websocket)
 
-                print(room.active_connections)
-
         if not connected:
-            print("Created new room")
             room = Room(room_id=room_id)
             await room.connect(websocket)
             self.rooms.append(room)
@@ -100,7 +93,6 @@ class ConnectionManager:
                     "websocket": websocket,
                 },
             )
-            print(room.active_connections)
 
     def get_room(self, room_id: int) -> Union[Room, None]:
         for room in self.rooms:
