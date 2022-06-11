@@ -50,6 +50,7 @@ async def vote_websocket(
     websocket: WebSocket,
     poll_id: str,
 ):
+    print(f"APP INSTANCE: {app}")
     await app.manager.connect_to_room(websocket, poll_id)
 
     db = next(get_db())
