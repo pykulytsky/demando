@@ -195,7 +195,6 @@ async def quiz(websocket: WebSocket, enter_code: str, token: str):
                         time_to_estimate=data["answer"]["time"],
                         rank=rank,
                     )
-                print(f"{websocket=}, {rank=}")
                 await app.quiz_manager.send_personal_message(
                     data={"results": rank}, websocket=websocket
                 )
@@ -255,7 +254,6 @@ async def create_upload_file(
     db: Session = Depends(get_db),
     file: UploadFile = File(...),
 ):
-    print(request.url._url[0:-11])
     async with aiofiles.open(f"src/static/{file.filename}", "wb") as out_file:
         content = await file.read()  # async read
         await out_file.write(content)  # async write

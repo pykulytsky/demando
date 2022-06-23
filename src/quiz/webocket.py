@@ -43,7 +43,6 @@ class QuizRoom(Room):
     def get_list_of_members(self):
         members = []
         for connection in self.active_connections:
-            print(f"{connection=}")
             members.append(connection.member.username)
 
         return members
@@ -84,30 +83,21 @@ class QuizConnectionManager(ConnectionManager):
         else:
             member = authenticate_via_websockets(token, db)
         quiz = Quiz.manager(db).get(enter_code=enter_code)
-        print(f"{member=}")
-        print(self.rooms)
         connected = False
         for room in self.rooms:
-            print(f"{room=}")
             if enter_code == room.enter_code:
                 connected = True
                 if member == quiz.owner:
-                    print(f"OWNER CONNECTED TO EXISTED ROOM: {room.quiz}")
                     await room.connect(websocket, member, is_owner=True)
                 else:
-                    print(f"USER {member} CONNECTED TO ROOM: {room.quiz}")
                     await room.connect(websocket, member)
 
         if not connected:
             room = QuizRoom(quiz)
             self.rooms.append(room)
-            print(f"{member==quiz.owner}")
-            print(self.rooms)
             if member == quiz.owner:
-                print(f"OWNER CONNECTED TO NEW ROOM: {room.quiz}")
                 await room.connect(websocket, member, is_owner=True)
             else:
-                print(f"USER {member} CONNECTED TO NEW ROOM: {room.quiz}")
                 await room.connect(websocket, member)
         self.active_connections.append(websocket)
 

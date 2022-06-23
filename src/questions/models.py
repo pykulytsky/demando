@@ -65,6 +65,7 @@ class Poll(Timestamped, BaseManagerMixin):
     allowed_votes = Column(Integer, default=1)
     limited_time = Column(Boolean, default=False)
     time_to_vote = Column(DateTime, nullable=True)
+    login_required = Column(Boolean, default=False)
 
     owner_pk = Column(Integer, ForeignKey("users.pk"))
     owner = relationship("User", back_populates="polls")

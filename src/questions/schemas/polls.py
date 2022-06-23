@@ -64,6 +64,7 @@ class Poll(BaseModel):
     allowed_votes: int
     limited_time: bool
     time_to_vote: Optional[datetime]
+    login_required: bool
     owner: User
     options: Optional[List[Option]]
     votes: Optional[List[BaseVote]]
@@ -90,6 +91,7 @@ class PollCreate(BaseModel):
     allowed_votes: Optional[int]
     limited_time: Optional[bool]
     time_to_vote: Optional[datetime]
+    login_required: Optional[bool]
 
 
 class AuthenticatedPollCreate(PollCreate):
@@ -102,3 +104,4 @@ class PollUpdate(BaseModel):
     allowed_votes: Optional[int]
     limited_time: Optional[bool]
     time_to_vote: Optional[datetime]
+    login_required: Optional[bool]
