@@ -17,6 +17,4 @@ ENV PYTHONUNBUFFERED 1
 
 COPY . /app/
 
-RUN poetry -v
-
 CMD poetry run prod
